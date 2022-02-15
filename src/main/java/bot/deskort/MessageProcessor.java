@@ -10,7 +10,10 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.internal.requests.restaction.interactions.ReplyActionImpl;
 
 import java.awt.*;
 import java.io.*;
@@ -22,18 +25,23 @@ import java.util.concurrent.TimeUnit;
 
 public class MessageProcessor extends Commands{
 
-    static private final HashMap<Long, MessageDeque> channelIdsToMessageDeques = new HashMap<>();
+    private static final List<Button> interactiveButtons = new ArrayList<>(Arrays.asList(
+            Button.primary("clrsongs",  "Free songs from memory"),
+            Button.primary("gc",        "Run GC"),
+            Button.primary("refresh",   "Refresh")
+    ));
+    private static final HashMap<Long, MessageDeque> channelIdsToMessageDeques = new HashMap<>();
     public static String PREFIX = ">";
     public static int PREFIX_OFFSET = 1;
     public static int PURGE_CAP = 1000;
-    final static Set<Long> AUTHORIZED_USERS = new HashSet<>();
+    protected final static Set<Long> AUTHORIZED_USERS = new HashSet<>();
 
     private static JDA jdaInterface;
     private static Actions actions;
     private static Channels channels;
     private static Youtube youtube;
 
-    private static MessageReceivedEvent messageReceived;
+    private static MessageReceivedEvent messageEvent;
     private static String messageText;
     private static long messageChannelId;
 
@@ -50,7 +58,7 @@ public class MessageProcessor extends Commands{
 
     protected static void logsRequest(){
         if(messageText.toLowerCase(Locale.ENGLISH).startsWith("logs", PREFIX_OFFSET)){
-            messageReceived.getMessage().delete().queue();
+            messageEvent.getMessage().delete().queue();
             MessageDeque deq = channelIdsToMessageDeques.get(messageChannelId);
             if(deq != null){
                 deq.removeLast();
@@ -61,17 +69,17 @@ public class MessageProcessor extends Commands{
 
     private static void logMessage(){
         if(channelIdsToMessageDeques.containsKey(messageChannelId)){
-            channelIdsToMessageDeques.get(messageChannelId).add(messageReceived);
+            channelIdsToMessageDeques.get(messageChannelId).add(messageEvent);
         }else{
             MessageDeque deq = new MessageDeque(MAX_DEQUE_SIZE);
-            deq.add(messageReceived);
+            deq.add(messageEvent);
             channelIdsToMessageDeques.put(messageChannelId,deq);
         }
     }
 
     protected static void processMessage(MessageReceivedEvent message, String messageContent, long idLong){
 
-        messageReceived = message;
+        messageEvent = message;
         messageText = messageContent;
         messageChannelId = idLong;
         logMessage();
@@ -79,7 +87,7 @@ public class MessageProcessor extends Commands{
     }
 
     private static void checkPrefixes(){
-        boolean isBot = messageReceived.getAuthor().isBot();
+        boolean isBot = messageEvent.getAuthor().isBot();
         if(messageText.startsWith(PREFIX)){
             final String commandName = getCommandName();
             if(commandName.isEmpty()){
@@ -103,7 +111,7 @@ public class MessageProcessor extends Commands{
     }
 
     protected static void shutdownRequest(){
-        if(AUTHORIZED_USERS.contains(messageReceived.getAuthor().getIdLong())){
+        if(AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong())){
             actions.sendAsMessageBlock(messageChannelId,"Shutting down");
             sleep(3000);
             System.exit(0);
@@ -111,14 +119,14 @@ public class MessageProcessor extends Commands{
     }
 
     protected static void loopRequest(){
-        AudioManager audioManager = messageReceived.getGuild().getAudioManager();
+        AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         AudioPlayer audioPlayer = (AudioPlayer) audioManager.getSendingHandler();
         if(audioPlayer ==  null){
             audioPlayer = new AudioPlayer(audioManager);
             audioManager.setSendingHandler(audioPlayer);
         }
         boolean isLooping = audioPlayer.switchLooping();
-        actions.messageChannel(messageReceived.getChannel(),"**Looping set to " + isLooping + "**");
+        actions.messageChannel(messageEvent.getChannel(),"**Looping set to " + isLooping + "**");
     }
 
     protected static void uptimeRequest(){
@@ -130,7 +138,7 @@ public class MessageProcessor extends Commands{
         message.append(hr).append("h ")
                 .append(min).append("m ")
                 .append(sec).append('s');
-        actions.sendAsMessageBlock(messageChannelId, message.toString());
+        actions.sendAsMessageBlock(messageEvent.getTextChannel(), message.toString());
     }
 
 
@@ -159,13 +167,13 @@ public class MessageProcessor extends Commands{
             if(stringBuilder.length() != 0){
                 embedBuilder.addField(new MessageEmbed.Field("", stringBuilder.toString(),true));
             }
-            actions.sendEmbed((TextChannel) messageReceived.getChannel(), embedBuilder.build());
+            actions.sendEmbed((TextChannel) messageEvent.getChannel(), embedBuilder.build());
         }
 
     }
 
     protected static void stopRequest(){
-        AudioManager audioManager = messageReceived.getGuild().getAudioManager();
+        AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         AudioPlayer audioPlayer = (AudioPlayer) audioManager.getSendingHandler();
         if(audioPlayer ==  null){
             audioPlayer = new AudioPlayer(audioManager);
@@ -178,7 +186,7 @@ public class MessageProcessor extends Commands{
 
     protected static void regain(){
 
-        Guild server = messageReceived.getGuild();
+        Guild server = messageEvent.getGuild();
         AudioManager audioManager = server.getAudioManager();
         AudioChannel currentAudioChannel = audioManager.getConnectedChannel();
         if(currentAudioChannel == null){
@@ -208,7 +216,7 @@ public class MessageProcessor extends Commands{
 
     protected static void warpRequest(){
         if(messageText.length() > PREFIX_OFFSET + 5){
-            Member msgAuthor = messageReceived.getMember();
+            Member msgAuthor = messageEvent.getMember();
             GuildVoiceState vcState = Objects.requireNonNull(msgAuthor).getVoiceState();
             if(vcState != null && !vcState.inAudioChannel()){
                 return;
@@ -219,19 +227,19 @@ public class MessageProcessor extends Commands{
             if(destinationChannel == null){
                 return;
             }
-            messageReceived.getGuild().moveVoiceMember(msgAuthor, destinationChannel).queue();
+            messageEvent.getGuild().moveVoiceMember(msgAuthor, destinationChannel).queue();
         }
     }
 
     protected static void leaveRequest(){
-        AudioManager audioManager = messageReceived.getGuild().getAudioManager();
+        AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         audioManager.closeAudioConnection();
     }
 
     protected static void playRequest(){
-        AudioManager audioManager = messageReceived.getGuild().getAudioManager();
+        AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         if(!audioManager.isConnected()){
-            actions.messageChannel(messageReceived.getChannel(),"I'm not in channel");
+            actions.messageChannel(messageEvent.getChannel(),"I'm not in channel");
             return;
         }
         AudioPlayer audioPlayer = addSendingHandlerIfNull(audioManager);
@@ -243,7 +251,7 @@ public class MessageProcessor extends Commands{
                 return;
             }
         }
-        actions.sendEmbed(messageReceived.getTextChannel(), createPlayingEmbed(audioPlayer));
+        actions.sendEmbed(messageEvent.getTextChannel(), createPlayingEmbed(audioPlayer));
         audioPlayer.setPlaying(true);
     }
 
@@ -257,9 +265,17 @@ public class MessageProcessor extends Commands{
         embedBuilder.setDescription(currentAudioTrack.getTrackName());
         return embedBuilder.build();
     }
+    protected static MessageEmbed createMemoryEmbed(){
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Memory stats");
+        embedBuilder.setColor(Color.BLACK);
+        embedBuilder.addField(new MessageEmbed.Field("",   getUsedRuntimeMemoryAsString(),false));
+        embedBuilder.addField(new MessageEmbed.Field("",   getSongsSizeInMemoryAsString(),false));
+        return embedBuilder.build();
+    }
 
     protected static void youtubeRequest(){
-        AudioManager audioManager = messageReceived.getGuild().getAudioManager();
+        AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         addSendingHandlerIfNull(audioManager);
         /*if(!audioManager.isConnected()){
                actions.messageChannel(messageReceived.getChannel(),"I'm not in channel");
@@ -272,14 +288,14 @@ public class MessageProcessor extends Commands{
         new Thread(new Runnable(){
             @Override
             public void run(){
-                YoutubeRequest ytRequest = new YoutubeRequest(youtube, messageReceived);
+                YoutubeRequest ytRequest = new YoutubeRequest(youtube, messageEvent);
                 ytRequest.process();
             }
         }).start();
     }
 
     protected static void joinRequest(){
-        AudioManager audioManager = messageReceived.getGuild().getAudioManager();
+        AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         addSendingHandlerIfNull(audioManager);
         //channel specific join
         final int commandLength = 4;
@@ -288,11 +304,11 @@ public class MessageProcessor extends Commands{
             String parsedName = messageText.substring(indexBlank + 1);
             VoiceChannel voice = channels.getVoiceChannelIgnoreCase(parsedName);
             if(voice == null){
-                actions.messageChannel(messageReceived.getChannel(),"VoiceChannel not found");
+                actions.messageChannel(messageEvent.getChannel(),"VoiceChannel not found");
                 return;
             }
             //if targeting another server
-            if(messageReceived.getGuild().getIdLong() != voice.getGuild().getIdLong()){
+            if(messageEvent.getGuild().getIdLong() != voice.getGuild().getIdLong()){
                 audioManager = voice.getGuild().getAudioManager();
                 addSendingHandlerIfNull(audioManager);
             }
@@ -300,7 +316,7 @@ public class MessageProcessor extends Commands{
             return;
         }
         //channel
-        Member member = messageReceived.getMember();
+        Member member = messageEvent.getMember();
         if(member == null) return;
         GuildVoiceState membersVoiceState = member.getVoiceState();
         if(membersVoiceState != null){
@@ -309,10 +325,10 @@ public class MessageProcessor extends Commands{
                 AudioChannel voice = member.getVoiceState().getChannel();
                 audioManager.openAudioConnection(voice);
             }else{
-                actions.messageChannel((TextChannel) messageReceived.getChannel(),"Member not in voice");
+                actions.messageChannel((TextChannel) messageEvent.getChannel(),"Member not in voice");
             }
         }else{
-            actions.messageChannel((TextChannel) messageReceived.getChannel(),"MemberVoiceState null");
+            actions.messageChannel((TextChannel) messageEvent.getChannel(),"MemberVoiceState null");
         }
     }
     //returns new sendingHandler
@@ -329,16 +345,26 @@ public class MessageProcessor extends Commands{
     }
 
     public static void memoryRequest(){
-        final int divisor = 1024*1024;
+        messageEvent.getTextChannel()
+                .sendMessageEmbeds(createMemoryEmbed())
+                .setActionRow(interactiveButtons)
+                .queue();
+    }
+    protected static String getUsedRuntimeMemoryAsString(){
         Runtime runtime = Runtime.getRuntime();
         long memUsed = runtime.totalMemory() - runtime.freeMemory();
-        actions.messageChannel(messageReceived.getChannel(),"total mem - free mem: " + memUsed/divisor);
+        String valueFormatted = String.format("%.2f", memUsed/(1024*1024D));
+        return "Total mem - free mem: ```" + valueFormatted + " MBs ```";
+    }
+    protected static String getSongsSizeInMemoryAsString(){
+        String valueFormatted =  String.format("%.2f", AudioPlayer.getSongsSizeInMemory()/(1024*1024D));
+        return "Songs size in memory: ```" + valueFormatted + " MBs ```";
     }
 
     protected static void helpRequest(){
-        MessageChannel channel = messageReceived.getChannel();
+        MessageChannel channel = messageEvent.getChannel();
         final String HELP_MESSAGE = "```" +
-                " [Available commands] \n" +
+                " [Available commands]\n" +
                 " req\n" +
                 " purge <amount> - channel based purge (each channel has its own deque, incorporates retrieving history when needed)\n" +
                 " warp <voiceChannelName> - warps you to a voice channel (provided you're in one already)\n" +
@@ -348,6 +374,7 @@ public class MessageProcessor extends Commands{
                 " loop - self explanatory\n" +
                 " sha <text> - one of many hashing algorithms (e.g. md5, sha256)\n" +
                 " sig <algorithm> <text> <hash> - check if hash matches the sequence\n" +
+                " mem - display memory management panel\n" +
                 " uptime\n" +
                 " [Youtube Commands] <format_number> index at which it appears counting from the top (0-indexed)\n" +
                 " ytinfo <videoID> retrieves information about the youtube video, displaying available formats\n" +
@@ -362,7 +389,7 @@ public class MessageProcessor extends Commands{
 
         final int expectedCommandLen = 5;
         if(messageText.length() < expectedCommandLen+PREFIX_OFFSET+1) return;
-        if(!AUTHORIZED_USERS.contains(messageReceived.getAuthor().getIdLong())) return;
+        if(!AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong())) return;
 
         int parsingOffset = expectedCommandLen+PREFIX_OFFSET+1;
 
@@ -379,7 +406,7 @@ public class MessageProcessor extends Commands{
         }
         //include purge request message
         amount++;
-        MessageChannel channel = messageReceived.getChannel();
+        MessageChannel channel = messageEvent.getChannel();
         MessageDeque cachedMessages = channelIdsToMessageDeques.get(messageChannelId);
         int deqAmount = Math.min(cachedMessages.size(), amount);
 
@@ -418,7 +445,7 @@ public class MessageProcessor extends Commands{
     }
 
     private static void deleteRequestMessage(){
-        Message msgToDelete = messageReceived.getMessage();
+        Message msgToDelete = messageEvent.getMessage();
         msgToDelete.delete().queue();
         channelIdsToMessageDeques.get(messageChannelId).removeLast();
     }
@@ -442,10 +469,10 @@ public class MessageProcessor extends Commands{
 
     protected static void linuxRequest(){
         if(OS.toLowerCase(Locale.ENGLISH).startsWith("win")){
-            actions.messageChannel(messageReceived.getTextChannel(),"Host running windows");
+            actions.messageChannel(messageEvent.getTextChannel(),"Host running windows");
             return;
         }
-        if (!AUTHORIZED_USERS.contains(messageReceived.getAuthor().getIdLong())){
+        if (!AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong())){
             return;
         }
         String command = messageText.substring(messageText.indexOf("$") + 1);
@@ -466,7 +493,7 @@ public class MessageProcessor extends Commands{
         //InputStream errorStream = procBuilder.getErrorStream();
         String stringedStream = streamToString(50_000, inputStream);
         if (stringedStream != null){
-            actions.sendAsMessageBlock(messageReceived.getTextChannel(), stringedStream);
+            actions.sendAsMessageBlock(messageEvent.getTextChannel(), stringedStream);
             try{
                 inputStream.close();
             }catch (IOException ioException){
@@ -539,7 +566,7 @@ public class MessageProcessor extends Commands{
         hashToCompare = messageText.substring(secondQuotesInd + 2);
         hashedResult = Hasher.anySHA(textToHash, algorithm);
 
-        MessageChannel msgChannel = messageReceived.getChannel();
+        MessageChannel msgChannel = messageEvent.getChannel();
         if(hashedResult != null && hashedResult.equals(hashToCompare)){
             msgChannel.sendMessage("Signature for " + textToHash + " matching").queue();
         }
@@ -563,7 +590,7 @@ public class MessageProcessor extends Commands{
         }
 
         if(hashedResult != null){
-            messageReceived.getChannel().sendMessage(hashedResult).queue();
+            messageEvent.getChannel().sendMessage(hashedResult).queue();
         }
     }
     private static String getCommandName(){
@@ -588,9 +615,13 @@ public class MessageProcessor extends Commands{
     public static Youtube getYoutube(){
         return youtube;
     }
-
-    public static void songsSizeRequest(){
-        String message = "Songs size in memory: " + AudioPlayer.getSongsSizeInMemory()/(1024*1024) + " MBs";
-        actions.messageChannel(messageReceived.getChannel(),message);
+    public static void genTokenRequest(){
+        actions.messageChannel(messageEvent.getTextChannel(),PseudoBotTokenGenerator.generateBotToken());
+    }
+    public static void GCRequest(){
+        System.gc();
+    }
+    public static void clearSongsRequest(){
+        AudioPlayer.clearAudioTracksFromMemory();
     }
 }

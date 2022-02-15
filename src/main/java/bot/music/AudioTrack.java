@@ -56,6 +56,16 @@ public class AudioTrack{
         audioBytesLength = songBytes.length;
         initAudio();
         displayAudioInfo();
+        closeAndNullifyAudioStream();
+    }
+
+    private void closeAndNullifyAudioStream(){
+        try{
+            audioStream.close();
+        }catch (IOException ioException){
+            ioException.printStackTrace();
+        }
+        audioStream = null;
     }
 
     private void initAudio(){

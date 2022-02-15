@@ -209,7 +209,6 @@ public class YoutubeRequest{
         return YoutubeVideoInfo.bitrateToSizeAsDouble(format.duration(),format.bitrate());
     }
 
-
     private static String formatExceededMessage(double formatSize){
         return "Format size of "  + String.format("%.2f", formatSize) + " MBs exceeds " + DOWNLOAD_SIZE_LIMIT_MB;
     }

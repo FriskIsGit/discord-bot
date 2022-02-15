@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.util.List;
 import java.util.Set;
-
+//general model
 public class Permissions{
     private final JDA jdaInterface;
     public Permissions(){

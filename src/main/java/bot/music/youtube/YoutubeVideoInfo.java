@@ -28,7 +28,6 @@ public class YoutubeVideoInfo{
         this.baos = new ByteArrayOutputStream();
     }
 
-
     public String detailsToString(){
         if(videoDetails == null){
             return "Invalid video, no details available";
@@ -133,13 +132,11 @@ public class YoutubeVideoInfo{
     public static String audioFormatToString(AudioFormat audioFormat, int index){
         StringBuilder propertiesStr = new StringBuilder();
         propertiesStr.append(index);
-        propertiesStr.append(" |type ")
-                .append(audioFormat.type())
-                .append(" |sample rate ").append(audioFormat.audioSampleRate())
-                .append(" |audio quality ").append(audioFormat.audioQuality())
-                .append(" |bitrate ").append(audioFormat.bitrate())
-                .append(" |avg bitrate ").append(audioFormat.averageBitrate())
-                .append(" |extension ").append(audioFormat.extension().value());
+        propertiesStr.append(" |type ").append(audioFormat.type())
+                     .append(" |sample rate ").append(audioFormat.audioSampleRate())
+                     .append(" |bitrate ").append(audioFormat.bitrate())
+                     .append(" |avg bitrate ").append(audioFormat.averageBitrate())
+                     .append(" |extension ").append(audioFormat.extension().value());
         String sizeInMBs = bitrateToSizeAsStr(audioFormat.duration(), audioFormat.bitrate());
         propertiesStr.append(" |est size ").append(sizeInMBs).append(NEW_LINE);
         return propertiesStr.toString();
@@ -147,14 +144,12 @@ public class YoutubeVideoInfo{
     public static String videoFormatToString(VideoFormat videoFormat, int index){
         StringBuilder propertiesStr = new StringBuilder();
         propertiesStr.append(index);
-        propertiesStr.append(" |type ")
-                .append(videoFormat.type())
-                .append(" |fps ").append(videoFormat.fps())
-                .append(" |quality ").append(videoFormat.videoQuality())
-                .append(" |width ").append(videoFormat.width())
-                .append(" |height ").append(videoFormat.height())
-                .append(" |bitrate ").append(videoFormat.bitrate())
-                .append(" |extension ").append(videoFormat.extension().value());
+        propertiesStr.append(" |type ").append(videoFormat.type())
+                     .append(" |fps ").append(videoFormat.fps())
+                     .append(" |width ").append(videoFormat.width())
+                     .append(" |height ").append(videoFormat.height())
+                     .append(" |bitrate ").append(videoFormat.bitrate())
+                     .append(" |extension ").append(videoFormat.extension().value());
         String sizeInMBs = bitrateToSizeAsStr(videoFormat.duration(), videoFormat.bitrate());
         propertiesStr.append(" |est size ").append(sizeInMBs).append(NEW_LINE);
         return propertiesStr.toString();
@@ -162,16 +157,14 @@ public class YoutubeVideoInfo{
     public static String videoWithAudioFormatToString(VideoWithAudioFormat videoAudioFormat, int index){
         StringBuilder propertiesStr = new StringBuilder();
         propertiesStr.append(index);
-        propertiesStr.append(" |type ")
-                .append(videoAudioFormat.type())
-                .append(" |fps ").append(videoAudioFormat.fps())
-                .append(" |quality ").append(videoAudioFormat.videoQuality())
-                .append(" |width ").append(videoAudioFormat.width())
-                .append(" |height ").append(videoAudioFormat.height())
-                .append(" |bitrate ").append(videoAudioFormat.bitrate())
-                .append(" |avg bitrate ").append(videoAudioFormat.averageBitrate())
-                .append(" |audio quality ").append(videoAudioFormat.audioQuality())
-                .append(" |extension ").append(videoAudioFormat.extension().value());
+        propertiesStr.append(" |type ").append(videoAudioFormat.type())
+                     .append(" |fps ").append(videoAudioFormat.fps())
+                     .append(" |width ").append(videoAudioFormat.width())
+                     .append(" |height ").append(videoAudioFormat.height())
+                     .append(" |bitrate ").append(videoAudioFormat.bitrate())
+                     .append(" |avg bitrate ").append(videoAudioFormat.averageBitrate())
+                     .append(" |audio quality ").append(videoAudioFormat.audioQuality())
+                     .append(" |extension ").append(videoAudioFormat.extension().value());
         String sizeInMBs = bitrateToSizeAsStr(videoAudioFormat.duration(), videoAudioFormat.bitrate());
         propertiesStr.append(" |est size ").append(sizeInMBs).append(NEW_LINE);
         return propertiesStr.toString();

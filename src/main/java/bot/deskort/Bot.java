@@ -31,7 +31,7 @@ public class Bot{
     private static Actions actions;
     private static Servers servers;
     private static Channels channels;
-    private static bot.utilities.Permissions permissions;
+    //private static bot.utilities.Permissions permissions;
 
     public static boolean initialize() throws InterruptedException{
         if(jdaBuilder == null){
@@ -40,7 +40,7 @@ public class Bot{
 
             //voice limits
             jdaBuilder.enableCache(CacheFlag.VOICE_STATE);
-            //jdaBuilder.disableCache(CacheFlag.MEMBER_OVERRIDES, CacheFlag.VOICE_STATE);
+            //jdaBuilder.disableCache(CacheFlag.MEMBER_OVERRIDES);
             try{
                 jdaInterface = jdaBuilder.build();
             }catch (LoginException e){

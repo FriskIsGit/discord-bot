@@ -182,7 +182,6 @@ public class Actions{
         messageChannel((TextChannel) txtChannel,msgText);
     }
 
-
     public void sendAsMessageBlock(TextChannel txtChannel, String msgText){
         if(txtChannel == null) return;
         int msgLength = msgText.length();

@@ -46,4 +46,18 @@ public class PseudoBotTokenGenerator{
     public static int getRandom(int min, int max){
         return random.nextInt(max + 1 - min) + min;
     }
+    public static boolean couldBeValid(String token){
+        if (token.length() != 59 || !Character.isUpperCase(token.charAt(0))){
+            return false;
+        }
+        char[] arr = token.toCharArray();
+        for (int i = 0; i < 59; i++){
+            if(arr[i] == '.'){
+                if(i != 24 && i != 31){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

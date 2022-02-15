@@ -1,7 +1,6 @@
 import bot.deskort.Bot;
 
 class BotRunner{
-
     public static void main(String[] args){
         try{
             boolean success = Bot.initialize();

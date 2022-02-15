@@ -12,7 +12,6 @@ public class YoutubeRequestParser{
         this.length = request.length();
     }
 
-
     public ParsedResult parse(){
         StreamType type = null;
         //>yttype id num

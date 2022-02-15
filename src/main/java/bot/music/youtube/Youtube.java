@@ -20,21 +20,20 @@ public class Youtube{
     private final YoutubeDownloader downloader;
     private final Config config;
 
-    public Config getConfig(){
-        return config;
-    }
-
     public Youtube(){
         this.downloader = new YoutubeDownloader();
         this.config = downloader.getConfig();
     }
 
+    public Config getConfig(){
+        return config;
+    }
     public YoutubeDownloader getDownloader(){
         return downloader;
     }
 
     public YoutubeVideoInfo getVideoInformation(String videoId){
-        Response<VideoInfo> response = downloader.getVideoInfo(getRequestVideoInfo(videoId));
+        Response<VideoInfo> response = downloader.getVideoInfo(new RequestVideoInfo(videoId));
         if(!response.ok()){
             return null;
         }
@@ -57,15 +56,13 @@ public class Youtube{
         return audioFile;
     }
 
-    private RequestVideoInfo getRequestVideoInfo(String videoId){
-        return new RequestVideoInfo(videoId);
-    }
+    //TODO
     protected RequestVideoStreamDownload getStream(StreamType type){
         Format format = null;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         RequestVideoStreamDownload streamDownload = new RequestVideoStreamDownload(null, baos);
-
-        return new RequestVideoStreamDownload(null,null);
+        //return new RequestVideoStreamDownload(null,null);
+        return null;
     }
 
 }

@@ -70,6 +70,10 @@ public class AudioPlayer implements AudioSendHandler{
         return allBytes;
     }
 
+    public static void clearAudioTracksFromMemory(){
+        fileNamesToSongs.clear();
+    }
+
     public AudioTrack getCurrentAudioTrack(){
         return this.audioTrack;
     }
