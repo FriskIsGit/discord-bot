@@ -5,10 +5,17 @@ class ParsedResult{
     protected StreamType type;
     protected int formatNumber;
 
-    public ParsedResult(String videoId, StreamType type, int formatNumber){
+    public ParsedResult(StreamType type, String videoId, int formatNumber){
         this.videoId = videoId;
         this.type = type;
         this.formatNumber = formatNumber;
+    }
+    public ParsedResult(StreamType type, String videoId){
+        this.videoId = videoId;
+        this.type = type;
+    }
+    public ParsedResult(StreamType type){
+        this.type = type;
     }
     @Override
     public String toString(){
