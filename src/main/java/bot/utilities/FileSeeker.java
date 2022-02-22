@@ -74,9 +74,6 @@ public class FileSeeker{
         return false;
     }
 
-    public static void returnNothing(){
-    }
-
     /**
      * method should account for hidden files prepended with a dot
      * @param absoluteName - name potentially with extension

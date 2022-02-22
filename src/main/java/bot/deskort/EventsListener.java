@@ -2,10 +2,13 @@ package bot.deskort;
 
 import bot.music.AudioPlayer;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
+import java.util.Objects;
 
 public class EventsListener extends ListenerAdapter{
 
@@ -23,8 +26,6 @@ public class EventsListener extends ListenerAdapter{
         boolean isBot = messageEdited.getAuthor().isBot();
         if(editedRawContent.length() > 0){
             System.out.println(authorName + "(bot:" + isBot + ") edited their message in [" + messageEdited.getChannel().getName() + "] to " + editedRawContent);
-        }else{
-            System.out.println("Likely embed update triggered by " + authorName + "(bot:" + isBot + ')');
         }
     }
 
@@ -36,6 +37,12 @@ public class EventsListener extends ListenerAdapter{
         printReceivedMessage();
         long messageChannelId = messageEvent.getChannel().getIdLong();
         MessageProcessor.processMessage(messageEvent, messageText, messageChannelId);
+    }
+    @Override
+    public void onGuildUnban(GuildUnbanEvent unbanEvent){
+        System.out.println("Member ["
+                + unbanEvent.getUser().getName()
+                + "] was unbanned");
     }
     @Override
     public void onButtonClick(ButtonClickEvent clickEvent) {
@@ -53,9 +60,14 @@ public class EventsListener extends ListenerAdapter{
                 break;
             case "refresh":
                 break;
+            default:
+                System.out.println("Foreign button clicked");
+                return;
         }
         MessageEmbed memoryEmbed = MessageProcessor.createMemoryEmbed();
         clickEvent.editMessageEmbeds().setEmbeds(memoryEmbed).queue();
+        clickEvent.getHook().editOriginalEmbeds(memoryEmbed).queue();
+        clickEvent.getHook().deleteOriginal().queue();
     }
 
     private void printReceivedMessage(){
