@@ -1,6 +1,5 @@
 package bot.music.youtube;
 
-import net.dv8tion.jda.api.entities.TextChannel;
 import youtube_lib.downloader.YoutubeDownloader;
 import youtube_lib.downloader.downloader.request.RequestVideoFileDownload;
 import youtube_lib.downloader.downloader.response.Response;
@@ -29,7 +28,7 @@ public class YoutubeRequest{
     protected YoutubeDownloader youtubeDownloader;
     protected String requestText;
     protected MessageChannel requestChannel;
-    protected TextChannel requestTextChannel;
+    protected long requestChannelId;
     protected Actions actions;
 
     public YoutubeRequest(Youtube youtube, MessageReceivedEvent messageReceivedEvent){
@@ -40,7 +39,7 @@ public class YoutubeRequest{
 
         this.requestText = messageReceivedEvent.getMessage().getContentRaw();
         this.requestChannel = messageReceivedEvent.getMessage().getChannel();
-        this.requestTextChannel = messageReceivedEvent.getTextChannel();
+        this.requestChannelId = requestChannel.getIdLong();
 
         this.actions = Bot.getActions();
     }
@@ -68,13 +67,9 @@ public class YoutubeRequest{
 
         YoutubeRequestParser parser = new YoutubeRequestParser(requestText);
         ParsedResult result = parser.parse();
-        if(result.type == StreamType.NONE){
-            actions.messageChannel(requestTextChannel,"Invalid request");
-            return;
-        }
         YoutubeVideoInfo ytVideoInfo = youtube.getVideoInformation(result.videoId);
         if(ytVideoInfo == null){
-            actions.messageChannel(requestTextChannel,"Unable to get info about video");
+            actions.messageChannel(requestChannelId,"Unable to get info about video");
             return;
         }
         this.ytVideoInfo = ytVideoInfo;
@@ -94,30 +89,30 @@ public class YoutubeRequest{
     }
 
     private void displayVideoInformation(){
-        actions.sendAsMessageBlock(requestTextChannel, ytVideoInfo.detailsToString());
-        actions.sendAsMessageBlock(requestTextChannel, ytVideoInfo.getAvailableVideoFormats());
-        actions.sendAsMessageBlock(requestTextChannel, ytVideoInfo.getAvailableAudioFormats());
-        actions.sendAsMessageBlock(requestTextChannel, ytVideoInfo.getAvailableVideoWithAudioFormats());
-        actions.sendAsMessageBlock(requestTextChannel, "Alleged best formats: \n" + ytVideoInfo.bestFormatsToString());
+        actions.sendAsMessageBlock(requestChannelId, ytVideoInfo.detailsToString());
+        actions.sendAsMessageBlock(requestChannelId, ytVideoInfo.getAvailableVideoFormats());
+        actions.sendAsMessageBlock(requestChannelId, ytVideoInfo.getAvailableAudioFormats());
+        actions.sendAsMessageBlock(requestChannelId, ytVideoInfo.getAvailableVideoWithAudioFormats());
+        actions.sendAsMessageBlock(requestChannelId, "Alleged best formats: \n" + ytVideoInfo.bestFormats());
     }
 
     private void downloadVideo(int formatNumber){
         List<VideoFormat> videoFormatList = ytVideoInfo.videoFormats();
         if (formatNumber >= videoFormatList.size()){
-            actions.messageChannel(requestTextChannel, "Format out of range");
+            actions.messageChannel(requestChannelId, "Format out of range");
             return;
         }
         VideoFormat desiredVidFormat = videoFormatList.get(formatNumber);
         double formatSize = getFormatSize(desiredVidFormat);
         if(formatSize > DOWNLOAD_SIZE_LIMIT_MB){
-            actions.messageChannel(requestChannel, formatExceededMessage(formatSize));
+            actions.messageChannel(requestChannelId, formatExceededMessage(formatSize));
             return;
         }
 
         UUID uuid = UUID.randomUUID();
         RequestVideoFileDownload request = new RequestVideoFileDownload(desiredVidFormat).renameTo(String.valueOf(uuid));
 
-        actions.sendAsMessageBlock(requestTextChannel, "Downloading: \n" + YoutubeVideoInfo.videoFormatToString(desiredVidFormat,-1));
+        actions.sendAsMessageBlock(requestChannelId, "Downloading: \n" + YoutubeVideoInfo.videoFormatToString(desiredVidFormat,-1));
 
         flipRequestState();
         long st = System.currentTimeMillis();
@@ -127,34 +122,34 @@ public class YoutubeRequest{
         flipRequestState();
 
         if(video == null){
-            actions.messageChannel(requestChannel, "Request returned no data");
+            actions.messageChannel(requestChannelId, "Request returned no data");
             return;
         }else if(!downloadResponse.ok()){
-            actions.messageChannel(requestChannel, "Response not okii");
+            actions.messageChannel(requestChannelId, "Response not okii");
         }
 
         System.out.println("Absolute path for new file: " + video.getAbsolutePath());
         System.out.println("Time taken on download: " + (en-st));
 
-        actions.sendFile(requestTextChannel, video);
+        actions.sendFile(requestChannelId, video);
     }
 
 
     private void downloadVideoWithAudio(int formatNumber){
         List<VideoWithAudioFormat> availableFormats = ytVideoInfo.videoWithAudioFormats();
         if (formatNumber >= availableFormats.size()){
-            actions.messageChannel(requestChannel, "Format out of range");
+            actions.messageChannel(requestChannelId, "Format out of range");
             return;
         }
 
         VideoWithAudioFormat desiredFormat = availableFormats.get(formatNumber);
         double formatSize = getFormatSize(desiredFormat);
         if(formatSize > DOWNLOAD_SIZE_LIMIT_MB){
-            actions.messageChannel(requestChannel, formatExceededMessage(formatSize));
+            actions.messageChannel(requestChannelId, formatExceededMessage(formatSize));
             return;
         }
 
-        actions.sendAsMessageBlock(requestTextChannel, "Downloading: \n" + YoutubeVideoInfo.videoWithAudioFormatToString(desiredFormat,-1));
+        actions.sendAsMessageBlock(requestChannelId, "Downloading: \n" + YoutubeVideoInfo.videoWithAudioFormatToString(desiredFormat,-1));
         UUID uuid = UUID.randomUUID();
         RequestVideoFileDownload request = new RequestVideoFileDownload(desiredFormat).renameTo(String.valueOf(uuid));
 
@@ -165,13 +160,13 @@ public class YoutubeRequest{
         long en = System.currentTimeMillis();
         flipRequestState();
         if(videoWithAudio == null){
-            actions.messageChannel(requestTextChannel, "Request returned no data");
+            actions.messageChannel(requestChannelId, "Request returned no data");
             return;
         }
         System.out.println("Absolute path for new file: " + videoWithAudio.getAbsolutePath());
         System.out.println("Time taken on download: " + (en-st));
 
-        actions.sendFile(requestTextChannel, videoWithAudio);
+        actions.sendFile(requestChannelId, videoWithAudio);
     }
 
     private void downloadAudioImpl(AudioFormat format){
@@ -185,26 +180,26 @@ public class YoutubeRequest{
         flipRequestState();
 
         if(audioFile == null){
-            actions.messageChannel(requestTextChannel, "Request returned no data");
+            actions.messageChannel(requestChannelId, "Request returned no data");
             return;
         }
         System.out.println("Absolute path for new file: " + audioFile.getAbsolutePath());
         System.out.println("Time taken on download: " + (en-st));
-        actions.sendFile(requestTextChannel,audioFile);
+        actions.sendFile(requestChannelId,audioFile);
     }
 
     private void downloadAudio(int formatNumber){
         AudioFormat requestedFormat;
         List<AudioFormat> formatList = ytVideoInfo.audioFormats();
         if (formatNumber >= formatList.size()){
-            actions.messageChannel(requestTextChannel, "Format out of range");
+            actions.messageChannel(requestChannelId, "Format out of range");
             return;
         }
 
         requestedFormat = formatList.get(formatNumber);
         double formatSize = getFormatSize(requestedFormat);
         if(formatSize > DOWNLOAD_SIZE_LIMIT_MB){
-            actions.messageChannel(requestTextChannel, formatExceededMessage(formatSize));
+            actions.messageChannel(requestChannelId, formatExceededMessage(formatSize));
             return;
         }
         downloadAudioImpl(requestedFormat);

@@ -1,23 +1,22 @@
 package bot.music.youtube;
 
-import bot.deskort.Commands;
 import bot.deskort.MessageProcessor;
 
 public class YoutubeRequestParser{
-    private final String[] requestTerms;
-    public YoutubeRequestParser(String requestText){
-        int prefixOffset = MessageProcessor.PREFIX_OFFSET;
-        this.requestTerms = Commands.splitIntoTerms(requestText, prefixOffset);
+    private final int prefixOffset;
+    String request;
+    int length;
+    public YoutubeRequestParser(String request){
+        this.prefixOffset = MessageProcessor.PREFIX_OFFSET;
+        this.request = request;
+        this.length = request.length();
     }
 
     public ParsedResult parse(){
-        if(requestTerms.length < 2){
-            return new ParsedResult(StreamType.NONE);
-        }
         StreamType type = null;
-        //command <id> <num>
+        //>yttype id num
+        char typeChar = request.charAt(prefixOffset + 2);
 
-        char typeChar = requestTerms[0].charAt(2);
         if(typeChar == 'i'){
             type = StreamType.INFO;
         }else if(typeChar == 'a'){
@@ -26,36 +25,48 @@ public class YoutubeRequestParser{
             type = StreamType.VIDEO;
         }
 
-        //entire links for convenience
-        if(requestTerms[1].startsWith("www") || requestTerms[1].startsWith("http")){
-            requestTerms[1] = Youtube.getVideoId(requestTerms[1]);
-        }
-        //info requests should have only two terms
-        if (type == StreamType.INFO){
-            ParsedResult result = new ParsedResult(StreamType.INFO, requestTerms[1]);
-            System.out.println(result);
-            return result;
-        }
-
-        //checks if video/vi is followed up with audio/au or the other way around
-        if(type == StreamType.VIDEO || type == StreamType.AUDIO){
-            for(int i = 3;i<requestTerms[0].length(); i++){
-                char character = requestTerms[0].charAt(i);
-                if(character == 'a' || character == 'v'){
+        int i = prefixOffset+3;
+        if(type == StreamType.VIDEO){
+            for(;i<length; i++){
+                char character = request.charAt(i);
+                if(character == ' '){
+                    i--;
+                    break;
+                }else if(character == 'a'){
                     type = StreamType.VIDEO_AUDIO;
                     break;
                 }
             }
         }
-
         //parse videoId and formatNumber
-        int formatNumber;
-        try{
-            formatNumber = Integer.parseInt(requestTerms[2]);
-        }catch (NumberFormatException nfExc){
-            return new ParsedResult(StreamType.NONE);
+        int whitespaces = 0, indexId = -1, formatNumber = -1;
+        String videoId = null;
+        for (;i<length; i++){
+            char character = request.charAt(i);
+            //videoId begin
+            if(whitespaces == 0 && character == ' ' && i+1<length && request.charAt(i+1) != ' '){
+                indexId = i + 1;
+                if (type == StreamType.INFO){
+                    videoId = request.substring(indexId);
+                    ParsedResult result = new ParsedResult(videoId, type, formatNumber);
+                    System.out.println(result);
+                    return result;
+                }
+                whitespaces++;
+            }
+            //videoId end
+            else if(whitespaces == 1 && character == ' '){
+                whitespaces++;
+                videoId = request.substring(indexId, i);
+            }
+            //char before formatNumberBegin
+            else if(whitespaces > 1 && character != ' '){
+                String numAsStr = request.substring(i);
+                formatNumber = Integer.parseInt(numAsStr);
+                break;
+            }
         }
-        ParsedResult result = new ParsedResult(type, requestTerms[1], formatNumber);
+        ParsedResult result = new ParsedResult(videoId,type,formatNumber);
         System.out.println(result);
         return result;
     }

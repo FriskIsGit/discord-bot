@@ -12,6 +12,8 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyAction;
+import net.dv8tion.jda.internal.requests.restaction.interactions.ReplyActionImpl;
 
 import java.awt.*;
 import java.io.*;
@@ -23,16 +25,16 @@ import java.util.concurrent.TimeUnit;
 
 public class MessageProcessor extends Commands{
 
-    private static final int USER_ID_LENGTH = 18;
     private static final List<Button> interactiveButtons = new ArrayList<>(Arrays.asList(
             Button.primary("clrsongs",  "Free songs from memory"),
             Button.primary("gc",        "Run GC"),
             Button.primary("refresh",   "Refresh")
     ));
     private static final HashMap<Long, MessageDeque> channelIdsToMessageDeques = new HashMap<>();
-    public static String PREFIX;
-    public static int PREFIX_OFFSET;
+    public static String PREFIX = ">";
+    public static int PREFIX_OFFSET = 1;
     public static int PURGE_CAP = 1000;
+    protected final static Set<Long> AUTHORIZED_USERS = new HashSet<>();
 
     private static JDA jdaInterface;
     private static Actions actions;
@@ -43,9 +45,6 @@ public class MessageProcessor extends Commands{
     private static String messageText;
     private static long messageChannelId;
 
-    private static String commandName;
-    private static String commandArgs;
-
     static Runtime run = Runtime.getRuntime();
     protected final static String OS = System.getProperty("os.name");
     static int MAX_DEQUE_SIZE = 500;
@@ -55,8 +54,6 @@ public class MessageProcessor extends Commands{
         channels = Bot.getChannels();
         jdaInterface = Bot.getJDAInterface();
         youtube = new Youtube();
-        PREFIX = Bot.PREFIX;
-        PREFIX_OFFSET = Bot.PREFIX_OFFSET;
     }
 
     protected static void logsRequest(){
@@ -86,44 +83,22 @@ public class MessageProcessor extends Commands{
         messageText = messageContent;
         messageChannelId = idLong;
         logMessage();
-        dispatchCommand();
+        checkPrefixes();
     }
 
-    private static void dispatchCommand(){
+    private static void checkPrefixes(){
         boolean isBot = messageEvent.getAuthor().isBot();
         if(messageText.startsWith(PREFIX)){
-            final String msgLowerCase = messageText.toLowerCase();
-            final String[] splitCommand = Commands.doubleTermSplit(messageText);
-            commandName = splitCommand[0].toLowerCase();
-            commandArgs = splitCommand[1];
+            final String commandName = getCommandName();
             if(commandName.isEmpty()){
                 return;
             }
 
-            RequestFunction funcToExecute;
             //System.out.println("=|" + commandName+ "|=");
             if(COMMANDS_TO_FUNCTIONS.containsKey(commandName)){
-                funcToExecute = COMMANDS_TO_FUNCTIONS.get(commandName);
+                RequestFunction funcToExecute = COMMANDS_TO_FUNCTIONS.get(commandName);
                 if(!isBot || funcToExecute.isTriggerableByBot()){
                     funcToExecute.run();
-                }
-            }else{
-                //youtube associated requests
-                if(msgLowerCase.length() < PREFIX_OFFSET+2){
-                    return;
-                }
-                if(msgLowerCase.charAt(PREFIX_OFFSET)=='y' && msgLowerCase.charAt(PREFIX_OFFSET+1)=='t'){
-                    funcToExecute = COMMANDS_TO_FUNCTIONS.get("yt");
-                    if(!isBot || funcToExecute.isTriggerableByBot()){
-                        funcToExecute.run();
-                    }
-                }
-                //hash aliases
-                if(Hasher.hasAlgorithm(commandName)){
-                    funcToExecute = COMMANDS_TO_FUNCTIONS.get("hash");
-                    if(!isBot || funcToExecute.isTriggerableByBot()){
-                        funcToExecute.run();
-                    }
                 }
             }
         }
@@ -132,10 +107,11 @@ public class MessageProcessor extends Commands{
                 linuxRequest();
             }catch (Exception exc){exc.printStackTrace();}
         }
+
     }
 
     protected static void shutdownRequest(){
-        if(isAuthorAuthorized()){
+        if(AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong())){
             actions.sendAsMessageBlock(messageChannelId,"Shutting down");
             sleep(3000);
             System.exit(0);
@@ -239,16 +215,20 @@ public class MessageProcessor extends Commands{
     }
 
     protected static void warpRequest(){
-        Member msgAuthor = messageEvent.getMember();
-        GuildVoiceState vcState = Objects.requireNonNull(msgAuthor).getVoiceState();
-        if(vcState != null && !vcState.inAudioChannel()){
-            return;
+        if(messageText.length() > PREFIX_OFFSET + 5){
+            Member msgAuthor = messageEvent.getMember();
+            GuildVoiceState vcState = Objects.requireNonNull(msgAuthor).getVoiceState();
+            if(vcState != null && !vcState.inAudioChannel()){
+                return;
+            }
+            int parsingOffset = PREFIX_OFFSET + 5;
+            String channelName = messageText.substring(parsingOffset);
+            VoiceChannel destinationChannel = channels.getVoiceChannelIgnoreCase(channelName);
+            if(destinationChannel == null){
+                return;
+            }
+            messageEvent.getGuild().moveVoiceMember(msgAuthor, destinationChannel).queue();
         }
-        VoiceChannel destinationChannel = channels.getVoiceChannelIgnoreCase(commandArgs);
-        if(destinationChannel == null){
-            return;
-        }
-        messageEvent.getGuild().moveVoiceMember(msgAuthor, destinationChannel).queue();
     }
 
     protected static void leaveRequest(){
@@ -263,8 +243,10 @@ public class MessageProcessor extends Commands{
             return;
         }
         AudioPlayer audioPlayer = addSendingHandlerIfNull(audioManager);
-        if(messageText.length() > PREFIX_OFFSET + 4 + 1){
-            if (!audioPlayer.setAudioTrack(commandArgs)){
+        final int commandLength = 4;
+        if(messageText.length() > PREFIX_OFFSET + 5){
+            String trackName = messageText.substring(PREFIX_OFFSET + commandLength + 1);
+            if (!audioPlayer.setAudioTrack(trackName)){
                 actions.messageChannel(messageChannelId,"Track doesn't exist");
                 return;
             }
@@ -295,6 +277,10 @@ public class MessageProcessor extends Commands{
     protected static void youtubeRequest(){
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         addSendingHandlerIfNull(audioManager);
+        /*if(!audioManager.isConnected()){
+               actions.messageChannel(messageReceived.getChannel(),"I'm not in channel");
+               return;
+           }*/
         /*if(YoutubeRequest.hasActiveRequest()){
                actions.messageChannel(messageChannelId,"Has an active request to process");
                return;
@@ -387,13 +373,14 @@ public class MessageProcessor extends Commands{
                 " tracks - displays all available tracks, separated with '|', some may be distorted\n" +
                 " loop - self explanatory\n" +
                 " sha <text> - one of many hashing algorithms (e.g. md5, sha256)\n" +
+                " sig <algorithm> <text> <hash> - check if hash matches the sequence\n" +
                 " mem - display memory management panel\n" +
                 " uptime\n" +
                 " [Youtube Commands] <format_number> index at which it appears counting from the top (0-indexed)\n" +
-                " ytinfo <videoID/link> retrieves information about the youtube video, displaying available formats\n" +
-                " ytaudio <videoID/link> <format_number> retrieves audio file in specified format\n" +
-                " ytvideo <videoID/link> <format_number> retrieves video file in specified format\n" +
-                " ytviau <videoID/link> <format_number> retrieves video with audio in specified format\n" +
+                " ytinfo <videoID> retrieves information about the youtube video, displaying available formats\n" +
+                " ytaudio <videoID> <format_number> retrieves audio file in specified format\n" +
+                " ytvideo <videoID> <format_number> retrieves video file in specified format\n" +
+                " ytviau <videoID> <format_number> retrieves video with audio in specified format\n" +
                 "```";
         channel.sendMessage(HELP_MESSAGE).queue();
     }
@@ -402,7 +389,7 @@ public class MessageProcessor extends Commands{
 
         final int expectedCommandLen = 5;
         if(messageText.length() < expectedCommandLen+PREFIX_OFFSET+1) return;
-        if(!isAuthorAuthorized()) return;
+        if(!AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong())) return;
 
         int parsingOffset = expectedCommandLen+PREFIX_OFFSET+1;
 
@@ -485,7 +472,7 @@ public class MessageProcessor extends Commands{
             actions.messageChannel(messageEvent.getTextChannel(),"Host running windows");
             return;
         }
-        if(!isAuthorAuthorized()){
+        if (!AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong())){
             return;
         }
         String command = messageText.substring(messageText.indexOf("$") + 1);
@@ -540,6 +527,7 @@ public class MessageProcessor extends Commands{
                     buffer = tempBuffer;
                     tempBuffer = null;
                 }
+
             }
             output = bytesToStr(buffer,offset);
             return output;
@@ -558,27 +546,70 @@ public class MessageProcessor extends Commands{
     }
     //TODO not implemented
     private static void fileHashRequest(){
+        if(messageText.startsWith("file",PREFIX_OFFSET)){
+
+        }
         //>file sha256 <url>
+    }
+    //TODO fix ""
+    protected static void signatureCheck(){
+        int spaces = 0;
+        int firstQuotesInd = messageText.indexOf("\"");
+        int secondQuotesInd = messageText.indexOf("\"",firstQuotesInd + 1);
+
+        String textToHash, algorithm, hashedResult, hashToCompare;
+        int firstSpace = messageText.indexOf(' ');
+        int secondSpace = messageText.indexOf(' ', firstSpace + 1);
+
+        algorithm = messageText.substring(firstSpace + 1, secondSpace);
+        textToHash = messageText.substring(firstQuotesInd+1, secondQuotesInd);
+        hashToCompare = messageText.substring(secondQuotesInd + 2);
+        hashedResult = Hasher.anySHA(textToHash, algorithm);
+
+        MessageChannel msgChannel = messageEvent.getChannel();
+        if(hashedResult != null && hashedResult.equals(hashToCompare)){
+            msgChannel.sendMessage("Signature for " + textToHash + " matching").queue();
+        }
+        else{
+            msgChannel.sendMessage("Signature for " + textToHash + " is different").queue();
+        }
     }
 
     protected static void stringHashRequest(){
-        String hashedResult, textToHash;
-        int whitespace = messageText.indexOf(' ', PREFIX_OFFSET);
-        try{
-            if(whitespace == -1){
-                System.out.println("No whitespace or was trailing");
-                return;
-            }
-            whitespace++;
-            textToHash = messageText.substring(whitespace);
-            hashedResult = Hasher.hash(textToHash, commandName);
-        }catch (IndexOutOfBoundsException outOfBoundsExc){
-            System.err.println("Hashing failed");
-            return;
+        if(messageText.length()<5) return;
+        String hashedResult = null;
+        String textToHash;
+        if(messageText.startsWith("hash", PREFIX_OFFSET) || messageText.startsWith("sha256", PREFIX_OFFSET)){
+            textToHash = messageText.substring(messageText.indexOf(' ') + 1);
+            hashedResult = Hasher.sha256(textToHash);
+        }else if(messageText.startsWith("sha", PREFIX_OFFSET) || messageText.startsWith("md5", PREFIX_OFFSET)){
+            int spaceIndex = messageText.indexOf(' ');
+            textToHash = messageText.substring(spaceIndex + PREFIX_OFFSET);
+            String algorithm = messageText.substring(messageText.indexOf(PREFIX) + 1, spaceIndex);
+            hashedResult = Hasher.anySHA(textToHash,algorithm);
         }
+
         if(hashedResult != null){
             messageEvent.getChannel().sendMessage(hashedResult).queue();
         }
+    }
+    private static String getCommandName(){
+        String lowerCase = messageText.toLowerCase(Locale.ENGLISH);
+        int length = lowerCase.length();
+        int endIndex = lowerCase.indexOf(' ', PREFIX_OFFSET);
+        //no parameter requests
+        if(endIndex == -1 && length>PREFIX_OFFSET){
+            return lowerCase.substring(PREFIX_OFFSET);
+        }
+        if(PREFIX_OFFSET>endIndex){
+            return "";
+        }
+        //youtube associated requests
+        if(lowerCase.charAt(PREFIX_OFFSET)=='y' && lowerCase.charAt(PREFIX_OFFSET+1)=='t'){
+            return "yt";
+        }
+        //other parameterized requests
+        return lowerCase.substring(PREFIX_OFFSET, endIndex);
     }
 
     public static Youtube getYoutube(){
@@ -592,89 +623,5 @@ public class MessageProcessor extends Commands{
     }
     public static void clearSongsRequest(){
         AudioPlayer.clearAudioTracksFromMemory();
-    }
-    public static void httpCatRequest(){
-        final String httpCatAddress = "https://http.cat/";
-        try{
-            Integer.parseInt(commandArgs);
-        }catch (NumberFormatException nfExc){
-            return;
-        }
-        actions.messageChannel(messageChannelId,httpCatAddress + commandArgs);
-    }
-
-    public static void banRequest(){
-        if(!isAuthorAuthorized()){
-            return;
-        }
-        if(messageText.length() > PREFIX_OFFSET + USER_ID_LENGTH + 3){
-            User userToBan;
-            try{
-                userToBan = jdaInterface.retrieveUserById(commandArgs).complete();
-            }catch (IllegalArgumentException illegalArgExc){
-                return;
-            }
-            boolean res = actions.banUser(userToBan, messageEvent.getGuild());
-            if(res){
-                actions.messageChannel(messageChannelId,"User unbanned :skull:");
-            }
-        }
-    }
-
-    public static void unbanRequest(){
-        if(!isAuthorAuthorized()){
-            return;
-        }
-        if(messageText.length() > PREFIX_OFFSET + USER_ID_LENGTH + 5){
-            User userToBan;
-            try{
-                userToBan = jdaInterface.retrieveUserById(commandArgs).complete();
-            }catch (IllegalArgumentException illegalArgExc){
-                return;
-            }
-            boolean res = actions.unbanUser(userToBan, messageEvent.getGuild());
-            if(res){
-                actions.messageChannel(messageChannelId,"User unbanned :right_facing_fist:");
-            }
-        }
-    }
-
-    public static void lengthRequest(){
-        //len
-        if(messageText.length() > PREFIX_OFFSET + 3){
-            actions.messageChannel(messageEvent.getTextChannel(), "``" + commandArgs.length() +"``");
-        }
-    }
-
-    //TODO
-    public static void auditLogRequest(){
-        if(!isAuthorAuthorized()){
-            return;
-        }
-
-    }
-
-    public static void test(){
-        long id1 = 943646128082133032L;
-        long id2 = 944235200668377161L;
-        Guild thisGuild = messageEvent.getGuild();
-        User userToUnban1 = jdaInterface.retrieveUserById(id1).complete();
-        User userToUnban2 = jdaInterface.retrieveUserById(id2).complete();
-        try{
-            thisGuild.retrieveBanById(userToUnban1.getId()).complete();
-            thisGuild.unban(userToUnban1).queue();
-        }catch (Throwable throwable1){
-            System.err.println("User is not banned");
-        }
-        try{
-            thisGuild.retrieveBanById(userToUnban2.getId()).complete();
-            thisGuild.unban(userToUnban2).queue();
-        }catch (Throwable throwable2){
-            System.err.println("User is not banned");
-        }
-
-    }
-    private static boolean isAuthorAuthorized(){
-        return Bot.AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong());
     }
 }

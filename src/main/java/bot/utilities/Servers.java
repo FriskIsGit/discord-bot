@@ -14,7 +14,7 @@ public class Servers {
     private static JDA jdaInterface;
     public Servers(){
         jdaInterface = Bot.getJDAInterface();
-        List<Guild> guilds = jdaInterface.getGuilds();
+        List<Guild> guilds = getServers();
         if(guilds.size() < 1){
             System.err.println("Bot is not on any server");
             System.exit(0);
@@ -26,7 +26,7 @@ public class Servers {
         return jdaInterface.getGuildById(id);
     }
     public Guild getServer(String partialName){
-        List<Guild> servers = jdaInterface.getGuilds();
+        List<Guild> servers = getServers();
         for (Guild server : servers){
             if (server.getName().contains(partialName)){
                 currentGuild = server;
@@ -37,7 +37,7 @@ public class Servers {
     }
     public Guild getServerIgnoreCase(String partialName){
         partialName = partialName.toLowerCase(Locale.ROOT);
-        List<Guild> servers = jdaInterface.getGuilds();
+        List<Guild> servers = getServers();
         for (Guild server : servers){
             if (server.getName().toLowerCase(Locale.ROOT).contains(partialName)){
                 currentGuild = server;
@@ -46,8 +46,11 @@ public class Servers {
         }
         return currentGuild;
     }
+    public List<Guild> getServers(){
+        return jdaInterface.getGuilds();
+    }
     public List<String> getServerNames(){
-        List<Guild> guilds = jdaInterface.getGuilds();
+        List<Guild> guilds = getServers();
         int numberOfGuilds = guilds.size();
         List<String> serverNames = new ArrayList<>(numberOfGuilds);
         for (Guild guild : guilds){

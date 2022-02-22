@@ -14,5 +14,6 @@ class BotRunner{
 
         Thread chatThread = new Thread(() -> Bot.getActions().chatWithBot("bot"));
         chatThread.start();
+
     }
 }
