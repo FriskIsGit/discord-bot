@@ -6,6 +6,9 @@ public class PseudoBotTokenGenerator{
     final static Random random = new Random();
     final static int[] LENGTHS = {24,6,27};
 
+    public static void main(String[] args){
+        System.out.println(generateBotToken());
+    }
     public static String generateBotToken(){
         StringBuilder token = new StringBuilder();
         appendSection(token, LENGTHS[0]);

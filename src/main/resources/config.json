@@ -1,7 +1,6 @@
 {
-  "token":"Zx9bZO22DBeU8hC3eljBnPxa.38U3Nj.vpJ9w37762C2Ze1vtT9X99dif3e",
+  "token":"CKiwSUZaa6RkevNWKspoht0u.4F417m.Es37s4UY5oKRE30POo2671I9Tp6",
   "prefix":"-",
-  "bot_id":923294593108279386,
   "purge_cap": 1000,
   "message_cap_per_channel": 1500,
   "sudo_users":[
@@ -9,5 +8,5 @@
     278778540554715137,
     489788192145539072,
     356165467486027788],
-  "audio_dir":"home/users/audio"
+  "audio_dir":"/home/user/audio"
 }

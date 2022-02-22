@@ -56,7 +56,7 @@ public class Channels{
     }
 
     public Channel getChannel(String partialName){
-        List<Guild> serversList = servers.getServers();
+        List<Guild> serversList = jdaInterface.getGuilds();
         for(Guild guild : serversList){
             List<GuildChannel> listOfChannels = guild.getChannels();
             for(GuildChannel channel : listOfChannels){
