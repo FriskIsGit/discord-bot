@@ -92,7 +92,7 @@ public abstract class Commands{
                 expectingWhitespace = true;
             }
             if(i == arr.length-1){
-                terms.add(text.substring(fromIndex,i));
+                terms.add(text.substring(fromIndex,arr.length));
                 break;
             }
         }
