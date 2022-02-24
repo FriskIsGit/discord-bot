@@ -260,7 +260,7 @@ public class MessageProcessor extends Commands{
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         if(!audioManager.isConnected()){
             actions.messageChannel(messageEvent.getChannel(),"I'm not in channel");
-            return;
+            joinRequest();
         }
         AudioPlayer audioPlayer = addSendingHandlerIfNull(audioManager);
         if(messageText.length() > PREFIX_OFFSET + 4 + 1){
@@ -312,11 +312,8 @@ public class MessageProcessor extends Commands{
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         addSendingHandlerIfNull(audioManager);
         //channel specific join
-        final int commandLength = 4;
-        if(messageText.length() > PREFIX_OFFSET+commandLength+1){
-            int indexBlank = messageText.indexOf(' ');
-            String parsedName = messageText.substring(indexBlank + 1);
-            VoiceChannel voice = channels.getVoiceChannelIgnoreCase(parsedName);
+        if(!commandArgs.isEmpty()){
+            VoiceChannel voice = channels.getVoiceChannelIgnoreCase(commandArgs);
             if(voice == null){
                 actions.messageChannel(messageEvent.getChannel(),"VoiceChannel not found");
                 return;
@@ -387,7 +384,7 @@ public class MessageProcessor extends Commands{
                 " tracks - displays all available tracks, separated with '|', some may be distorted\n" +
                 " loop - self explanatory\n" +
                 " sha <text> - one of many hashing algorithms (e.g. md5, sha256)\n" +
-                " mem - display memory management panel\n" +
+                " mempanel - display memory management panel\n" +
                 " uptime\n" +
                 " [Youtube Commands] <format_number> index at which it appears counting from the top (0-indexed)\n" +
                 " ytinfo <videoID/link> retrieves information about the youtube video, displaying available formats\n" +
@@ -638,10 +635,14 @@ public class MessageProcessor extends Commands{
             }
         }
     }
+    //TODO
+    public static void queueRequest(){
+
+    }
 
     public static void lengthRequest(){
         //len
-        if(messageText.length() > PREFIX_OFFSET + 3){
+        if(!commandArgs.isEmpty()){
             actions.messageChannel(messageEvent.getTextChannel(), "``" + commandArgs.length() +"``");
         }
     }

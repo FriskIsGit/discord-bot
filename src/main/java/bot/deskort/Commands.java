@@ -2,7 +2,6 @@ package bot.deskort;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 
 public abstract class Commands{
     final static HashMap<String, RequestFunction> COMMANDS_TO_FUNCTIONS = new HashMap<String, RequestFunction>() {{
@@ -15,6 +14,7 @@ public abstract class Commands{
         put("join",        new RequestFunction(MessageProcessor::joinRequest,       false));
         put("warp",        new RequestFunction(MessageProcessor::warpRequest,       false));
         put("play",        new RequestFunction(MessageProcessor::playRequest,       false));
+        put("queue",       new RequestFunction(MessageProcessor::queueRequest,      true));
         put("stop",        new RequestFunction(MessageProcessor::stopRequest,       false));
         put("leave",       new RequestFunction(MessageProcessor::leaveRequest,      false));
         put("loop",        new RequestFunction(MessageProcessor::loopRequest,       false));

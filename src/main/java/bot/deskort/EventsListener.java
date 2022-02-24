@@ -66,8 +66,7 @@ public class EventsListener extends ListenerAdapter{
         }
         MessageEmbed memoryEmbed = MessageProcessor.createMemoryEmbed();
         clickEvent.editMessageEmbeds().setEmbeds(memoryEmbed).queue();
-        clickEvent.getHook().editOriginalEmbeds(memoryEmbed).queue();
-        clickEvent.getHook().deleteOriginal().queue();
+        //clickEvent.getHook().editOriginalEmbeds(memoryEmbed).queue();
     }
 
     private void printReceivedMessage(){
