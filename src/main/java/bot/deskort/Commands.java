@@ -8,6 +8,7 @@ public abstract class Commands{
 
         put("logs",        new RequestFunction(MessageProcessor::logsRequest,       true));
         put("shutdown",    new RequestFunction(MessageProcessor::shutdownRequest,   true));
+        put("abort",       new RequestFunction(MessageProcessor::abortRequest,      true));
 
         put("ban",         new RequestFunction(MessageProcessor::banRequest,        false));
         put("unban",       new RequestFunction(MessageProcessor::unbanRequest,      false));

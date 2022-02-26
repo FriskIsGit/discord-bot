@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.AudioManager;
 
 import java.io.File;
@@ -167,7 +168,12 @@ public class Actions{
         int msgLength = msgText.length();
 
         if(1994>=msgLength && msgLength>0){
-            txtChannel.sendMessage("```" + msgText + "```").queue();
+            try{
+                txtChannel.sendMessage("```" + msgText + "```").queue();
+            }catch (InsufficientPermissionException insufficientPermExc){
+                System.err.println("Lacking permission MESSAGE_SEND");
+            }
+
         }
         else if(msgLength>2000){
             int parts = msgLength/2000 + 1;
@@ -321,9 +327,5 @@ public class Actions{
     public void purgeLastMessagesInChannel(String partialName, int numberOfMessages){
         purgeLastMessagesInChannel(channels.getTextChannel(partialName), numberOfMessages);
     }
-
-
-
-
 
 }

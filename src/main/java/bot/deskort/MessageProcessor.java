@@ -16,6 +16,7 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import java.awt.*;
 import java.io.*;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +39,7 @@ public class MessageProcessor extends Commands{
     private static Actions actions;
     private static Channels channels;
     private static Youtube youtube;
+    private static ShutdownTimer shutdownTimer;
 
     private static MessageReceivedEvent messageEvent;
     private static String messageText;
@@ -55,6 +57,8 @@ public class MessageProcessor extends Commands{
         channels = Bot.getChannels();
         jdaInterface = Bot.getJDAInterface();
         youtube = new Youtube();
+        shutdownTimer = new ShutdownTimer();
+
         PREFIX = Bot.PREFIX;
         PREFIX_OFFSET = Bot.PREFIX_OFFSET;
     }
@@ -136,9 +140,26 @@ public class MessageProcessor extends Commands{
 
     protected static void shutdownRequest(){
         if(isAuthorAuthorized()){
-            actions.sendAsMessageBlock(messageChannelId,"Shutting down");
-            sleep(3000);
-            System.exit(0);
+            if(!commandArgs.isEmpty()){
+                int seconds = ShutdownTimer.parseToSeconds(commandArgs);
+                if(seconds == -1){
+                    actions.sendAsMessageBlock(messageEvent.getTextChannel(), "Shutdown argument failure");
+                    return;
+                }
+                shutdownTimer.countdown(seconds);
+            }else{
+                shutdownTimer.countdown(0);
+            }
+            actions.sendAsMessageBlock(messageEvent.getTextChannel(), "Shutdown scheduled");
+        }
+    }
+    public static void abortRequest(){
+        if(isAuthorAuthorized()){
+            if(!shutdownTimer.isScheduled()){
+                return;
+            }
+            shutdownTimer.abort();
+            actions.sendAsMessageBlock(messageEvent.getTextChannel(), "Aborting shutdown");
         }
     }
 
@@ -244,11 +265,21 @@ public class MessageProcessor extends Commands{
         if(vcState != null && !vcState.inAudioChannel()){
             return;
         }
-        VoiceChannel destinationChannel = channels.getVoiceChannelIgnoreCase(commandArgs);
+        Guild thisGuild = messageEvent.getGuild();
+
+        List<VoiceChannel> voiceChannels = thisGuild.getVoiceChannels();
+        String channelNameLower = commandArgs.toLowerCase(Locale.ROOT);
+        VoiceChannel destinationChannel = null;
+        for (VoiceChannel vc : voiceChannels){
+            if(vc.getName().contains(channelNameLower)){
+                destinationChannel = vc;
+                break;
+            }
+        }
         if(destinationChannel == null){
             return;
         }
-        messageEvent.getGuild().moveVoiceMember(msgAuthor, destinationChannel).queue();
+        thisGuild.moveVoiceMember(msgAuthor, destinationChannel).queue();
     }
 
     protected static void leaveRequest(){
@@ -257,13 +288,15 @@ public class MessageProcessor extends Commands{
     }
 
     protected static void playRequest(){
+        String tempArgs = commandArgs;
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         if(!audioManager.isConnected()){
-            actions.messageChannel(messageEvent.getChannel(),"I'm not in channel");
+            commandArgs = "";
             joinRequest();
         }
+        commandArgs = tempArgs;
         AudioPlayer audioPlayer = addSendingHandlerIfNull(audioManager);
-        if(messageText.length() > PREFIX_OFFSET + 4 + 1){
+        if(!commandArgs.isEmpty()){
             if (!audioPlayer.setAudioTrack(commandArgs)){
                 actions.messageChannel(messageChannelId,"Track doesn't exist");
                 return;
@@ -678,4 +711,5 @@ public class MessageProcessor extends Commands{
     private static boolean isAuthorAuthorized(){
         return Bot.AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong());
     }
+
 }
