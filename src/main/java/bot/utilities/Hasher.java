@@ -10,7 +10,7 @@ public class Hasher{
     public final static HashMap<String, String> NAMES_TO_ALGORITHMS = new HashMap<String, String>() {{
         put("hash",   "SHA-256");
         put("sha256", "SHA-256");
-        put("sha378", "SHA-378");
+        put("sha384", "SHA-384");
         put("sha512", "SHA-512");
 
         put("sha1",   "SHA-1");
