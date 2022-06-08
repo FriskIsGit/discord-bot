@@ -88,6 +88,10 @@ public class MessageProcessor extends Commands{
         }
     }
 
+    protected static HashMap<Long, MessageDeque> getChannelIdsToMessageDeques(){
+        return channelIdsToMessageDeques;
+    }
+
     protected static void processMessage(MessageReceivedEvent message, String messageContent, long idLong){
 
         messageEvent = message;
