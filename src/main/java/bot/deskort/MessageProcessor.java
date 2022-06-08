@@ -1,6 +1,7 @@
 package bot.deskort;
 
 import bot.music.AudioTrack;
+import bot.music.youtube.SongQueue;
 import bot.utilities.*;
 
 import bot.music.AudioPlayer;
@@ -8,6 +9,9 @@ import bot.music.youtube.Youtube;
 import bot.music.youtube.YoutubeRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.audio.AudioSendHandler;
+import net.dv8tion.jda.api.audit.ActionType;
+import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.Button;
@@ -97,7 +101,7 @@ public class MessageProcessor extends Commands{
         boolean isBot = messageEvent.getAuthor().isBot();
         if(messageText.startsWith(PREFIX)){
             final String msgLowerCase = messageText.toLowerCase();
-            final String[] splitCommand = Commands.doubleTermSplit(messageText);
+            final String[] splitCommand = Commands.doubleTermSplit(messageText, Bot.PREFIX_OFFSET);
             commandName = splitCommand[0].toLowerCase();
             commandArgs = splitCommand[1];
             if(commandName.isEmpty()){
@@ -301,6 +305,10 @@ public class MessageProcessor extends Commands{
                 actions.messageChannel(messageChannelId,"Track doesn't exist");
                 return;
             }
+        }else if(audioPlayer.getCurrentAudioTrack() == null){
+            //play from playlist
+            String nextSong = audioPlayer.getSongQueue().take();
+            audioPlayer.setAudioTrack(nextSong);
         }
         actions.sendEmbed(messageEvent.getTextChannel(), createPlayingEmbed(audioPlayer));
         audioPlayer.setPlaying(true);
@@ -308,12 +316,17 @@ public class MessageProcessor extends Commands{
 
     private static MessageEmbed createPlayingEmbed(AudioPlayer audioPlayer){
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Now playing");
+
         AudioTrack currentAudioTrack = audioPlayer.getCurrentAudioTrack();
-        if(currentAudioTrack == null){
-            return null;
+        if(currentAudioTrack != null){
+            embedBuilder.setTitle("Now playing");
+            embedBuilder.setDescription(currentAudioTrack.getTrackName());
+            String seconds = String.valueOf((int)(currentAudioTrack.getLengthSeconds()));
+            embedBuilder.appendDescription("\nDuration: ").appendDescription(seconds).appendDescription("s");
+            return embedBuilder.build();
         }
-        embedBuilder.setDescription(currentAudioTrack.getTrackName());
+        embedBuilder.setTitle("Nothing is playing right now");
+        embedBuilder.setDescription("**sleepy noises**");
         return embedBuilder.build();
     }
     protected static MessageEmbed createMemoryEmbed(){
@@ -397,24 +410,29 @@ public class MessageProcessor extends Commands{
     protected static String getUsedRuntimeMemoryAsString(){
         Runtime runtime = Runtime.getRuntime();
         long memUsed = runtime.totalMemory() - runtime.freeMemory();
-        String valueFormatted = String.format("%.2f", memUsed/(1024*1024D));
+        String valueFormatted = formatDouble(memUsed/(1024*1024D));
         return "Total mem - free mem: ```" + valueFormatted + " MBs ```";
     }
     protected static String getSongsSizeInMemoryAsString(){
-        String valueFormatted =  String.format("%.2f", AudioPlayer.getSongsSizeInMemory()/(1024*1024D));
+        String valueFormatted =  formatDouble(AudioPlayer.getSongsSizeInMemory()/(1024*1024D));
         return "Songs size in memory: ```" + valueFormatted + " MBs ```";
+    }
+    public static String formatDouble(double value){
+        return String.format("%.2f", value);
     }
 
     protected static void helpRequest(){
         MessageChannel channel = messageEvent.getChannel();
         final String HELP_MESSAGE = "```" +
                 " [Available commands]\n" +
-                " req\n" +
                 " purge <amount> - channel based purge (each channel has its own deque, incorporates retrieving history when needed)\n" +
                 " warp <voiceChannelName> - warps you to a voice channel (provided you're in one already)\n" +
-                " join <partialName> if left blank bot will attempt to join message author\n" +
+                " join <partialName> - if left blank bot will attempt to join message author\n" +
+                " leave - disconnects bot from channel\n" +
                 " play <track> - makes bot play its 48Khz 16bit stereo 2channel 4bytes/frame BIG.ENDIAN PCM Signed opus encoded audio\n" +
-                " tracks - displays all available tracks, separated with '|', some may be distorted\n" +
+                " tracks - displays all available tracks, some may be distorted\n" +
+                " queue <track> - enqueues specified track, if name was not provided - displays the queue\n" +
+                " skip - consumes the first song in queue and loads it\n" +
                 " loop - self explanatory\n" +
                 " sha <text> - one of many hashing algorithms (e.g. md5, sha256)\n" +
                 " mempanel - display memory management panel\n" +
@@ -668,10 +686,6 @@ public class MessageProcessor extends Commands{
             }
         }
     }
-    //TODO
-    public static void queueRequest(){
-
-    }
 
     public static void lengthRequest(){
         //len
@@ -680,36 +694,64 @@ public class MessageProcessor extends Commands{
         }
     }
 
+    public static void queueRequest(){
+        AudioPlayer audioPlayer = addSendingHandlerIfNull(messageEvent.getGuild().getAudioManager());
+        //display queue
+        if(commandArgs.isEmpty()){
+            SongQueue songQueue = audioPlayer.getSongQueue();
+            if(songQueue.isEmpty()){
+                actions.messageChannel(messageEvent.getTextChannel(), "Queue is empty");
+            }else{
+                actions.messageChannel(messageEvent.getTextChannel(), songQueue.toString());
+            }
+
+        }else{
+            //add to queue
+            audioPlayer.getSongQueue().append(commandArgs);
+        }
+    }
+
+    public static void skipRequest(){
+        AudioPlayer audioPlayer = addSendingHandlerIfNull(messageEvent.getGuild().getAudioManager());
+        audioPlayer.setAudioTrack(audioPlayer.getSongQueue().take());
+    }
+
     //TODO
     public static void auditLogRequest(){
         if(!isAuthorAuthorized()){
             return;
         }
-
-    }
-
-    public static void test(){
-        long id1 = 943646128082133032L;
-        long id2 = 944235200668377161L;
-        Guild thisGuild = messageEvent.getGuild();
-        User userToUnban1 = jdaInterface.retrieveUserById(id1).complete();
-        User userToUnban2 = jdaInterface.retrieveUserById(id2).complete();
-        try{
-            thisGuild.retrieveBanById(userToUnban1.getId()).complete();
-            thisGuild.unban(userToUnban1).queue();
-        }catch (Throwable throwable1){
-            System.err.println("User is not banned");
+        //<prefix>auditlog <actionType> <limit>
+        String[] twoSplit = Commands.doubleTermSplit(commandArgs);
+        ActionType actionType = AuditLog.toActionType(twoSplit[0]);
+        if(actionType == null){
+            return;
         }
-        try{
-            thisGuild.retrieveBanById(userToUnban2.getId()).complete();
-            thisGuild.unban(userToUnban2).queue();
-        }catch (Throwable throwable2){
-            System.err.println("User is not banned");
+        int limit = 50;
+        if(!twoSplit[1].isEmpty()){
+            try{
+                limit = Integer.parseInt(twoSplit[1]);
+            }catch (NumberFormatException nfExc){
+                return;
+            }
         }
-
+        List<AuditLogEntry> entryList = AuditLog.retrieveFromAuditLog(actionType, limit, messageEvent.getGuild());
+        StringBuilder entriesBuilder = new StringBuilder(128);
+        entriesBuilder.append("Retrieved ").append(entryList.size()).append(" entries of type ").append(actionType).append('\n');
+        for (AuditLogEntry entry : entryList){
+            entriesBuilder.append("Approximate time: ").append(entry.getTimeCreated()).append(' ');
+            User userResponsible = entry.getUser();
+            if(userResponsible == null){
+                continue;
+            }
+            entriesBuilder
+                    .append("User responsible: ").append(userResponsible.getAsTag()).append(' ')
+                    .append("Target ID: ").append(entry.getTargetId()).append(' ')
+                    .append('\n');
+        }
+        actions.sendAsMessageBlock(messageEvent.getTextChannel(),entriesBuilder.toString());
     }
     private static boolean isAuthorAuthorized(){
         return Bot.AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong());
     }
-
 }

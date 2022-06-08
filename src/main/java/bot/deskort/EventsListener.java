@@ -2,12 +2,15 @@ package bot.deskort;
 
 import bot.music.AudioPlayer;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class EventsListener extends ListenerAdapter{
@@ -43,6 +46,15 @@ public class EventsListener extends ListenerAdapter{
         System.out.println("Member ["
                 + unbanEvent.getUser().getName()
                 + "] was unbanned");
+    }
+    @Override
+    public void onChannelDelete(ChannelDeleteEvent channelDelete) {
+        long deletedChannelId = channelDelete.getChannel().getIdLong();
+        HashMap<Long, MessageDeque> map = MessageProcessor.getChannelIdsToMessageDeques();
+        if(map.containsKey(deletedChannelId)){
+            map.remove(deletedChannelId);
+            System.out.println("Deleted non-existent channel to prevent memory leaks");
+        }
     }
     @Override
     public void onButtonClick(ButtonClickEvent clickEvent) {
