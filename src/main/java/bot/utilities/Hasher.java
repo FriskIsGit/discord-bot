@@ -17,6 +17,9 @@ public class Hasher{
         put("md5",    "MD5");
     }};
     public static boolean hasAlgorithm(String alg){
+        if(alg.length() > 6){
+            return false;
+        }
         return NAMES_TO_ALGORITHMS.containsKey(alg);
     }
 

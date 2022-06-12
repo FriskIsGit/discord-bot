@@ -38,6 +38,9 @@ public class Youtube{
         if(index == -1){
             index = youtubeLink.indexOf("be/");
         }
+        if(index == -1){
+            index = youtubeLink.indexOf("ts/");
+        }
         if(index != -1 && youtubeLink.length() > index+3){
             //make sure it's not joined with an ampersand or ends in whitespace
             int ampersand = youtubeLink.indexOf('&',index + 3);

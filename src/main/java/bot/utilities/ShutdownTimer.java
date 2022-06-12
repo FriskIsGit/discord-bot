@@ -36,6 +36,7 @@ public class ShutdownTimer {
         shutdownTask = new TimerTask(){
             @Override
             public void run(){
+                System.out.println("Shutting down");
                 Bot.getJDAInterface().shutdown();
                 System.exit(0);
             }

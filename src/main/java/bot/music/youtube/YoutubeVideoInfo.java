@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class YoutubeVideoInfo{
 
     private AudioFormat discordAudioFormat;
+    private AudioFormat bestM4AFormat;
     private VideoInfo videoInfo;
     private VideoDetails videoDetails;
     private static final char NEW_LINE = '\n';
@@ -84,6 +85,23 @@ public class YoutubeVideoInfo{
             }
         }
         return discordAudioFormat;
+    }
+    public AudioFormat getBestM4AFormat(){
+        if(bestM4AFormat != null){
+            return bestM4AFormat;
+        }
+        //targets highest available sample rate
+        int highestSampleRate = 0;
+        List<AudioFormat> audioFormats = audioFormats();
+        for (AudioFormat af : audioFormats){
+            if(af.extension().toString().equals("m4a")){
+                if(highestSampleRate < af.audioSampleRate()){
+                    highestSampleRate = af.audioSampleRate();
+                    bestM4AFormat = af;
+                }
+            }
+        }
+        return bestM4AFormat;
     }
     public String getAvailableVideoWithAudioFormats(){
         StringBuilder formatsAsStr = new StringBuilder();
@@ -158,8 +176,15 @@ public class YoutubeVideoInfo{
                 .append(" |quality ").append(videoFormat.videoQuality())
                 .append(" |bitrate ").append(videoFormat.bitrate())
                 .append(" |ext ").append(videoFormat.extension().value());
-        String sizeInMBs = bytesToMBs(videoFormat.contentLength());
-        propertiesStr.append(" | size ").append(sizeInMBs).append(NEW_LINE);
+        String sizeInMBs;
+        String sizeKind = " | size ";
+        if(videoFormat.contentLength() == null){
+            sizeKind = " | est size ";
+            sizeInMBs = bitrateToSizeAsStr(videoFormat.duration(),videoFormat.bitrate());
+        }else{
+            sizeInMBs = bytesToMBs(videoFormat.contentLength());
+        }
+        propertiesStr.append(sizeKind).append(sizeInMBs).append(NEW_LINE);
         return propertiesStr.toString();
     }
     public static String videoWithAudioFormatToString(VideoWithAudioFormat videoAudioFormat, int index){

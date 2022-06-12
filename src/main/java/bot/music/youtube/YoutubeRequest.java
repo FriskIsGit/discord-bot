@@ -79,18 +79,20 @@ public class YoutubeRequest{
         }
         this.ytVideoInfo = ytVideoInfo;
 
-        if(result.type == StreamType.INFO){
-            displayVideoInformation();
-        }else if(result.type == StreamType.AUDIO){
-            downloadAudio(result.formatNumber);
+        switch (result.type){
+            case INFO:
+                displayVideoInformation();
+                break;
+            case AUDIO:
+                downloadAudio(result.formatNumber);
+                break;
+            case VIDEO:
+                downloadVideo(result.formatNumber);
+                break;
+            case VIDEO_AUDIO:
+                downloadVideoWithAudio(result.formatNumber);
+                break;
         }
-        else if(result.type == StreamType.VIDEO){
-            downloadVideo(result.formatNumber);
-        }
-        else if(result.type == StreamType.VIDEO_AUDIO){
-            downloadVideoWithAudio(result.formatNumber);
-        }
-
     }
 
     private void displayVideoInformation(){
@@ -174,7 +176,7 @@ public class YoutubeRequest{
         actions.sendFile(requestTextChannel, videoWithAudio);
     }
 
-    private void downloadAudioImpl(AudioFormat format){
+    public void downloadAudioImpl(AudioFormat format){
         RequestVideoFileDownload request = new RequestVideoFileDownload(format).renameTo(String.valueOf(UUID.randomUUID()));
 
         flipRequestState();

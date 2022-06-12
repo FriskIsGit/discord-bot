@@ -3,6 +3,8 @@ package bot.music.youtube;
 import bot.deskort.Commands;
 import bot.deskort.MessageProcessor;
 
+import static bot.music.youtube.StreamType.*;
+
 public class YoutubeRequestParser{
     private final String[] requestTerms;
     public YoutubeRequestParser(String requestText){
@@ -19,11 +21,11 @@ public class YoutubeRequestParser{
 
         char typeChar = requestTerms[0].charAt(2);
         if(typeChar == 'i'){
-            type = StreamType.INFO;
+            type = INFO;
         }else if(typeChar == 'a'){
-            type = StreamType.AUDIO;
+            type = AUDIO;
         }else if(typeChar == 'v'){
-            type = StreamType.VIDEO;
+            type = VIDEO;
         }
 
         //entire links for convenience
@@ -31,18 +33,18 @@ public class YoutubeRequestParser{
             requestTerms[1] = Youtube.getVideoId(requestTerms[1]);
         }
         //info requests should have only two terms
-        if (type == StreamType.INFO){
-            ParsedResult result = new ParsedResult(StreamType.INFO, requestTerms[1]);
+        if (type == INFO){
+            ParsedResult result = new ParsedResult(INFO, requestTerms[1]);
             System.out.println(result);
             return result;
         }
 
         //checks if video/vi is followed up with audio/au or the other way around
-        if(type == StreamType.VIDEO || type == StreamType.AUDIO){
+        if(type == VIDEO || type == AUDIO){
             for(int i = 3;i<requestTerms[0].length(); i++){
                 char character = requestTerms[0].charAt(i);
                 if(character == 'a' || character == 'v'){
-                    type = StreamType.VIDEO_AUDIO;
+                    type = VIDEO_AUDIO;
                     break;
                 }
             }
@@ -53,7 +55,7 @@ public class YoutubeRequestParser{
         try{
             formatNumber = Integer.parseInt(requestTerms[2]);
         }catch (NumberFormatException nfExc){
-            return new ParsedResult(StreamType.NONE);
+            return new ParsedResult(NONE);
         }
         ParsedResult result = new ParsedResult(type, requestTerms[1], formatNumber);
         System.out.println(result);

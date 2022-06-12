@@ -46,7 +46,7 @@ public class FileSeeker{
     }
 
     private boolean stepDown(File currentDir){
-        File [] files = currentDir.listFiles();
+        File[] files = currentDir.listFiles();
         for(int i = 0; i<files.length; i++){
             if (files[i].isDirectory()){
                 if(stepDown(files[i])){
@@ -60,7 +60,7 @@ public class FileSeeker{
         return false;
     }
     private boolean stepDownContains(File currentDir){
-        File [] files = currentDir.listFiles();
+        File[] files = currentDir.listFiles();
         for(int i = 0; i<files.length; i++){
             if (files[i].isDirectory()){
                 if(stepDownContains(files[i])){
