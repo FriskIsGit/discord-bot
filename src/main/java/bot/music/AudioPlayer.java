@@ -1,5 +1,7 @@
 package bot.music;
 
+import bot.deskort.Commands;
+import bot.music.youtube.SongQueue;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.Nullable;
@@ -14,12 +16,12 @@ import java.util.HashSet;
 
 public class AudioPlayer implements AudioSendHandler{
 
-    private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au"));
+    private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","m4a"));
     private final static String HOME_DIR = System.getProperty("user.home");
     public static File AUDIO_FILES_DIR = new File(HOME_DIR);
     private boolean looping = false;
 
-    final static int NUM_OF_SONGS = 30;
+    final static int NUM_OF_SONGS = 32;
     static HashMap<String,AudioTrack> fileNamesToSongs = new HashMap<>(NUM_OF_SONGS);
 
     private AudioTrack audioTrack;
@@ -32,10 +34,12 @@ public class AudioPlayer implements AudioSendHandler{
     volatile protected boolean isOpus;
 
     protected AudioManager audioManager;
+    protected SongQueue songQueue;
     volatile private boolean playing = false;
 
     public AudioPlayer(AudioManager audioManager) {
         this.audioManager = audioManager;
+        this.songQueue = new SongQueue();
     }
 
     public void setPlaying(boolean flag){
@@ -74,14 +78,21 @@ public class AudioPlayer implements AudioSendHandler{
         fileNamesToSongs.clear();
     }
 
+    public SongQueue getSongQueue(){
+        return this.songQueue;
+    }
+
     public AudioTrack getCurrentAudioTrack(){
         return this.audioTrack;
     }
     /**
-     * @param trackName - track key
-     * @return false if track doesn't exist
+     * @param trackName track key
+     * @return false if track doesn't exist or track key empty
      */
     public boolean setAudioTrack(String trackName){
+        if(trackName.isEmpty()){
+            return false;
+        }
         if(fileNamesToSongs.containsKey(trackName)){
             this.audioTrack = fileNamesToSongs.get(trackName);
         }else{
@@ -117,12 +128,10 @@ public class AudioPlayer implements AudioSendHandler{
         isOpus = audioTrack.isOpus();
     }
 
-
     public void rewindTrack(){
         offset = 0;
         methodCalls = 0;
     }
-
 
     @Override
     public boolean canProvide(){
@@ -134,12 +143,20 @@ public class AudioPlayer implements AudioSendHandler{
     public ByteBuffer provide20MsAudio(){
         methodCalls++;
 
-        if(methodCalls >= fragmentsOf20Ms){
+        if(methodCalls >= fragmentsOf20Ms-1){
             playing = false;
             System.out.println("Finished after " + methodCalls + " calls");
             if(looping){
                 rewindTrack();
                 playing = true;
+            }else if(!songQueue.isEmpty()){
+                boolean exists;
+                do{
+                    exists = setAudioTrack(songQueue.take());
+                }while(!exists && !songQueue.isEmpty());
+                if(exists){
+                    playing = true;
+                }
             }
         }
 

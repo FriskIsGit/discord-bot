@@ -32,14 +32,19 @@ public class AudioTrack{
             String extFormat = audioFileFormat(PATH);
             if(extFormat.equals("mp3")){
                 System.out.println("-Attempting mp3 conversion-");
-                AudioConversionResult result = AudioConverter.convertMp3FileToRaw(PATH);
+                AudioConversionResult result = AudioConverter.convertMP3FileToRaw(PATH);
+                if(result == null) return;
+                songBytes = result.bytes;
+                audioStream = result.audioInputStream;
+            }else if(extFormat.equals("m4a") || extFormat.equals("mp4")){
+                AudioConversionResult result = AudioConverter.convertM4AToRaw(PATH);
                 if(result == null) return;
                 songBytes = result.bytes;
                 audioStream = result.audioInputStream;
             }else{
                 audioStream = AudioSystem.getAudioInputStream(new File(path));
                 songBytes = Files.readAllBytes(Paths.get(path));
-                songBytes = AudioConverter.removeMetadata(songBytes);
+                songBytes = AudioConverter.removeWAVMetadata(songBytes);
             }
             AudioConversionResult result = AudioConverter.target48Hz(audioStream);
             songBytes = result.bytes != null ? result.bytes : songBytes;
@@ -117,17 +122,21 @@ public class AudioTrack{
     protected int getBaseLength(){
         return length;
     }
-    public String getTrackName(){
-        return NAME;
-    }
     protected double fragmentsOf20Ms(){
         return fragmentsOf20Ms;
     }
     protected boolean isBigEndian(){
         return isBigEndian;
     }
-    public boolean isOpus(){
+    protected boolean isOpus(){
         return isOpus;
+    }
+
+    public double getLengthSeconds(){
+        return lengthSeconds;
+    }
+    public String getTrackName(){
+        return NAME;
     }
 
 }
