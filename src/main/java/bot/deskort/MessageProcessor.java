@@ -52,7 +52,7 @@ public class MessageProcessor extends Commands{
     private static String commandName;
     private static String commandArgs;
 
-    static Runtime run = Runtime.getRuntime();
+    private static final Runtime run = Runtime.getRuntime();
     protected final static String OS = System.getProperty("os.name");
     static int MAX_DEQUE_SIZE = 500;
 
@@ -279,7 +279,7 @@ public class MessageProcessor extends Commands{
         String channelNameLower = commandArgs.toLowerCase(Locale.ROOT);
         VoiceChannel destinationChannel = null;
         for (VoiceChannel vc : voiceChannels){
-            if(vc.getName().contains(channelNameLower)){
+            if(vc.getName().toLowerCase().contains(channelNameLower)){
                 destinationChannel = vc;
                 break;
             }
@@ -345,16 +345,13 @@ public class MessageProcessor extends Commands{
     protected static void youtubeRequest(){
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         addSendingHandlerIfNull(audioManager);
-        /*if(YoutubeRequest.hasActiveRequest()){
-               actions.messageChannel(messageChannelId,"Has an active request to process");
-               return;
-           }*/
-        new Thread(new Runnable(){
-            @Override
-            public void run(){
-                YoutubeRequest ytRequest = new YoutubeRequest(youtube, messageEvent);
-                ytRequest.process();
-            }
+        /*if (YoutubeRequest.hasActiveRequest()){
+            actions.messageChannel(messageChannelId, "Has an active request to process");
+            return;
+        }*/
+        new Thread(() -> {
+            YoutubeRequest ytRequest = new YoutubeRequest(youtube, messageEvent);
+            ytRequest.process();
         }).start();
     }
 
