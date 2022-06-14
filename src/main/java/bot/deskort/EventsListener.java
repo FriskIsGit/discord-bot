@@ -1,24 +1,38 @@
 package bot.deskort;
 
 import bot.music.AudioPlayer;
+import bot.utilities.LeaverTimer;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
+import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.managers.AudioManager;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class EventsListener extends ListenerAdapter{
-
+    private final HashMap<Guild, LeaverTimer> guildsToTimers;
+    private Guild guildOfOrigin;
     private MessageReceivedEvent messageEvent;
     private String messageText;
 
     public EventsListener(){
+        List<Guild> guilds = Bot.getJDAInterface().getGuilds();
+        guildsToTimers = new HashMap<>(guilds.size());
+        for (Guild guild : guilds){
+            guildsToTimers.put(guild, new LeaverTimer(guild.getAudioManager()));
+        }
         new MessageProcessor();
     }
 
@@ -56,6 +70,46 @@ public class EventsListener extends ListenerAdapter{
             System.out.println("Deleted non-existent channel to prevent memory leaks");
         }
     }
+    @Override
+    public void onGenericGuildVoice(@Nonnull GenericGuildVoiceEvent voiceEvent) {
+        guildOfOrigin = voiceEvent.getGuild();
+        AudioManager thisAudioManager = guildOfOrigin.getAudioManager();
+        //voice channel presence events
+        if (voiceEvent instanceof GuildVoiceLeaveEvent ||
+            voiceEvent instanceof GuildVoiceJoinEvent  ||
+            voiceEvent instanceof GuildVoiceMoveEvent){
+            System.out.println("Voice event");
+            resolveVoiceEventInTheFuture(thisAudioManager);
+        }
+    }
+    private void resolveVoiceEventInTheFuture(final AudioManager audioManager){
+        //connection is delayed to
+        TimerTask futureTask = new TimerTask(){
+            @Override
+            public void run(){
+                if(audioManager.isConnected()){
+                    @SuppressWarnings("all")
+                    List<Member> connectedMembers = audioManager.getConnectedChannel().getMembers();
+                    LeaverTimer leaverTimer = guildsToTimers.get(guildOfOrigin);
+                    //bot alone
+                    if(connectedMembers.size() == 1){
+                        leaverTimer.schedule();
+                    }
+                    //bot not alone
+                    else{
+                        if(leaverTimer.isScheduled()){
+                            leaverTimer.cancel();
+                        }
+                    }
+                }
+                else{
+                    System.out.println("Not connected to voice");
+                }
+            }
+        };
+        new Timer().schedule(futureTask, 1500);
+    }
+
     @Override
     public void onButtonClick(ButtonClickEvent clickEvent) {
         String buttonId = clickEvent.getComponentId();
