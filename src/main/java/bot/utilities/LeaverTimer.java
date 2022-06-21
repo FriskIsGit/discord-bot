@@ -12,7 +12,7 @@ import java.util.TimerTask;
 //disconnects the bot if it remains alone in a channel for too long
 //solution accounts for all connected servers
 public class LeaverTimer{
-    boolean scheduled = false;
+    private boolean scheduled = false;
     private Timer timer;
     private final AudioManager guildAudio;
     private final long DELAY_MS = 3_600_000;
@@ -20,7 +20,7 @@ public class LeaverTimer{
     public LeaverTimer(AudioManager guildAudio){
         this.guildAudio = guildAudio;
     }
-    TimerTask createNewTask(){
+    private TimerTask createNewTask(){
         return new TimerTask(){
             @Override
             public void run(){

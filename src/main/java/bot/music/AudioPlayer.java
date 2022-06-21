@@ -16,13 +16,13 @@ import java.util.HashSet;
 
 public class AudioPlayer implements AudioSendHandler{
 
-    private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","m4a"));
+    private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","mp4 (very few containers)"));
     private final static String HOME_DIR = System.getProperty("user.home");
     public static File AUDIO_FILES_DIR = new File(HOME_DIR);
     private boolean looping = false;
 
-    final static int NUM_OF_SONGS = 32;
-    static HashMap<String,AudioTrack> fileNamesToSongs = new HashMap<>(NUM_OF_SONGS);
+    private static final int NUM_OF_SONGS = 32;
+    private static final HashMap<String, AudioTrack> fileNamesToSongs = new HashMap<>(NUM_OF_SONGS);
 
     private AudioTrack audioTrack;
     private ByteBuffer audioBuffer;

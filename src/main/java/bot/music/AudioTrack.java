@@ -21,8 +21,6 @@ public class AudioTrack{
     private volatile AudioFormat audioInfo;
     private boolean isBigEndian;
     private double lengthSeconds;
-    private int audioBytesLength;
-
 
     protected AudioTrack(String path){
         this.PATH = path;
@@ -58,7 +56,6 @@ public class AudioTrack{
             return;
         }
 
-        audioBytesLength = songBytes.length;
         initAudio();
         displayAudioInfo();
         closeAndNullifyAudioStream();
@@ -78,7 +75,7 @@ public class AudioTrack{
         isBigEndian = audioInfo.isBigEndian();
         lengthSeconds = audioStream.getFrameLength() / audioInfo.getFrameRate();
         fragmentsOf20Ms = lengthSeconds * 1000 / MILLIS_20;
-        length = (int) ((double) audioBytesLength / fragmentsOf20Ms);
+        length = (int) ((double) songBytes.length / fragmentsOf20Ms);
         fragmentsOf20Ms = (int) fragmentsOf20Ms;
         if (length % 2 == 1){
             length--;

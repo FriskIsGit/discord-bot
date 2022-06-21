@@ -3,8 +3,8 @@ package bot.utilities;
 import java.util.Random;
 
 public class PseudoBotTokenGenerator{
-    final static Random random = new Random();
-    final static int[] LENGTHS = {24,6,27};
+    private final static Random random = new Random();
+    private final static int[] LENGTHS = {24,6,27};
 
     public static String generateBotToken(){
         StringBuilder token = new StringBuilder();

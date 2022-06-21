@@ -22,17 +22,6 @@ public class Hasher{
         }
         return NAMES_TO_ALGORITHMS.containsKey(alg);
     }
-
-    static String [] splitStrInto(String str, int parts){
-        int totalLen = str.length();
-        int baseParseLen = totalLen/parts;
-        String [] parsedStr = new String[totalLen/(double)(parts) % 1 == 0 ? parts : parts+1];
-        for(int i = 0, p = 0; p<totalLen; p+=baseParseLen, i++){
-            parsedStr[i] = str.substring(p, Math.min(totalLen,p+baseParseLen));
-        }
-        return parsedStr;
-    }
-
     public static String hash(String text, String algorithm){
         MessageDigest msgDigest;
         try{
@@ -47,5 +36,14 @@ public class Hasher{
         BigInteger number = new BigInteger(1, hashedBytes);
         StringBuilder hexString = new StringBuilder(number.toString(16));
         return new String(hexString);
+    }
+    private static String [] splitStrInto(String str, int parts){
+        int totalLen = str.length();
+        int baseParseLen = totalLen/parts;
+        String [] parsedStr = new String[totalLen/(double)(parts) % 1 == 0 ? parts : parts+1];
+        for(int i = 0, p = 0; p<totalLen; p+=baseParseLen, i++){
+            parsedStr[i] = str.substring(p, Math.min(totalLen,p+baseParseLen));
+        }
+        return parsedStr;
     }
 }

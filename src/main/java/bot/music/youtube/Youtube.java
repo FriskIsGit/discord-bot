@@ -42,19 +42,24 @@ public class Youtube{
             index = youtubeLink.indexOf("ts/");
         }
         if(index != -1 && youtubeLink.length() > index+3){
-            //make sure it's not joined with an ampersand or ends in whitespace
-            int ampersand = youtubeLink.indexOf('&',index + 3);
-            int whitespace = youtubeLink.indexOf(' ', index + 3);
-            //neither do they end in whitespace nor contain an ampersand
-            if(ampersand == whitespace){
+            //make sure it's not joined with an ampersand, whitespace or a question mark
+            int endIndex = -1;
+            for (int i = index + 3, len = youtubeLink.length(); i < len; i++){
+                switch (youtubeLink.charAt(i)){
+                    case ' ':
+                    case '&':
+                    case '?':
+                    case '/':
+                        endIndex = i;
+                        break;
+                }
+            }
+            //likely ends with an - out of bounds character
+            if(endIndex == -1){
                 return youtubeLink.substring(index + 3);
             }
-            if(ampersand == -1){
-                //has to contain whitespace
-                return youtubeLink.substring(index + 3, whitespace);
-            }
-            //has to contain ampersand
-            return youtubeLink.substring(index + 3, ampersand);
+            //ends with any of the specified four chars
+            return youtubeLink.substring(index + 3, endIndex);
         }
         return "";
     }
