@@ -54,7 +54,11 @@ public class MessageProcessor extends Commands{
 
     private static final Runtime run = Runtime.getRuntime();
     protected final static String OS = System.getProperty("os.name");
-    static int MAX_DEQUE_SIZE = 500;
+    protected static int MAX_DEQUE_SIZE = 500;
+
+    protected static HashMap<Long, MessageDeque> getChannelIdsToMessageDeques(){
+        return channelIdsToMessageDeques;
+    }
 
     MessageProcessor(){
         actions = Bot.getActions();
@@ -66,18 +70,6 @@ public class MessageProcessor extends Commands{
         PREFIX = Bot.PREFIX;
         PREFIX_OFFSET = Bot.PREFIX_OFFSET;
     }
-
-    protected static void logsRequest(){
-        if(messageText.toLowerCase(Locale.ENGLISH).startsWith("logs", PREFIX_OFFSET)){
-            messageEvent.getMessage().delete().queue();
-            MessageDeque deq = channelIdsToMessageDeques.get(messageChannelId);
-            if(deq != null){
-                deq.removeLast();
-                deq.print();
-            }
-        }
-    }
-
     private static void logMessage(){
         if(channelIdsToMessageDeques.containsKey(messageChannelId)){
             channelIdsToMessageDeques.get(messageChannelId).add(messageEvent);
@@ -88,12 +80,7 @@ public class MessageProcessor extends Commands{
         }
     }
 
-    protected static HashMap<Long, MessageDeque> getChannelIdsToMessageDeques(){
-        return channelIdsToMessageDeques;
-    }
-
-    protected static void processMessage(MessageReceivedEvent message, String messageContent, long idLong){
-
+    public static void processMessage(MessageReceivedEvent message, String messageContent, long idLong){
         messageEvent = message;
         messageText = messageContent;
         messageChannelId = idLong;
@@ -145,7 +132,22 @@ public class MessageProcessor extends Commands{
             }catch (Exception exc){exc.printStackTrace();}
         }
     }
-
+    protected static void logsRequest(){
+        if(messageText.toLowerCase(Locale.ENGLISH).startsWith("logs", PREFIX_OFFSET)){
+            messageEvent.getMessage().delete().queue();
+            MessageDeque deq = channelIdsToMessageDeques.get(messageChannelId);
+            if(deq != null){
+                deq.removeLast();
+                deq.print();
+            }
+        }
+    }
+    private static void deleteLastMessageFromDeque(){
+        MessageDeque deq = channelIdsToMessageDeques.get(messageChannelId);
+        if(deq != null){
+            deq.removeLast();
+        }
+    }
     protected static void shutdownRequest(){
         if(isAuthorAuthorized()){
             if(!commandArgs.isEmpty()){
@@ -445,6 +447,8 @@ public class MessageProcessor extends Commands{
                 " ytviau <videoID/link> <format_number> retrieves video with audio in specified format\n" +
                 "```";
         channel.sendMessage(HELP_MESSAGE).queue();
+        messageEvent.getMessage().delete().queue();
+        deleteLastMessageFromDeque();
     }
 
     protected static void purgeRequest(){
