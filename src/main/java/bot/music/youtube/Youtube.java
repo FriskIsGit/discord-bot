@@ -44,6 +44,7 @@ public class Youtube{
         if(index != -1 && youtubeLink.length() > index+3){
             //make sure it's not joined with an ampersand, whitespace or a question mark
             int endIndex = -1;
+            loop:
             for (int i = index + 3, len = youtubeLink.length(); i < len; i++){
                 switch (youtubeLink.charAt(i)){
                     case ' ':
@@ -51,7 +52,7 @@ public class Youtube{
                     case '?':
                     case '/':
                         endIndex = i;
-                        break;
+                        break loop;
                 }
             }
             //likely ends with an - out of bounds character
