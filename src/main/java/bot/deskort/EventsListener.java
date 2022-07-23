@@ -16,10 +16,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.time.Instant;
+import java.util.*;
 
 public class EventsListener extends ListenerAdapter{
     private final HashMap<Guild, LeaverTimer> guildsToTimers;
@@ -74,7 +72,7 @@ public class EventsListener extends ListenerAdapter{
     public void onGuildVoiceLeave(GuildVoiceLeaveEvent vcLeave) {
         User user = vcLeave.getMember().getUser();
         if(user.isBot() && user.getIdLong() == Bot.BOT_ID){
-            System.out.println("Bot left vc");
+            System.out.println("Bot left vc at: " + Date.from(Instant.now()));
         }
     }
     @Override
