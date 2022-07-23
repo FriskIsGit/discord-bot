@@ -40,6 +40,7 @@ public abstract class Commands{
         put("http",        httpCatRequest);
         put("cat",         httpCatRequest);
         put("auditlog",    new RequestFunction(MessageProcessor::auditLogRequest,   false));
+        put("vcstate",     new RequestFunction(MessageProcessor::hasActiveConnectionRequest,   false));
 
 
         RequestFunction    memoryRequestFunction = new RequestFunction(MessageProcessor::memoryRequest, false);

@@ -7,6 +7,7 @@ import bot.utilities.*;
 import bot.music.AudioPlayer;
 import bot.music.youtube.Youtube;
 import bot.music.youtube.YoutubeRequest;
+import bot.utilities.NotNull;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.audit.ActionType;
@@ -265,7 +266,6 @@ public class MessageProcessor extends Commands{
         }
         server.moveVoiceMember(botMember, swapChannel).complete();
         server.moveVoiceMember(botMember, currentAudioChannel).complete();
-
     }
 
     protected static void warpRequest(){
@@ -360,7 +360,7 @@ public class MessageProcessor extends Commands{
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
         addSendingHandlerIfNull(audioManager);
         //channel specific join
-        if(!commandArgs.isEmpty()){
+        if(commandArgs.length() > 2){
             VoiceChannel voice = channels.getVoiceChannelIgnoreCase(commandArgs);
             if(voice == null){
                 actions.messageChannel(messageEvent.getChannel(),"VoiceChannel not found");
@@ -387,7 +387,7 @@ public class MessageProcessor extends Commands{
                 actions.messageChannel((TextChannel) messageEvent.getChannel(),"Member not in voice");
             }
         }else{
-            actions.messageChannel((TextChannel) messageEvent.getChannel(),"MemberVoiceState null");
+            actions.messageChannel((TextChannel) messageEvent.getChannel(),"VOICE_STATE was disabled manually?");
         }
     }
     //returns new sendingHandler
@@ -432,13 +432,16 @@ public class MessageProcessor extends Commands{
                 " join <partialName> - if left blank bot will attempt to join message author\n" +
                 " leave - disconnects bot from channel\n" +
                 " play <track> - makes bot play its 48Khz 16bit stereo 2channel 4bytes/frame BIG.ENDIAN PCM Signed opus encoded audio\n" +
+                " stop - ends playback of the current song\n" +
                 " tracks - displays all available tracks, some may be distorted\n" +
                 " queue <track> - enqueues specified track, if name was not provided - displays the queue\n" +
                 " skip - consumes the first song in queue and loads it\n" +
                 " loop - self explanatory\n" +
-                " sha <text> - one of many hashing algorithms (e.g. md5, sha256)\n" +
+                " sha <text> - oen of many hashing algorithms (e.g. md5, sha256)\n" +
                 " mempanel - display memory management panel\n" +
                 " uptime\n" +
+                " len <text>\n - display text length" +
+                " cat <number>\n - display HTTP status codes" +
                 " [Youtube Commands] <format_number> index at which it appears counting from the top (0-indexed)\n" +
                 " ytinfo <videoID/link> retrieves information about the youtube video, displaying available formats\n" +
                 " ytaudio <videoID/link> <format_number> retrieves audio file in specified format\n" +
@@ -518,7 +521,7 @@ public class MessageProcessor extends Commands{
     /**
      * @param channel - where the purge occurs
      * @param amount - excluding the purge request message
-     * @returns oldest message id as a reference point
+     * @returns id of the oldest message as a reference point
      **/
     private static String popAndPurgeLastMessages(MessageChannel channel, int amount){
         List<Message> list = channelIdsToMessageDeques.get(messageChannelId).drainDequeIntoList(amount);
@@ -757,5 +760,18 @@ public class MessageProcessor extends Commands{
     }
     private static boolean isAuthorAuthorized(){
         return Bot.AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong());
+    }
+
+    public static void hasActiveConnectionRequest(){
+        AudioManager audio = messageEvent.getGuild().getAudioManager();
+
+        if(audio.isConnected()){
+            actions.messageChannel(
+                    messageEvent.getChannel(),
+                    "TRUE, bot is currently connected to: " + NotNull.notNull(audio.getConnectedChannel()).getName()
+            );
+            return;
+        }
+        actions.messageChannel(messageEvent.getChannel(), "FALSE, bot is not connected to any voice channel");
     }
 }

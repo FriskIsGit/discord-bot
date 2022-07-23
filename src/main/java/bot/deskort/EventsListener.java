@@ -29,7 +29,7 @@ public class EventsListener extends ListenerAdapter{
 
     public EventsListener(){
         List<Guild> guilds = Bot.getJDAInterface().getGuilds();
-        guildsToTimers = new HashMap<>(guilds.size());
+        guildsToTimers = new HashMap<>(guilds.size() + 1, 1);
         for (Guild guild : guilds){
             guildsToTimers.put(guild, new LeaverTimer(guild.getAudioManager()));
         }
@@ -68,6 +68,13 @@ public class EventsListener extends ListenerAdapter{
         if(map.containsKey(deletedChannelId)){
             map.remove(deletedChannelId);
             System.out.println("Deleted non-existent channel to prevent memory leaks");
+        }
+    }
+    @Override
+    public void onGuildVoiceLeave(GuildVoiceLeaveEvent vcLeave) {
+        User user = vcLeave.getMember().getUser();
+        if(user.isBot() && user.getIdLong() == Bot.BOT_ID){
+            System.out.println("Bot left vc");
         }
     }
     @Override

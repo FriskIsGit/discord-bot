@@ -32,11 +32,14 @@ class MessageDeque extends ArrayDeque<MessageReceivedEvent>{
 
     public void print(){
         System.out.println("[========================]");
-        this.forEach(msgEvent -> System.out.println(
-                msgEvent.getMessage().getTimeCreated().toLocalDate() + " " +
-                "[" + msgEvent.getChannel().getName() + "] " +
-                        msgEvent.getAuthor().getName() + ": " + msgEvent.getMessage().getContentRaw()
-                )
+        this.forEach(
+                msgEvent -> {
+                    System.out.println(
+                            msgEvent.getMessage().getTimeCreated().toLocalDate() + " " +
+                            "[" + msgEvent.getChannel().getName() + "] " +
+                            msgEvent.getAuthor().getName() + ": " + msgEvent.getMessage().getContentRaw()
+                    );
+                }
         );
         System.out.println("[============ "+ this.size() + " ============]");
     }
