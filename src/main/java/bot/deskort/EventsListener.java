@@ -107,9 +107,6 @@ public class EventsListener extends ListenerAdapter{
                         }
                     }
                 }
-                else{
-                    System.out.println("Not connected to voice");
-                }
             }
         };
         new Timer().schedule(futureTask, 1500);
