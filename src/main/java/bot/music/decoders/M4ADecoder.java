@@ -1,55 +1,44 @@
 package bot.music.decoders;
 
+import net.sourceforge.jaad.aac.AACException;
 import org.jcodec.common.*;
 import org.jcodec.common.model.AudioBuffer;
 import org.jcodec.common.model.Packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 //will not decode if file lacks chunk sample tables (all .m4a (audio only) yt videos)
 public class M4ADecoder{
+    private final static int NULL_THRESHOLD = 22;
     private AudioFormat decodedAudioFormat;
     private DemuxerTrack audioTrack;
     private ByteArrayOutputStream streamBytes;
+    private Demuxer demuxer;
 
-
-    public M4ADecoder(File m4aFile){
+    public M4ADecoder(File m4aFile) throws FileNotFoundException{
+        if(!m4aFile.exists()){
+            throw new FileNotFoundException(m4aFile.getAbsolutePath() + " path doesn't exist");
+        }
         try{
             Format fileFormat = JCodecUtil.detectFormat(m4aFile);
             if (fileFormat == null){
                 System.out.println("File format is null");
                 return;
             }
-            Demuxer demuxer = JCodecUtil.createDemuxer(fileFormat, m4aFile);
+            demuxer = JCodecUtil.createDemuxer(fileFormat, m4aFile);
             audioTrack = demuxer.getAudioTracks().get(0);
 
         }catch (IOException ioException){
             ioException.printStackTrace();
         }
     }
-    public M4ADecoder(String path){
-        if(Files.notExists(Paths.get(path))){
-            System.out.println("  file path");
-        }
-        File file = new File(path);
-        try{
-            Format fileFormat = JCodecUtil.detectFormat(file);
-            if (fileFormat == null){
-                System.out.println("File format is null");
-                return;
-            }
-            Demuxer demuxer = JCodecUtil.createDemuxer(fileFormat, file);
-            audioTrack = demuxer.getAudioTracks().get(0);
-            demuxer.close();
-
-        }catch (IOException ioException){
-            ioException.printStackTrace();
-        }
-
+    public M4ADecoder(String path) throws FileNotFoundException{
+        this(new File(path));
     }
 
     public AudioFormat getDecodedAudioFormat(){
@@ -84,15 +73,22 @@ public class M4ADecoder{
         do{
             encodedPacket = audioTrack.nextFrame();
             if (encodedPacket == null){
-                if (++nulls > 3){
-                    System.out.println("Packet was null 3+ times in a row.. quitting");
+                if (++nulls > NULL_THRESHOLD){
+                    System.out.println("Packet was null " + NULL_THRESHOLD + "+ times in a row.. quitting");
                     break;
                 }
                 System.out.println("Packet null..");
                 continue;
             }
             frames++;
-            AudioBuffer decodedAudioBuffer = audioDecoder.decodeFrame(encodedPacket.data, null);
+            AudioBuffer decodedAudioBuffer;
+            try{
+                decodedAudioBuffer = audioDecoder.decodeFrame(encodedPacket.data, null);
+            }catch (AACException aacExc){
+                frames--;
+                continue;
+            }
+
 
             //usually endian order differs from the original
             if (firstPacket){
@@ -109,5 +105,14 @@ public class M4ADecoder{
 
         return frames;
 
+    }
+    @Override
+    protected void finalize(){
+        try{
+            demuxer.close();
+        }catch (IOException ioExc){
+            System.out.println("Couldn't finalize demuxer");
+            ioExc.printStackTrace();
+        }
     }
 }

@@ -10,6 +10,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class AudioConverter{
@@ -27,7 +28,13 @@ public class AudioConverter{
 
     public static AudioConversionResult convertM4AToRaw(String m4aFilePath){
 
-        M4ADecoder m4ADecoder = new M4ADecoder(m4aFilePath);
+        M4ADecoder m4ADecoder;
+        try{
+            m4ADecoder = new M4ADecoder(m4aFilePath);
+        }catch (FileNotFoundException fileNotFoundException){
+            fileNotFoundException.printStackTrace();
+            return null;
+        }
         int frames = 0;
         try{
             frames = m4ADecoder.decode();

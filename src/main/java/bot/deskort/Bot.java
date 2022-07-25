@@ -49,9 +49,9 @@ public class Bot{
             //jdaBuilder.disableCache(CacheFlag.MEMBER_OVERRIDES);
             try{
                 jdaInterface = jdaBuilder.build();
-            }catch (LoginException e){
+            }catch (LoginException loginExc){
                 System.err.println("Connection failed");
-                e.printStackTrace();
+                loginExc.printStackTrace();
                 return false;
             }
 
