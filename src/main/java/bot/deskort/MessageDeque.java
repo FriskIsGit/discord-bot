@@ -20,9 +20,9 @@ class MessageDeque extends ArrayDeque<MessageReceivedEvent>{
         return maxSize;
     }
 
-    public List<Message> drainDequeIntoList(int amount){
-        amount = Math.min(this.size(),amount);
-        List<Message> listToPurge = new ArrayList<>(amount);
+    public List<Message> toList(int amount){
+        amount = Math.min(this.size(), amount);
+        List<Message> listToPurge = new ArrayList<>();
         for(int i = 0; i<amount; i++){
             listToPurge.add(this.removeLast().getMessage());
         }

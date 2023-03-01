@@ -17,9 +17,13 @@ public abstract class Commands{
         put("join",        new RequestFunction(MessageProcessor::joinRequest,       false));
         put("leave",       new RequestFunction(MessageProcessor::leaveRequest,      false));
         put("loop",        new RequestFunction(MessageProcessor::loopRequest,       false));
-        put("play",        new RequestFunction(MessageProcessor::playRequest,       false));
+        RequestFunction    playRequest = new RequestFunction(MessageProcessor::playRequest,       false);
+        put("play",        playRequest);
+        put("p",           playRequest);
         put("stop",        new RequestFunction(MessageProcessor::stopRequest,       false));
-        put("queue",       new RequestFunction(MessageProcessor::queueRequest,      true));
+        RequestFunction    queueRequest = new RequestFunction(MessageProcessor::queueRequest,      true);
+        put("queue",       queueRequest);
+        put("q",           queueRequest);
         put("skip",        new RequestFunction(MessageProcessor::skipRequest,       true));
 
         put("regain",      new RequestFunction(MessageProcessor::regain,            false));
@@ -59,7 +63,11 @@ public abstract class Commands{
     public static String[] doubleTermSplit(String commandText){
         return doubleTermSplit(commandText,0);
     }
+    //always returns an array of length 2
     public static String[] doubleTermSplit(String commandText, int fromIndex){
+        if(fromIndex < 0 || commandText.length() <= fromIndex){
+            return new String[]{"",""};
+        }
         ArrayList<String> terms = new ArrayList<>(2);
         char[] arr = commandText.toCharArray();
         boolean lookingForWhitespace = true;
@@ -85,7 +93,11 @@ public abstract class Commands{
         return res;
     }
 
+    //returns an array of length at least 1
     public static String[] splitIntoTerms(String text, int fromIndex){
+        if(fromIndex < 0 || text.length() <= fromIndex){
+            return new String[]{""};
+        }
         ArrayList<String> terms = new ArrayList<>(8);
         text = text.trim();
         char[] arr = text.toCharArray();

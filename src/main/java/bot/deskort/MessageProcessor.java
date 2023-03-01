@@ -20,7 +20,6 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import java.awt.*;
 import java.io.*;
 
-import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -524,7 +523,7 @@ public class MessageProcessor extends Commands{
      * @returns id of the oldest message as a reference point
      **/
     private static String popAndPurgeLastMessages(MessageChannel channel, int amount){
-        List<Message> list = channelIdsToMessageDeques.get(messageChannelId).drainDequeIntoList(amount);
+        List<Message> list = channelIdsToMessageDeques.get(messageChannelId).toList(amount);
         int lastIndex = list.size()-1;
         String oldestMessageId = list.get(lastIndex).getId();
         List<CompletableFuture<Void>> completableFutureList = channel.purgeMessages(list);

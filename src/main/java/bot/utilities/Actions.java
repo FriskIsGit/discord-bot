@@ -1,6 +1,7 @@
 package bot.utilities;
 
 import bot.deskort.Bot;
+import bot.deskort.Commands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.exceptions.ContextException;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -53,6 +55,10 @@ public class Actions{
     }
 
     public void sendFile(TextChannel channel, File fileToSend){
+        if(fileToSend == null){
+            System.out.println("Given file was null");
+            return;
+        }
         byte [] bytes;
         try{
             bytes = Files.readAllBytes(fileToSend.toPath());
@@ -66,63 +72,8 @@ public class Actions{
         }
 
         if(channel != null){
+            System.out.println("Sending file..");
             channel.sendFile(bytes, fileToSend.getName()).queue();
-        }
-    }
-
-    public void sendFile(long channelId, String path){
-        byte [] bytes = null;
-        try{
-            bytes = Files.readAllBytes(Paths.get(path));
-        }catch (IOException ioException){
-            ioException.printStackTrace();
-        }
-
-        TextChannel channel = jdaInterface.getTextChannelById(channelId);
-        if(bytes != null && channel != null){
-            int lastSlash = path.lastIndexOf('/');
-            if(lastSlash == - 1){
-                lastSlash = path.lastIndexOf('\\');
-            }
-            channel.sendFile(bytes,path.substring(lastSlash+1)).queue();
-        }
-    }
-
-    public void sendFile(String partialChannelName, String filePath){
-        byte [] bytes;
-        try{
-            bytes = Files.readAllBytes(Paths.get(filePath));
-        }catch (IOException ioException){
-            ioException.printStackTrace();
-            return;
-        }
-
-        TextChannel channel = channels.getTextChannel(partialChannelName);
-        if(channel == null){
-            return;
-        }
-        if(bytes.length > MB_8){
-            messageChannel(channel.getIdLong(),"8MBs exceeded");
-        }
-
-        int lastSlash = filePath.lastIndexOf('/');
-        if(lastSlash == - 1){
-            lastSlash = filePath.lastIndexOf('\\');
-        }
-        channel.sendFile(bytes,filePath.substring(lastSlash+1)).queue();
-    }
-
-    public void sendFile(long channelId, String path, String fileName){
-        byte [] bytes = null;
-        try{
-            bytes = Files.readAllBytes(Paths.get(path));
-        }catch (IOException ioException){
-            ioException.printStackTrace();
-        }
-
-        TextChannel channel = jdaInterface.getTextChannelById(channelId);
-        if(bytes != null && channel != null){
-            channel.sendFile(bytes,fileName).queue();
         }
     }
 
@@ -192,135 +143,113 @@ public class Actions{
         sendAsMessageBlock(jdaInterface.getTextChannelById(channelId),msgText);
     }
     public void chatWithBot(TextChannel textChannel){
-        if(textChannel == null) return;
+        if(textChannel == null)
+            return;
+
         boolean inServer = true;
-        long lastDmId = 0;
+        long dmId = 0;
         String input;
-        do {
+
+        outer:
+        while(true) {
             input = scanner.nextLine();
-            if(isChannelChangeRequested(input)){
-                TextChannel nextChannel = findChannel(input);
-                if(nextChannel != null){
-                    textChannel = nextChannel;
-                    System.out.println("Moved to: " + nextChannel.getName());
-                    inServer = true;
-                }
-                continue;
-            }else if(isListOfChannelsRequested(input)){
-                String serverPartialName = input.substring(4);
-                Guild server = Bot.getServers().getServerIgnoreCase(serverPartialName);
-                if(server == null){
-                    continue;
-                }
-                System.out.println(server.getTextChannels());
-                continue;
-            }
-            else if (input.contains("[file:")){
-                int fileBegIndex = input.indexOf("[file:");
-                int fileEndIndex = input.indexOf("]", fileBegIndex);
-                if(fileEndIndex == -1){
-                    continue;
-                }
-                String filePath = input.substring(fileBegIndex+6,fileEndIndex);
-                File fileToSend = new File(filePath);
+            if(!input.startsWith(Bot.PREFIX)){
                 if(inServer){
-                    sendFile(textChannel,fileToSend);
+                    messageChannel(textChannel, input);
                 }else{
-                    sendFileToUser(lastDmId,fileToSend);
+                    this.messageUser(dmId, input);
                 }
                 continue;
             }
-            else if(input.startsWith(">dm")){
-                String userId = input.substring(4);
-                try{
-                    lastDmId = Long.parseLong(userId);
-                    System.out.println("Switched to dm");
-                    inServer = false;
-                }catch (NumberFormatException numFormatExc){
-                    continue;
+            String[] args = Commands.doubleTermSplit(input, Bot.PREFIX_OFFSET);
+            switch (args[0]){
+                case "cc":
+                    TextChannel nextChannel = findChannel(input);
+                    if(nextChannel != null){
+                        textChannel = nextChannel;
+                        System.out.println("Moved to: " + nextChannel.getName());
+                        inServer = true;
+                    }
+                    break;
+                case "lc":
+                    //server name required
+                    Guild server = Bot.getServers().getServerIgnoreCase(args[1]);
+                    if (server == null){
+                        continue;
+                    }
+                    System.out.println(server.getTextChannels());
+                    break;
+                case "dm":
+                    //user id required
+                    try{
+                        dmId = Long.parseLong(args[1]);
+                        System.out.println("Switched to dm, id: " + dmId);
+                        inServer = false;
+                    }catch (NumberFormatException numFormatExc){
+                        System.out.println("Failed to parse id");
+                    }
+                    break;
+                case "file":
+                    //file path
+                    File file = new File(args[1]);
+                    if(inServer){
+                        sendFile(textChannel, file);
+                    }else{
+                        sendFileToUser(dmId, file);
+                    }
+                    break;
+                case "exit":
+                    //exit chat
+                    break outer;
+                case "where": {
+                    if (inServer)
+                        System.out.println("Current channel: " + textChannel);
+                    else System.out.println("In dm: " + dmId);
                 }
-                continue;
             }
-            if(inServer){
-                messageChannel(textChannel,input);
-            }else{
-                this.messageUser(lastDmId, input);
-            }
-
-        }while(!input.equals("exit"));
-    }
-
-    private boolean isListOfChannelsRequested(String input){
-        return (input.startsWith(">lc") || input.startsWith(">ls")) && input.length() > 4;
+        }
+        System.out.println("Exited chat permanently");
     }
 
     public void chatWithBot(String textChannelPartialName){
         chatWithBot(channels.getTextChannel(textChannelPartialName));
     }
-    public void chatWithBot(long channelId){
-        chatWithBot(jdaInterface.getTextChannelById(channelId));
-    }
-    public void chatWithBot(MessageChannel channel){
-        chatWithBot((TextChannel) channel);
-    }
-
-    protected boolean isChannelChangeRequested(String msg){
-        return (msg.startsWith(">cc") || msg.startsWith(">cd")) && msg.length() > 4;
-    }
-
-    public void joinVoiceChannel(long channelId){
-        VoiceChannel vc = jdaInterface.getVoiceChannelById(channelId);
-        AudioManager audioManager = jdaInterface.getGuilds().get(0).getAudioManager();
-        audioManager.openAudioConnection(vc);
-    }
-    public void joinVoiceChannel(String partialServerName, String partialChannelName){
-        String partialServerNameLower = partialServerName.toLowerCase(Locale.ROOT);
-        Guild destGuild = null;
-        List<Guild> servers = jdaInterface.getGuilds();
-        for(Guild server : servers){
-            if(server.getName().toLowerCase(Locale.ROOT).contains(partialServerNameLower)){
-                destGuild = server;
-            }
-        }
-        if(destGuild == null) return;
-        AudioManager audioManager = destGuild.getAudioManager();
-        VoiceChannel vc = channels.getVoiceChannelIgnoreCase(partialChannelName);
-        audioManager.openAudioConnection(vc);
-    }
 
     public void messageUser(long userId, String messageContent){
-        User possiblyCachedUser = jdaInterface.getUserById(userId);
-        if(possiblyCachedUser == null){
-            User retrievedUser = jdaInterface.retrieveUserById(userId).complete();
-            PrivateChannel userDM = retrievedUser.openPrivateChannel().complete();
-            try{
-                userDM.sendMessage(messageContent).queue();
-            }catch (IllegalArgumentException iaExc){
-                System.err.println("Cannot message user");
-            }
+        User user = jdaInterface.getUserById(userId);
+        //if not cached - retrieve
+        if(user == null){
+            user = jdaInterface.retrieveUserById(userId).complete();
         }
-    }
-    //TODO fix (doesn't work for some reason)
-    public void sendFileToUser(long userId, File file){
-        User possiblyCachedUser = jdaInterface.getUserById(userId);
-        if(possiblyCachedUser == null){
-            User retrievedUser = jdaInterface.retrieveUserById(userId).complete();
-            PrivateChannel userDM = retrievedUser.openPrivateChannel().complete();
-            try{
-                byte[] bytes;
-                try{
-                    bytes = Files.readAllBytes(file.toPath());
-                }catch (IOException ioException){
-                    return;
-                }
-                userDM.sendFile(bytes, "file.mp4").queue();
-            }catch (IllegalArgumentException iaExc){
-                System.err.println("Cannot send file to user");
-            }
+        PrivateChannel userDM = user.openPrivateChannel().complete();
+        try{
+            userDM.sendMessage(messageContent).queue();
+        }catch (Exception exc){
+            System.err.println("Cannot message user: " + exc);
         }
     }
 
-    //TODO
+    public void sendFileToUser(long userId, File file){
+        User user = jdaInterface.getUserById(userId);
+        //if not cached - retrieve
+        if(user == null){
+            user = jdaInterface.retrieveUserById(userId).complete();
+        }
+        PrivateChannel userDM = user.openPrivateChannel().complete();
+        try{
+            byte[] bytes;
+            try{
+                bytes = Files.readAllBytes(file.toPath());
+            }catch (IOException ioException){
+                return;
+            }
+            userDM.sendFile(bytes, file.getName()).queue();
+        }catch (IllegalArgumentException iaExc){
+            System.err.println("Cannot send file to user");
+        }
+    }
+
+    //TODO(never)
     public void purgeLastMessagesInChannel(TextChannel textChannel, int numberOfMessages){
         //implementation
     }

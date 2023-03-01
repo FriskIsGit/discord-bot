@@ -79,9 +79,8 @@ public class Bot{
             String prefix = data.getString("prefix");
             Bot.PREFIX = prefix == null ? Bot.PREFIX : prefix;
             Bot.PREFIX_OFFSET = Bot.PREFIX.length();
-            Iterator<Object> sudoers = data.getJSONArray("sudo_users").iterator();
-            while (sudoers.hasNext()){
-                long userId = (Long) sudoers.next();
+            for (Object sudo : data.getJSONArray("sudo_users")){
+                long userId = (Long) sudo;
                 Bot.AUTHORIZED_USERS.add(userId);
             }
             MessageProcessor.PURGE_CAP = data.getInt("purge_cap");
