@@ -45,6 +45,7 @@ public abstract class Commands{
         put("cat",         httpCatRequest);
         put("auditlog",    new RequestFunction(MessageProcessor::auditLogRequest,   false));
         put("vcstate",     new RequestFunction(MessageProcessor::hasActiveConnectionRequest,   false));
+        put("emoji",       new RequestFunction(MessageProcessor::emojiId,   true));
 
 
         RequestFunction    memoryRequestFunction = new RequestFunction(MessageProcessor::memoryRequest, false);

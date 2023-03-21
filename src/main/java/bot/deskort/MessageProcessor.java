@@ -773,4 +773,8 @@ public class MessageProcessor extends Commands{
         }
         actions.messageChannel(messageEvent.getChannel(), "FALSE, bot is not connected to any voice channel");
     }
+    public static void emojiId(){
+        TextChannel channel = messageEvent.getTextChannel();
+        channel.sendMessage(commandArgs).queue();
+    }
 }
