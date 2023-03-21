@@ -3,20 +3,17 @@ package bot.deskort;
 import bot.music.AudioPlayer;
 import bot.utilities.LeaverTimer;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 
-import javax.annotation.Nonnull;
-import java.time.Instant;
 import java.util.*;
 
 public class EventsListener extends ListenerAdapter{
@@ -31,6 +28,7 @@ public class EventsListener extends ListenerAdapter{
         for (Guild guild : guilds){
             guildsToTimers.put(guild, new LeaverTimer(guild.getAudioManager()));
         }
+        System.out.println("Leaver timer is initialized");
         new MessageProcessor();
     }
 
@@ -69,23 +67,32 @@ public class EventsListener extends ListenerAdapter{
         }
     }
     @Override
-    public void onGuildVoiceLeave(GuildVoiceLeaveEvent vcLeave) {
-        User user = vcLeave.getMember().getUser();
-        if(user.isBot() && user.getIdLong() == Bot.BOT_ID){
-            System.out.println("Bot left vc at: " + Date.from(Instant.now()));
-        }
-    }
-    @Override
-    public void onGenericGuildVoice(@Nonnull GenericGuildVoiceEvent voiceEvent) {
+    public void onGenericGuildVoice(GenericGuildVoiceEvent voiceEvent) {
         guildOfOrigin = voiceEvent.getGuild();
+
         AudioManager thisAudioManager = guildOfOrigin.getAudioManager();
         //voice channel presence events
-        if (voiceEvent instanceof GuildVoiceLeaveEvent ||
-            voiceEvent instanceof GuildVoiceJoinEvent  ||
-            voiceEvent instanceof GuildVoiceMoveEvent){
-            System.out.println("Voice event");
+
+        if (voiceEvent instanceof GuildVoiceUpdateEvent){
             resolveVoiceEventInTheFuture(thisAudioManager);
+            GuildVoiceUpdateEvent updateEvent = (GuildVoiceUpdateEvent) voiceEvent;
+            boolean moved = true;
+            if(updateEvent.getNewValue() == null){
+                moved = false;
+                String channelName = updateEvent.getOldValue() == null ? "unknown" : updateEvent.getOldValue().getName();
+                System.out.println(toString(voiceEvent.getMember()) + " left " + channelName);
+            }
+            if(updateEvent.getOldValue() == null){
+                moved = false;
+                System.out.println(toString(voiceEvent.getMember()) + " joined " + updateEvent.getNewValue().getName());
+            }
+            if(moved){
+                System.out.println(toString(voiceEvent.getMember()) + " moved vc.");
+            }
         }
+    }
+    private String toString(Member member){
+        return member.getUser().getAsTag();
     }
     private void resolveVoiceEventInTheFuture(final AudioManager audioManager){
         //connection is delayed to
@@ -98,6 +105,7 @@ public class EventsListener extends ListenerAdapter{
                     LeaverTimer leaverTimer = guildsToTimers.get(guildOfOrigin);
                     //bot alone
                     if(connectedMembers.size() == 1){
+                        System.out.println("Scheduled");
                         leaverTimer.schedule();
                     }
                     //bot not alone
@@ -113,7 +121,7 @@ public class EventsListener extends ListenerAdapter{
     }
 
     @Override
-    public void onButtonClick(ButtonClickEvent clickEvent) {
+    public void onButtonInteraction(ButtonInteractionEvent clickEvent) {
         String buttonId = clickEvent.getComponentId();
         switch (buttonId){
             case "clrsongs":

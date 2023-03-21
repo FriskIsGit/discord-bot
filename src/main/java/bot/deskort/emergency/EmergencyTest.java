@@ -4,12 +4,13 @@ import bot.deskort.Bot;
 import bot.utilities.Channels;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class EmergencyTest{
     private static JDA jdaInterface;
@@ -58,7 +59,7 @@ public class EmergencyTest{
         User user3 = jdaInterface.retrieveUserById(id3).complete();
         if(user1 != null && user2 != null && user3 != null){
             new Thread(() -> {
-                guild.ban(user1.getId(), 0, "Test ban1").complete();
+                guild.ban(user1, 0, TimeUnit.MICROSECONDS).reason("Test ban1").complete();
             }).start();
             try{
                 Thread.sleep(250);
@@ -66,10 +67,10 @@ public class EmergencyTest{
                 interruptedException.printStackTrace();
             }
             new Thread(() -> {
-                guild.kick(user2.getId(), "Test kick2").complete();
+                guild.kick(user2).reason("Test kick2").complete();
             }).start();
             new Thread(() -> {
-                guild.ban(user3.getId(), 0, "Test ban3").complete();
+                guild.ban(user3, 0, TimeUnit.MICROSECONDS).reason("Test ban3").complete();
             }).start();
         }
 

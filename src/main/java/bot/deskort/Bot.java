@@ -2,6 +2,7 @@ package bot.deskort;
 
 import bot.deskort.emergency.EmergencyListener;
 import bot.music.AudioPlayer;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.json.JSONException;
 import org.json.JSONObject;
 import net.dv8tion.jda.api.JDA;
@@ -46,14 +47,9 @@ public class Bot{
             jdaBuilder.addEventListeners(new EmergencyListener(jdaBuilder));
             //voice limits
             jdaBuilder.enableCache(CacheFlag.VOICE_STATE);
+            jdaBuilder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
             //jdaBuilder.disableCache(CacheFlag.MEMBER_OVERRIDES);
-            try{
-                jdaInterface = jdaBuilder.build();
-            }catch (LoginException loginExc){
-                System.err.println("Connection failed");
-                loginExc.printStackTrace();
-                return false;
-            }
+            jdaInterface = jdaBuilder.build();
 
             jdaInterface.awaitReady();
             LAUNCH_TIME = System.currentTimeMillis();

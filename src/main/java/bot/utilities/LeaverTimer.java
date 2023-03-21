@@ -14,8 +14,9 @@ import java.util.TimerTask;
 public class LeaverTimer{
     private boolean scheduled = false;
     private Timer timer;
+    private TimerTask task;
     private final AudioManager guildAudio;
-    private final long DELAY_MS = 3_600_000;
+    private final long DELAY_MS = 20000;
     //audio manager of guild to which the timer belongs to
     public LeaverTimer(AudioManager guildAudio){
         this.guildAudio = guildAudio;
@@ -39,13 +40,15 @@ public class LeaverTimer{
     }
     public void schedule(){
         if(scheduled){
-            timer.cancel();
+            cancel();
         }
         timer = new Timer();
-        timer.schedule(createNewTask(), DELAY_MS);
+        task = createNewTask();
+        timer.schedule(task, DELAY_MS);
         scheduled = true;
     }
     public void cancel(){
+        task.cancel();
         timer.cancel();
         scheduled = false;
     }

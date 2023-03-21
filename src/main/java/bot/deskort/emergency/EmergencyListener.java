@@ -9,15 +9,15 @@ import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +45,7 @@ public class EmergencyListener extends ListenerAdapter{
     }
 
     @Override
-    public void onReady(@Nonnull ReadyEvent readyEvent) {
+    public void onReady(@NotNull ReadyEvent readyEvent) {
         isReady = true;
         List<Guild> connectedGuilds = Bot.getJDAInterface().getGuilds();
         guildsToLastKicks = new HashMap<>(connectedGuilds.size());
@@ -62,7 +62,7 @@ public class EmergencyListener extends ListenerAdapter{
     }
 
     @Override
-    public void onGenericEvent(@Nonnull GenericEvent anyEvent) {
+    public void onGenericEvent(@NotNull GenericEvent anyEvent) {
         if(!isReady){
             return;
         }

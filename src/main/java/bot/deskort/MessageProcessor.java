@@ -8,14 +8,19 @@ import bot.music.AudioPlayer;
 import bot.music.youtube.Youtube;
 import bot.music.youtube.YoutubeRequest;
 import bot.utilities.NotNull;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.awt.*;
 import java.io.*;
@@ -152,14 +157,14 @@ public class MessageProcessor extends Commands{
             if(!commandArgs.isEmpty()){
                 int seconds = ShutdownTimer.parseToSeconds(commandArgs);
                 if(seconds == -1){
-                    actions.sendAsMessageBlock(messageEvent.getTextChannel(), "Shutdown argument failure");
+                    actions.sendAsMessageBlock(messageEvent.getChannel().getIdLong(), "Shutdown argument failure");
                     return;
                 }
                 shutdownTimer.countdown(seconds);
             }else{
                 shutdownTimer.countdown(0);
             }
-            actions.sendAsMessageBlock(messageEvent.getTextChannel(), "Shutdown scheduled");
+            actions.sendAsMessageBlock(messageEvent.getChannel().getIdLong(), "Shutdown scheduled");
         }
     }
     public static void abortRequest(){
@@ -168,7 +173,7 @@ public class MessageProcessor extends Commands{
                 return;
             }
             shutdownTimer.abort();
-            actions.sendAsMessageBlock(messageEvent.getTextChannel(), "Aborting shutdown");
+            actions.sendAsMessageBlock(messageEvent.getChannel().getIdLong(), "Aborting shutdown");
         }
     }
 
@@ -180,7 +185,7 @@ public class MessageProcessor extends Commands{
             audioManager.setSendingHandler(audioPlayer);
         }
         boolean isLooping = audioPlayer.switchLooping();
-        actions.messageChannel(messageEvent.getChannel(),"**Looping set to " + isLooping + "**");
+        actions.messageChannel(messageEvent.getChannel().getIdLong(),"**Looping set to " + isLooping + "**");
     }
 
     protected static void uptimeRequest(){
@@ -192,7 +197,7 @@ public class MessageProcessor extends Commands{
         message.append(hr).append("h ")
                 .append(min).append("m ")
                 .append(sec).append('s');
-        actions.sendAsMessageBlock(messageEvent.getTextChannel(), message.toString());
+        actions.sendAsMessageBlock(messageEvent.getChannel().getIdLong(), message.toString());
     }
 
 
@@ -221,7 +226,7 @@ public class MessageProcessor extends Commands{
             if(stringBuilder.length() != 0){
                 embedBuilder.addField(new MessageEmbed.Field("", stringBuilder.toString(),true));
             }
-            actions.sendEmbed((TextChannel) messageEvent.getChannel(), embedBuilder.build());
+            actions.sendEmbed(messageEvent.getChannel(), embedBuilder.build());
         }
 
     }
@@ -239,7 +244,6 @@ public class MessageProcessor extends Commands{
 
 
     protected static void regain(){
-
         Guild server = messageEvent.getGuild();
         AudioManager audioManager = server.getAudioManager();
         AudioChannel currentAudioChannel = audioManager.getConnectedChannel();
@@ -314,7 +318,7 @@ public class MessageProcessor extends Commands{
             String nextSong = audioPlayer.getSongQueue().take();
             audioPlayer.setAudioTrack(nextSong);
         }
-        actions.sendEmbed(messageEvent.getTextChannel(), createPlayingEmbed(audioPlayer));
+        actions.sendEmbed(messageEvent.getChannel(), createPlayingEmbed(audioPlayer));
         audioPlayer.setPlaying(true);
     }
 
@@ -383,14 +387,14 @@ public class MessageProcessor extends Commands{
                 AudioChannel voice = member.getVoiceState().getChannel();
                 audioManager.openAudioConnection(voice);
             }else{
-                actions.messageChannel((TextChannel) messageEvent.getChannel(),"Member not in voice");
+                actions.messageChannel(messageEvent.getChannel(),"Member not in voice");
             }
         }else{
-            actions.messageChannel((TextChannel) messageEvent.getChannel(),"VOICE_STATE was disabled manually?");
+            actions.messageChannel(messageEvent.getChannel(),"VOICE_STATE was disabled manually?");
         }
     }
     //returns new sendingHandler
-    private static AudioPlayer addSendingHandlerIfNull(AudioManager audioManager){
+    public static AudioPlayer addSendingHandlerIfNull(AudioManager audioManager){
         AudioPlayer sendingHandler;
         AudioPlayer currentHandler = (AudioPlayer) audioManager.getSendingHandler();
         if(currentHandler == null){
@@ -403,7 +407,7 @@ public class MessageProcessor extends Commands{
     }
 
     public static void memoryRequest(){
-        messageEvent.getTextChannel()
+        messageEvent.getChannel()
                 .sendMessageEmbeds(createMemoryEmbed())
                 .setActionRow(interactiveButtons)
                 .queue();
@@ -423,7 +427,7 @@ public class MessageProcessor extends Commands{
     }
 
     protected static void helpRequest(){
-        MessageChannel channel = messageEvent.getChannel();
+        MessageChannelUnion channel = messageEvent.getChannel();
         final String HELP_MESSAGE = "```" +
                 " [Available commands]\n" +
                 " purge <amount> - channel based purge (each channel has its own deque, incorporates retrieving history when needed)\n" +
@@ -473,7 +477,7 @@ public class MessageProcessor extends Commands{
         }
         //include purge request message
         amount++;
-        MessageChannel channel = messageEvent.getChannel();
+        MessageChannelUnion channel = messageEvent.getChannel();
         MessageDeque cachedMessages = channelIdsToMessageDeques.get(messageChannelId);
         int deqAmount = Math.min(cachedMessages.size(), amount);
 
@@ -536,7 +540,7 @@ public class MessageProcessor extends Commands{
 
     protected static void linuxRequest(){
         if(OS.toLowerCase(Locale.ENGLISH).startsWith("win")){
-            actions.messageChannel(messageEvent.getTextChannel(),"Host running windows");
+            actions.messageChannel(messageEvent.getChannel(),"Host running windows");
             return;
         }
         if(!isAuthorAuthorized()){
@@ -560,7 +564,7 @@ public class MessageProcessor extends Commands{
         //InputStream errorStream = procBuilder.getErrorStream();
         String stringedStream = streamToString(50_000, inputStream);
         if (stringedStream != null){
-            actions.sendAsMessageBlock(messageEvent.getTextChannel(), stringedStream);
+            actions.sendAsMessageBlock(messageEvent.getChannel(), stringedStream);
             try{
                 inputStream.close();
             }catch (IOException ioException){
@@ -639,7 +643,7 @@ public class MessageProcessor extends Commands{
         return youtube;
     }
     public static void genTokenRequest(){
-        actions.messageChannel(messageEvent.getTextChannel(),PseudoBotTokenGenerator.generateBotToken());
+        actions.messageChannel(messageEvent.getChannel(), PseudoBotTokenGenerator.generateBotToken());
     }
     public static void GCRequest(){
         System.gc();
@@ -696,7 +700,7 @@ public class MessageProcessor extends Commands{
     public static void lengthRequest(){
         //len
         if(!commandArgs.isEmpty()){
-            actions.messageChannel(messageEvent.getTextChannel(), "``" + commandArgs.length() +"``");
+            actions.messageChannel(messageEvent.getChannel(), "``" + commandArgs.length() +"``");
         }
     }
 
@@ -706,9 +710,9 @@ public class MessageProcessor extends Commands{
         if(commandArgs.isEmpty()){
             SongQueue songQueue = audioPlayer.getSongQueue();
             if(songQueue.isEmpty()){
-                actions.messageChannel(messageEvent.getTextChannel(), "Queue is empty");
+                actions.messageChannel(messageEvent.getChannel(), "Queue is empty");
             }else{
-                actions.messageChannel(messageEvent.getTextChannel(), songQueue.toString());
+                actions.messageChannel(messageEvent.getChannel(), songQueue.toString());
             }
 
         }else{
@@ -755,7 +759,7 @@ public class MessageProcessor extends Commands{
                     .append("Target ID: ").append(entry.getTargetId()).append(' ')
                     .append('\n');
         }
-        actions.sendAsMessageBlock(messageEvent.getTextChannel(),entriesBuilder.toString());
+        actions.sendAsMessageBlock(messageEvent.getChannel(), entriesBuilder.toString());
     }
     private static boolean isAuthorAuthorized(){
         return Bot.AUTHORIZED_USERS.contains(messageEvent.getAuthor().getIdLong());
@@ -774,7 +778,7 @@ public class MessageProcessor extends Commands{
         actions.messageChannel(messageEvent.getChannel(), "FALSE, bot is not connected to any voice channel");
     }
     public static void emojiId(){
-        TextChannel channel = messageEvent.getTextChannel();
+        MessageChannel channel = messageEvent.getChannel();
         channel.sendMessage(commandArgs).queue();
     }
 }

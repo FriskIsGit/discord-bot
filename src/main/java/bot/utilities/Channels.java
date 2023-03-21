@@ -3,6 +3,10 @@ package bot.utilities;
 import bot.deskort.Bot;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 import java.util.List;
 import java.util.Locale;
@@ -18,16 +22,28 @@ public class Channels{
 
     public TextChannel getTextChannel(String partialName){
         List<TextChannel> textChannels = jdaInterface.getTextChannels();
-        for(int i = 0; i<textChannels.size(); i++){
-            if(textChannels.get(i).getName().contains(partialName)){
-                return textChannels.get(i);
+        for (TextChannel textChannel : textChannels){
+            if (textChannel.getName().contains(partialName)){
+                return textChannel;
             }
         }
         return null;
     }
-    public TextChannel getTextChannel(long id){
-        return jdaInterface.getTextChannelById(id);
+    public MessageChannel getMessageChannel(String partialName){
+        List<Guild> serversList = jdaInterface.getGuilds();
+        for(Guild guild : serversList){
+            List<GuildChannel> listOfChannels = guild.getChannels();
+            for(GuildChannel channel : listOfChannels){
+                if(channel.getName().contains(partialName)){
+                    if(channel instanceof MessageChannel){
+                        return (MessageChannel) channel;
+                    }
+                }
+            }
+        }
+        return null;
     }
+
     public VoiceChannel getVoiceChannel(long id){
         return jdaInterface.getVoiceChannelById(id);
     }
@@ -50,19 +66,6 @@ public class Channels{
             String voiceName = voiceChannel.getName().toLowerCase(Locale.ROOT);
             if (voiceName.contains(lowerCaseName)){
                 return voiceChannel;
-            }
-        }
-        return null;
-    }
-
-    public Channel getChannel(String partialName){
-        List<Guild> serversList = jdaInterface.getGuilds();
-        for(Guild guild : serversList){
-            List<GuildChannel> listOfChannels = guild.getChannels();
-            for(GuildChannel channel : listOfChannels){
-                if(channel.getName().contains(partialName)){
-                    return channel;
-                }
             }
         }
         return null;

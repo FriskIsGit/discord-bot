@@ -1,6 +1,5 @@
 package bot.music;
 
-import bot.deskort.Commands;
 import bot.music.youtube.SongQueue;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.managers.AudioManager;
@@ -16,7 +15,7 @@ import java.util.HashSet;
 
 public class AudioPlayer implements AudioSendHandler{
 
-    private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","mp4 (very few containers)"));
+    private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","m4a","mp4"));
     private final static String HOME_DIR = System.getProperty("user.home");
     public static File AUDIO_FILES_DIR = new File(HOME_DIR);
     private boolean looping = false;

@@ -4,19 +4,19 @@ import bot.deskort.Bot;
 import bot.deskort.Commands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.exceptions.ContextException;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class Actions{
     private final static int MB_8 = 8388608;
@@ -28,16 +28,16 @@ public class Actions{
         this.channels = channels;
         scanner = new Scanner(System.in);
     }
-    public void sendEmbed(TextChannel textChannel, MessageEmbed embed){
+    public void sendEmbed(MessageChannelUnion channel, MessageEmbed embed){
         if(embed == null){
             return;
         }
-        textChannel.sendMessageEmbeds(embed).queue();
+        channel.sendMessageEmbeds(embed).queue();
     }
 
     public boolean banUser(User user, Guild guildOfOrigin){
         try{
-            guildOfOrigin.ban(user,0).queue();
+            guildOfOrigin.ban(user, 0, TimeUnit.SECONDS).queue();
         }catch (HierarchyException hierarchyExc){
             System.err.println(hierarchyExc.getMessage());
             return false;
@@ -54,7 +54,7 @@ public class Actions{
         return true;
     }
 
-    public void sendFile(TextChannel channel, File fileToSend){
+    public void sendFile(MessageChannel channel, File fileToSend){
         if(fileToSend == null){
             System.out.println("Given file was null");
             return;
@@ -67,23 +67,27 @@ public class Actions{
             return;
         }
         if(bytes.length > MB_8){
-            messageChannel(channel,"8MBs exceeded");
+            channel.sendMessage("8MBs exceeded").queue();
             return;
         }
 
         if(channel != null){
-            System.out.println("Sending file..");
-            channel.sendFile(bytes, fileToSend.getName()).queue();
+            try (FileUpload upload = FileUpload.fromData(bytes, fileToSend.getName())){
+                channel.sendFiles(upload).queue();
+                System.out.println("Sending file..");
+            }catch (IOException e){
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    protected TextChannel findChannel(String msg){
+    protected MessageChannel findChannel(String msg){
         int index = msg.indexOf(' ') + 1;
         if(index == 0){
             return null;
         }
         String channelPartialName = msg.substring(index);
-        return channels.getTextChannel(channelPartialName);
+        return channels.getMessageChannel(channelPartialName);
     }
 
     public void messageChannel(TextChannel txtChannel, String msgText){
@@ -114,7 +118,7 @@ public class Actions{
         messageChannel((TextChannel) txtChannel,msgText);
     }
 
-    public void sendAsMessageBlock(TextChannel txtChannel, String msgText){
+    public void sendAsMessageBlock(MessageChannel txtChannel, String msgText){
         if(txtChannel == null) return;
         int msgLength = msgText.length();
 
@@ -142,7 +146,7 @@ public class Actions{
     public void sendAsMessageBlock(long channelId, String msgText){
         sendAsMessageBlock(jdaInterface.getTextChannelById(channelId),msgText);
     }
-    public void chatWithBot(TextChannel textChannel){
+    public void chatWithBot(MessageChannel textChannel){
         if(textChannel == null)
             return;
 
@@ -164,7 +168,7 @@ public class Actions{
             String[] args = Commands.doubleTermSplit(input, Bot.PREFIX_OFFSET);
             switch (args[0]){
                 case "cc":
-                    TextChannel nextChannel = findChannel(input);
+                    MessageChannel nextChannel = findChannel(input);
                     if(nextChannel != null){
                         textChannel = nextChannel;
                         System.out.println("Moved to: " + nextChannel.getName());
@@ -243,7 +247,12 @@ public class Actions{
             }catch (IOException ioException){
                 return;
             }
-            userDM.sendFile(bytes, file.getName()).queue();
+            try (FileUpload upload = FileUpload.fromData(bytes, file.getName())){
+                userDM.sendFiles(upload).queue();
+                System.out.println("Sending file..");
+            }catch (IOException e){
+                System.out.println("IOException occurred on file upload");
+            }
         }catch (IllegalArgumentException iaExc){
             System.err.println("Cannot send file to user");
         }
