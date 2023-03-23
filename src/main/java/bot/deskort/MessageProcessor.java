@@ -38,14 +38,13 @@ public class MessageProcessor extends Commands{
             Button.primary("gc",        "Run GC"),
             Button.primary("refresh",   "Refresh")
     ));
-    private static final HashMap<Long, MessageDeque> channelIdsToMessageDeques = new HashMap<>();
+    public static final HashMap<Long, MessageDeque> channelIdsToMessageDeques = new HashMap<>();
     public static String PREFIX;
     public static int PREFIX_OFFSET;
     public static int PURGE_CAP = 1000;
 
     private static JDA jdaInterface;
     private static Actions actions;
-    private static Channels channels;
     private static Youtube youtube;
     private static ShutdownTimer shutdownTimer;
 
@@ -66,7 +65,6 @@ public class MessageProcessor extends Commands{
 
     MessageProcessor(){
         actions = Bot.getActions();
-        channels = Bot.getChannels();
         jdaInterface = Bot.getJDAInterface();
         youtube = new Youtube();
         shutdownTimer = new ShutdownTimer();
@@ -307,7 +305,7 @@ public class MessageProcessor extends Commands{
             joinRequest();
         }
         commandArgs = tempArgs;
-        AudioPlayer audioPlayer = addSendingHandlerIfNull(audioManager);
+        AudioPlayer audioPlayer = AudioPlayer.addSendingHandlerIfNull(audioManager);
         if(!commandArgs.isEmpty()){
             if (!audioPlayer.setAudioTrack(commandArgs)){
                 actions.messageChannel(messageChannelId,"Track doesn't exist");
@@ -348,7 +346,7 @@ public class MessageProcessor extends Commands{
 
     protected static void youtubeRequest(){
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
-        addSendingHandlerIfNull(audioManager);
+        AudioPlayer.addSendingHandlerIfNull(audioManager);
         /*if (YoutubeRequest.hasActiveRequest()){
             actions.messageChannel(messageChannelId, "Has an active request to process");
             return;
@@ -361,10 +359,10 @@ public class MessageProcessor extends Commands{
 
     protected static void joinRequest(){
         AudioManager audioManager = messageEvent.getGuild().getAudioManager();
-        addSendingHandlerIfNull(audioManager);
+        AudioPlayer.addSendingHandlerIfNull(audioManager);
         //channel specific join
         if(commandArgs.length() > 2){
-            VoiceChannel voice = channels.getVoiceChannelIgnoreCase(commandArgs);
+            VoiceChannel voice = getVoiceChannelIgnoreCase(commandArgs);
             if(voice == null){
                 actions.messageChannel(messageEvent.getChannel(),"VoiceChannel not found");
                 return;
@@ -372,7 +370,7 @@ public class MessageProcessor extends Commands{
             //if targeting another server
             if(messageEvent.getGuild().getIdLong() != voice.getGuild().getIdLong()){
                 audioManager = voice.getGuild().getAudioManager();
-                addSendingHandlerIfNull(audioManager);
+                AudioPlayer.addSendingHandlerIfNull(audioManager);
             }
             audioManager.openAudioConnection(voice);
             return;
@@ -393,17 +391,16 @@ public class MessageProcessor extends Commands{
             actions.messageChannel(messageEvent.getChannel(),"VOICE_STATE was disabled manually?");
         }
     }
-    //returns new sendingHandler
-    public static AudioPlayer addSendingHandlerIfNull(AudioManager audioManager){
-        AudioPlayer sendingHandler;
-        AudioPlayer currentHandler = (AudioPlayer) audioManager.getSendingHandler();
-        if(currentHandler == null){
-            sendingHandler = new AudioPlayer(audioManager);
-            System.out.println("-Setting up sending handler-");
-            audioManager.setSendingHandler(sendingHandler);
-            return sendingHandler;
+    public static VoiceChannel getVoiceChannelIgnoreCase(String partialName){
+        String lowerCaseName = partialName.toLowerCase(Locale.ROOT);
+        List<VoiceChannel> voiceChannels = jdaInterface.getVoiceChannels();
+        for (VoiceChannel voiceChannel : voiceChannels){
+            String voiceName = voiceChannel.getName().toLowerCase(Locale.ROOT);
+            if (voiceName.contains(lowerCaseName)){
+                return voiceChannel;
+            }
         }
-        return currentHandler;
+        return null;
     }
 
     public static void memoryRequest(){
@@ -515,7 +512,7 @@ public class MessageProcessor extends Commands{
 
     }
 
-    private static void deleteRequestMessage(){
+    public static void deleteRequestMessage(){
         Message msgToDelete = messageEvent.getMessage();
         msgToDelete.delete().queue();
         channelIdsToMessageDeques.get(messageChannelId).removeLast();
@@ -526,7 +523,7 @@ public class MessageProcessor extends Commands{
      * @param amount - excluding the purge request message
      * @returns id of the oldest message as a reference point
      **/
-    private static String popAndPurgeLastMessages(MessageChannel channel, int amount){
+    public static String popAndPurgeLastMessages(MessageChannel channel, int amount){
         List<Message> list = channelIdsToMessageDeques.get(messageChannelId).toList(amount);
         int lastIndex = list.size()-1;
         String oldestMessageId = list.get(lastIndex).getId();
@@ -534,7 +531,7 @@ public class MessageProcessor extends Commands{
         completeInFuture(completableFutureList);
         return oldestMessageId;
     }
-    private static void completeInFuture(List<CompletableFuture<Void>> futures){
+    public static void completeInFuture(List<CompletableFuture<Void>> futures){
         futures.forEach(future -> future.completeExceptionally(new Throwable("Insufficient permissions to purge?")));
     }
 
@@ -705,7 +702,7 @@ public class MessageProcessor extends Commands{
     }
 
     public static void queueRequest(){
-        AudioPlayer audioPlayer = addSendingHandlerIfNull(messageEvent.getGuild().getAudioManager());
+        AudioPlayer audioPlayer = AudioPlayer.addSendingHandlerIfNull(messageEvent.getGuild().getAudioManager());
         //display queue
         if(commandArgs.isEmpty()){
             SongQueue songQueue = audioPlayer.getSongQueue();
@@ -722,7 +719,7 @@ public class MessageProcessor extends Commands{
     }
 
     public static void skipRequest(){
-        AudioPlayer audioPlayer = addSendingHandlerIfNull(messageEvent.getGuild().getAudioManager());
+        AudioPlayer audioPlayer = AudioPlayer.addSendingHandlerIfNull(messageEvent.getGuild().getAudioManager());
         audioPlayer.setAudioTrack(audioPlayer.getSongQueue().take());
     }
 

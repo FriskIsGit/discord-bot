@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
@@ -15,17 +16,16 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 public class Actions{
     private final static int MB_8 = 8388608;
     private final JDA jdaInterface;
-    private final Channels channels;
     private final Scanner scanner;
-    public Actions(Channels channels){
+    public Actions(){
         jdaInterface = Bot.getJDAInterface();
-        this.channels = channels;
         scanner = new Scanner(System.in);
     }
     public void sendEmbed(MessageChannelUnion channel, MessageEmbed embed){
@@ -87,7 +87,32 @@ public class Actions{
             return null;
         }
         String channelPartialName = msg.substring(index);
-        return channels.getMessageChannel(channelPartialName);
+        return getMessageChannel(channelPartialName);
+    }
+
+    public MessageChannel getMessageChannel(String partialName){
+        List<Guild> serversList = jdaInterface.getGuilds();
+        for(Guild guild : serversList){
+            List<GuildChannel> listOfChannels = guild.getChannels();
+            for(GuildChannel channel : listOfChannels){
+                if(channel.getName().contains(partialName)){
+                    if(channel instanceof MessageChannel){
+                        return (MessageChannel) channel;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public TextChannel getTextChannel(String partialName){
+        List<TextChannel> textChannels = jdaInterface.getTextChannels();
+        for (TextChannel textChannel : textChannels){
+            if (textChannel.getName().contains(partialName)){
+                return textChannel;
+            }
+        }
+        return null;
     }
 
     public void messageChannel(TextChannel txtChannel, String msgText){
@@ -119,7 +144,8 @@ public class Actions{
     }
 
     public void sendAsMessageBlock(MessageChannel txtChannel, String msgText){
-        if(txtChannel == null) return;
+        if(txtChannel == null)
+            return;
         int msgLength = msgText.length();
 
         if(1994>=msgLength && msgLength>0){
@@ -128,7 +154,6 @@ public class Actions{
             }catch (InsufficientPermissionException insufficientPermExc){
                 System.err.println("Lacking permission MESSAGE_SEND");
             }
-
         }
         else if(msgLength>2000){
             int parts = msgLength/2000 + 1;
@@ -216,7 +241,7 @@ public class Actions{
     }
 
     public void chatWithBot(String textChannelPartialName){
-        chatWithBot(channels.getTextChannel(textChannelPartialName));
+        chatWithBot(getTextChannel(textChannelPartialName));
     }
 
     public void messageUser(long userId, String messageContent){
@@ -257,13 +282,4 @@ public class Actions{
             System.err.println("Cannot send file to user");
         }
     }
-
-    //TODO(never)
-    public void purgeLastMessagesInChannel(TextChannel textChannel, int numberOfMessages){
-        //implementation
-    }
-    public void purgeLastMessagesInChannel(String partialName, int numberOfMessages){
-        purgeLastMessagesInChannel(channels.getTextChannel(partialName), numberOfMessages);
-    }
-
 }

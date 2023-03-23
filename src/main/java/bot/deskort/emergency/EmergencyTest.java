@@ -1,7 +1,7 @@
 package bot.deskort.emergency;
 
 import bot.deskort.Bot;
-import bot.utilities.Channels;
+import bot.utilities.Actions;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class EmergencyTest{
     private static JDA jdaInterface;
     private static Guild guild;
-    private static Channels channels;
+    private static Actions actions;
     public static long guildId = 519857141494841344L;
 
     public static String[] channelNames = {
@@ -29,7 +29,6 @@ public class EmergencyTest{
     public static void initAndCreateChannels(){
         jdaInterface = Bot.getJDAInterface();
         guild = jdaInterface.getGuildById(guildId);
-        channels = Bot.getChannels();
 
         for(String channelName : channelNames){
             Objects.requireNonNull(guild).createTextChannel(channelName).queue();
@@ -37,10 +36,9 @@ public class EmergencyTest{
 
     }
     public static void getAndDeleteChannels(){
-        channels = Bot.getChannels();
 
         for(String channelName : channelNames){
-            TextChannel channel = channels.getTextChannel(channelName);
+            TextChannel channel = actions.getTextChannel(channelName);
             if(channel != null){
                 textChannels.add(channel);
             }

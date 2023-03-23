@@ -9,11 +9,9 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import bot.utilities.Actions;
-import bot.utilities.Channels;
 import bot.utilities.FileSeeker;
 import bot.utilities.Servers;
 
-import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 public class Bot{
@@ -37,7 +34,6 @@ public class Bot{
     private static JDA jdaInterface;
     private static Actions actions;
     private static Servers servers;
-    private static Channels channels;
     //private static bot.utilities.Permissions permissions;
 
     public static boolean initialize() throws InterruptedException{
@@ -54,8 +50,7 @@ public class Bot{
             jdaInterface.awaitReady();
             LAUNCH_TIME = System.currentTimeMillis();
             servers = new Servers();
-            channels = new Channels(servers);
-            actions = new Actions(channels);
+            actions = new Actions();
             //permissions = new util.Permissions();
             BOT_ID = jdaInterface.getSelfUser().getIdLong();
             jdaInterface.addEventListener(new EventsListener());
@@ -117,9 +112,6 @@ public class Bot{
     }
     public static Servers getServers(){
         return servers;
-    }
-    public static Channels getChannels(){
-        return channels;
     }
     public static long getUptime(){
         return System.currentTimeMillis() - LAUNCH_TIME;

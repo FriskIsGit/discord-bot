@@ -41,23 +41,6 @@ public class AudioPlayer implements AudioSendHandler{
         this.songQueue = new SongQueue();
     }
 
-    public void setPlaying(boolean flag){
-        if(audioBuffer == null){
-            System.err.println("Audio buffer null");
-            return;
-        }
-        this.playing = flag;
-    }
-
-    /**
-     * invert looping value
-     * @return new status
-     */
-    public boolean switchLooping(){
-        looping ^= true;
-        return looping;
-    }
-
     public static boolean isExtensionSupported(String extension){
         return SUPPORTED_FORMATS.contains(extension);
     }
@@ -75,6 +58,35 @@ public class AudioPlayer implements AudioSendHandler{
 
     public static void clearAudioTracksFromMemory(){
         fileNamesToSongs.clear();
+    }
+    //returns new sendingHandler
+    public static AudioPlayer addSendingHandlerIfNull(AudioManager audioManager){
+        AudioPlayer sendingHandler;
+        AudioPlayer currentHandler = (AudioPlayer) audioManager.getSendingHandler();
+        if(currentHandler == null){
+            sendingHandler = new AudioPlayer(audioManager);
+            System.out.println("-Setting up sending handler-");
+            audioManager.setSendingHandler(sendingHandler);
+            return sendingHandler;
+        }
+        return currentHandler;
+    }
+
+    public void setPlaying(boolean flag){
+        if(audioBuffer == null){
+            System.err.println("Audio buffer null");
+            return;
+        }
+        this.playing = flag;
+    }
+
+    /**
+     * invert looping value
+     * @return new status
+     */
+    public boolean switchLooping(){
+        looping ^= true;
+        return looping;
     }
 
     public SongQueue getSongQueue(){

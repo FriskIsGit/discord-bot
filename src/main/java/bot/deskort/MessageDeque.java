@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-class MessageDeque extends ArrayDeque<MessageReceivedEvent>{
+public class MessageDeque extends ArrayDeque<MessageReceivedEvent>{
     private final int maxSize;
 
     public MessageDeque(int maxNumberOfMessages){
