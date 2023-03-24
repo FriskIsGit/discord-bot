@@ -1,7 +1,7 @@
 package bot.utilities;
 
 import bot.deskort.Bot;
-import bot.deskort.Commands;
+import bot.deskort.commands.Commands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;

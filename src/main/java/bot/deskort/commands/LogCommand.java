@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class LogCommand extends Command{
     public LogCommand(String... aliases){
         super(aliases);
+        requiresAuth = true;
     }
 
     @Override

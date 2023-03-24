@@ -1,15 +1,10 @@
 package bot.deskort;
 
 import bot.deskort.commands.Command;
+import bot.deskort.commands.Commands;
 import bot.utilities.*;
 
-import bot.music.AudioPlayer;
-import bot.utilities.NotNull;
-
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -23,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 //singleton
-public class MessageProcessor extends Commands{
+public class MessageProcessor{
     private static MessageProcessor messageProcessor;
     public static final List<Button> interactiveButtons = new ArrayList<>(Arrays.asList(
             Button.primary("clrsongs",  "Free songs from memory"),
@@ -219,13 +214,6 @@ public class MessageProcessor extends Commands{
             charArr[i] = (char)bytes[i];
         }
         return new String(charArr);
-    }
-
-    public static void GCRequest(){
-        System.gc();
-    }
-    public static void clearSongsRequest(){
-        AudioPlayer.clearAudioTracksFromMemory();
     }
 
     private boolean isAuthorAuthorized(){
