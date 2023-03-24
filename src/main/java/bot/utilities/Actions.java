@@ -16,7 +16,9 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -148,7 +150,7 @@ public class Actions{
             return;
         int msgLength = msgText.length();
 
-        if(1994>=msgLength && msgLength>0){
+        if(1994 >= msgLength && msgLength>0){
             try{
                 txtChannel.sendMessage("```" + msgText + "```").queue();
             }catch (InsufficientPermissionException insufficientPermExc){
@@ -202,7 +204,7 @@ public class Actions{
                     break;
                 case "lc":
                     //server name required
-                    Guild server = Bot.getServers().getServerIgnoreCase(args[1]);
+                    Guild server = getServerIgnoreCase(args[1]);
                     if (server == null){
                         continue;
                     }
@@ -281,5 +283,25 @@ public class Actions{
         }catch (IllegalArgumentException iaExc){
             System.err.println("Cannot send file to user");
         }
+    }
+    public Guild getServerIgnoreCase(String partialName){
+        partialName = partialName.toLowerCase(Locale.ROOT);
+        List<Guild> servers = jdaInterface.getGuilds();
+        for (Guild server : servers){
+            if (server.getName().toLowerCase(Locale.ROOT).contains(partialName)){
+                return server;
+            }
+        }
+        return null;
+    }
+
+    public List<String> getServerNames(){
+        List<Guild> guilds = jdaInterface.getGuilds();
+        int numberOfGuilds = guilds.size();
+        List<String> serverNames = new ArrayList<>(numberOfGuilds);
+        for (Guild guild : guilds){
+            serverNames.add(guild.getName());
+        }
+        return serverNames;
     }
 }

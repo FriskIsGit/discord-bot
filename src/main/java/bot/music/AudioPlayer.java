@@ -1,6 +1,6 @@
 package bot.music;
 
-import bot.music.youtube.SongQueue;
+import bot.deskort.Bot;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.Nullable;
@@ -14,31 +14,25 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class AudioPlayer implements AudioSendHandler{
-
     private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","m4a","mp4"));
-    private final static String HOME_DIR = System.getProperty("user.home");
-    public static File AUDIO_FILES_DIR = new File(HOME_DIR);
-    private boolean looping = false;
+    private static final HashMap<String, AudioTrack> fileNamesToSongs = new HashMap<>(32);
 
-    private static final int NUM_OF_SONGS = 32;
-    private static final HashMap<String, AudioTrack> fileNamesToSongs = new HashMap<>(NUM_OF_SONGS);
+    public final File audioDirectory;
+    private boolean looping = false;
 
     private AudioTrack audioTrack;
     private ByteBuffer audioBuffer;
 
-    private int methodCalls = 0;
-    protected int offset = 0;
-    protected int length = 0;
-    volatile protected double fragmentsOf20Ms = 0;
-    volatile protected boolean isOpus;
+    private int methodCalls = 0, offset = 0, length = 0;
+    protected volatile double fragmentsOf20Ms = 0;
+    protected volatile boolean isOpus;
+    private volatile boolean playing = false;
 
-    protected AudioManager audioManager;
-    protected SongQueue songQueue;
-    volatile private boolean playing = false;
+    private final SongQueue songQueue;
 
-    public AudioPlayer(AudioManager audioManager) {
-        this.audioManager = audioManager;
+    public AudioPlayer() {
         this.songQueue = new SongQueue();
+        this.audioDirectory = Bot.getConfig().audioDirectory;
     }
 
     public static boolean isExtensionSupported(String extension){
@@ -64,7 +58,7 @@ public class AudioPlayer implements AudioSendHandler{
         AudioPlayer sendingHandler;
         AudioPlayer currentHandler = (AudioPlayer) audioManager.getSendingHandler();
         if(currentHandler == null){
-            sendingHandler = new AudioPlayer(audioManager);
+            sendingHandler = new AudioPlayer();
             System.out.println("-Setting up sending handler-");
             audioManager.setSendingHandler(sendingHandler);
             return sendingHandler;
@@ -107,7 +101,7 @@ public class AudioPlayer implements AudioSendHandler{
         if(fileNamesToSongs.containsKey(trackName)){
             this.audioTrack = fileNamesToSongs.get(trackName);
         }else{
-            FileSeeker fileSeeker = new FileSeeker(trackName, AUDIO_FILES_DIR.getAbsolutePath());
+            FileSeeker fileSeeker = new FileSeeker(trackName, audioDirectory.getAbsolutePath());
             String containedPath = fileSeeker.findContainingPath();
             if(containedPath.isEmpty()){
                 return false;

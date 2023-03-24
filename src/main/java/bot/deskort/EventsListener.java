@@ -1,5 +1,6 @@
 package bot.deskort;
 
+import bot.deskort.commands.MemoryCommand;
 import bot.music.AudioPlayer;
 import bot.utilities.LeaverTimer;
 import net.dv8tion.jda.api.entities.*;
@@ -18,6 +19,7 @@ import java.util.*;
 
 public class EventsListener extends ListenerAdapter{
     private final HashMap<Guild, LeaverTimer> guildsToTimers;
+    private final MessageProcessor messageProcessor;
     private Guild guildOfOrigin;
     private MessageReceivedEvent messageEvent;
     private String messageText;
@@ -29,7 +31,7 @@ public class EventsListener extends ListenerAdapter{
             guildsToTimers.put(guild, new LeaverTimer(guild.getAudioManager()));
         }
         System.out.println("Leaver timer is initialized");
-        new MessageProcessor();
+        messageProcessor = MessageProcessor.get();
     }
 
     @Override
@@ -48,8 +50,8 @@ public class EventsListener extends ListenerAdapter{
         this.messageText = messageEvent.getMessage().getContentRaw();
 
         printReceivedMessage();
-        long messageChannelId = messageEvent.getChannel().getIdLong();
-        MessageProcessor.processMessage(messageEvent, messageText, messageChannelId);
+        long channelId = messageEvent.getChannel().getIdLong();
+        messageProcessor.processMessage(messageEvent, channelId);
     }
     @Override
     public void onGuildUnban(GuildUnbanEvent unbanEvent){
@@ -60,7 +62,7 @@ public class EventsListener extends ListenerAdapter{
     @Override
     public void onChannelDelete(ChannelDeleteEvent channelDelete) {
         long deletedChannelId = channelDelete.getChannel().getIdLong();
-        HashMap<Long, MessageDeque> map = MessageProcessor.getChannelIdsToMessageDeques();
+        HashMap<Long, MessageDeque> map = messageProcessor.channelIdsToMessageDeques;
         if(map.containsKey(deletedChannelId)){
             map.remove(deletedChannelId);
             System.out.println("Deleted non-existent channel to prevent memory leaks");
@@ -140,7 +142,7 @@ public class EventsListener extends ListenerAdapter{
                 System.out.println("Foreign button clicked");
                 return;
         }
-        MessageEmbed memoryEmbed = MessageProcessor.createMemoryEmbed();
+        MessageEmbed memoryEmbed = MemoryCommand.createMemoryEmbed();
         clickEvent.editMessageEmbeds().setEmbeds(memoryEmbed).queue();
         //clickEvent.getHook().editOriginalEmbeds(memoryEmbed).queue();
     }

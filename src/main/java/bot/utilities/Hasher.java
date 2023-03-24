@@ -3,7 +3,6 @@ package bot.utilities;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 
 public class Hasher{
     public final static Hash SHA_512;
@@ -26,23 +25,6 @@ public class Hasher{
         }
     }
 
-    public final static HashMap<String, Hash> NAMES_TO_ALGORITHMS = new HashMap<String, Hash>() {{
-        put("sha224", SHA_224);
-        put("hash",   SHA_256);
-        put("sha256", SHA_256);
-        put("sha384", SHA_384);
-        put("sha512", SHA_512);
-
-        put("sha1",   SHA_1);
-        put("md5",    MD5);
-    }};
-
-    public static boolean hasAlgorithm(String alg){
-        if(alg.length() > 6){
-            return false;
-        }
-        return NAMES_TO_ALGORITHMS.containsKey(alg);
-    }
     public static String hashBytes(byte[] bytes, Hash hash){
         byte[] hashedBytes = hash.msgDigest.digest(bytes);
         StringBuilder hexString = new StringBuilder(hash.length);
@@ -52,8 +34,27 @@ public class Hasher{
         }
         return hexString.toString();
     }
-    public static String hash(String text, String name){
-        return hashBytes(text.getBytes(StandardCharsets.UTF_8), NAMES_TO_ALGORITHMS.get(name));
+    public static String hash(String text, Hash hash){
+        return hashBytes(text.getBytes(StandardCharsets.UTF_8), hash);
+    }
+    public static Hash choose(String name){
+        switch (name.toLowerCase()){
+            case "sha224":
+                return Hasher.SHA_224;
+            case "hash":
+            case "sha256":
+                return Hasher.SHA_256;
+            case "sha384":
+                return Hasher.SHA_384;
+            case "sha512":
+                return Hasher.SHA_512;
+            case "sha1":
+                return Hasher.SHA_1;
+            case "md5":
+                return Hasher.MD5;
+            default:
+                throw new IllegalStateException("No match for given algorithm");
+        }
     }
 
 }

@@ -7,7 +7,6 @@ import youtube_lib.downloader.model.videos.formats.Format;
 import youtube_lib.downloader.model.videos.formats.VideoFormat;
 import youtube_lib.downloader.model.videos.formats.VideoWithAudioFormat;
 
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,14 +30,12 @@ public class YoutubeVideoInfo{
         if(videoDetails == null){
             return "Invalid video, no details available";
         }
-        StringBuilder detailsStr = new StringBuilder();
-        detailsStr.append("Title: ")         .append(videoDetails.title())         .append(NEW_LINE)
-                .append("Views: ")           .append(videoDetails.viewCount())     .append(NEW_LINE)
-                .append("Length (seconds): ").append(videoDetails.lengthSeconds()) .append(NEW_LINE)
-                .append("Author: ")          .append(videoDetails.author())        .append(NEW_LINE)
-                .append("Downloadable: ")    .append(videoDetails.isDownloadable()).append(NEW_LINE)
-                .append("Live: ")            .append(videoDetails.isLive())        .append(NEW_LINE);
-        return detailsStr.toString();
+        return "Title: " + videoDetails.title() + NEW_LINE +
+                "Views: " + videoDetails.viewCount() + NEW_LINE +
+                "Length (seconds): " + videoDetails.lengthSeconds() + NEW_LINE +
+                "Author: " + videoDetails.author() + NEW_LINE +
+                "Downloadable: " + videoDetails.isDownloadable() + NEW_LINE +
+                "Live: " + videoDetails.isLive() + NEW_LINE;
     }
     public String bestFormatsToString(){
         if(videoInfo == null){
@@ -224,8 +221,12 @@ public class YoutubeVideoInfo{
         return ((double)allBytes / 1024D / 1024D);
     }
 
-    public List<AudioFormat> audioFormats(){return videoInfo.audioFormats();}
-    public List<VideoWithAudioFormat> videoWithAudioFormats(){return videoInfo.videoWithAudioFormats();}
+    public List<AudioFormat> audioFormats(){
+        return videoInfo.audioFormats();
+    }
+    public List<VideoWithAudioFormat> videoWithAudioFormats(){
+        return videoInfo.videoWithAudioFormats();
+    }
     public List<VideoFormat> videoFormats(){
         List<VideoFormat> videoFormats = videoInfo.videoFormats();
         return videoFormats.stream()

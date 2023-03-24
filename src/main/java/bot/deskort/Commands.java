@@ -5,60 +5,8 @@ import java.util.HashMap;
 
 public abstract class Commands{
     final static HashMap<String, RequestFunction> COMMANDS_TO_FUNCTIONS = new HashMap<String, RequestFunction>() {{
-
-        put("logs",        new RequestFunction(MessageProcessor::logsRequest,       true));
-        put("shutdown",    new RequestFunction(MessageProcessor::shutdownRequest,   true));
-        put("abort",       new RequestFunction(MessageProcessor::abortRequest,      true));
-
-        put("ban",         new RequestFunction(MessageProcessor::banRequest,        false));
-        put("unban",       new RequestFunction(MessageProcessor::unbanRequest,      false));
-        put("warp",        new RequestFunction(MessageProcessor::warpRequest,       false));
-
-        put("join",        new RequestFunction(MessageProcessor::joinRequest,       false));
-        put("leave",       new RequestFunction(MessageProcessor::leaveRequest,      false));
-        put("loop",        new RequestFunction(MessageProcessor::loopRequest,       false));
-        RequestFunction    playRequest = new RequestFunction(MessageProcessor::playRequest,       false);
-        put("play",        playRequest);
-        put("p",           playRequest);
-        put("stop",        new RequestFunction(MessageProcessor::stopRequest,       false));
-        RequestFunction    queueRequest = new RequestFunction(MessageProcessor::queueRequest,      true);
-        put("queue",       queueRequest);
-        put("q",           queueRequest);
-        put("skip",        new RequestFunction(MessageProcessor::skipRequest,       true));
-
-        put("regain",      new RequestFunction(MessageProcessor::regain,            false));
-        put("yt",          new RequestFunction(MessageProcessor::youtubeRequest,    false));
-        RequestFunction    tracksRequestFunction = new RequestFunction(MessageProcessor::tracksRequest, false);
-        put("tracks",      tracksRequestFunction);
-        put("songs",       tracksRequestFunction);
-
-        put("purge",       new RequestFunction(MessageProcessor::purgeRequest,      false));
-        put("uptime",      new RequestFunction(MessageProcessor::uptimeRequest,     true));
-        put("help",        new RequestFunction(MessageProcessor::helpRequest,       false));
-        put("gentoken",    new RequestFunction(MessageProcessor::genTokenRequest,   true));
-        RequestFunction    lengthRequest = new RequestFunction(MessageProcessor::lengthRequest, true);
-        put("length",      lengthRequest);
-        put("len",         lengthRequest);
-        RequestFunction    httpCatRequest = new RequestFunction(MessageProcessor::httpCatRequest,   true);
-        put("httpcat",     httpCatRequest);
-        put("http",        httpCatRequest);
-        put("cat",         httpCatRequest);
-        put("auditlog",    new RequestFunction(MessageProcessor::auditLogRequest,   false));
-        put("vcstate",     new RequestFunction(MessageProcessor::hasActiveConnectionRequest,   false));
-        put("emoji",       new RequestFunction(MessageProcessor::emojiId,   true));
-
-
-        RequestFunction    memoryRequestFunction = new RequestFunction(MessageProcessor::memoryRequest, false);
-        put("memstat",     memoryRequestFunction);
-        put("mempanel",    memoryRequestFunction);
-        put("memuse",      memoryRequestFunction);
         put("clrsongs",    new RequestFunction(MessageProcessor::clearSongsRequest, true));
         put("gc",          new RequestFunction(MessageProcessor::GCRequest,         true));
-
-        RequestFunction    hashRequestFunction = new RequestFunction(MessageProcessor::stringHashRequest, false);
-        put("hash",        hashRequestFunction);
-
-
     }};
 
     public static String[] doubleTermSplit(String commandText){

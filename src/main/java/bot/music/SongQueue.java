@@ -1,4 +1,4 @@
-package bot.music.youtube;
+package bot.music;
 
 import java.util.Iterator;
 import java.util.LinkedList;
