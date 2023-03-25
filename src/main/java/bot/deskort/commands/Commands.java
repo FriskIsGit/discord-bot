@@ -34,7 +34,6 @@ final public class Commands{
             new SkipCommand("skip"),
             new WarpCommand("warp"),
             new AuditLogCommand("auditlog"),
-            new EmojiCommand("emoji"),
             new YoutubeCommand("ytinfo", "ytviau", "ytvi", "ytvideo", "ytau", "ytaudio"),
             new StateCommand("state", "vcstate"),
             new RegainCommand("regain"),
@@ -42,6 +41,7 @@ final public class Commands{
             new GCCommand("gc"),
             new ClearSongsCommand("clearsongs", "clrsongs"),
             new FileHashCommand("hashfile", "file"),
+            new SayCommand("say"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
