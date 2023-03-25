@@ -1,6 +1,7 @@
 package bot.deskort.commands;
 
 import bot.deskort.commands.voice.*;
+import net.dv8tion.jda.api.entities.Invite;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ final public class Commands{
             new GCCommand("gc"),
             new ClearSongsCommand("clearsongs", "clrsongs"),
             new FileHashCommand("hashfile", "file"),
-            new SayCommand("say"),
+            new InviteCommand("invite"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
@@ -157,6 +158,9 @@ final public class Commands{
         final int[] index = {0};
         terms.forEach((el) -> res[index[0]++] = el);
         return res;
+    }
+    public static String[] splitIntoTerms(String text){
+        return splitIntoTerms(text, 0);
     }
 
 }
