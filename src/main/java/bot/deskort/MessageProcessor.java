@@ -77,6 +77,7 @@ public class MessageProcessor{
             if(command == null){
                 return;
             }
+
             if(allSplit.length == 1){
                 command.execute(commandName, message);
             }
