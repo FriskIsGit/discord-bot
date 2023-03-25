@@ -7,7 +7,7 @@ public class ModifyCommand extends Command{
     public ModifyCommand(String... aliases){
         super(aliases);
         requiresAuth = true;
-        description = "modify `command_name` `op` `var` `new_value`";
+        description = "modify `command_alias` `op` `var` `new_value`";
     }
 
     @Override

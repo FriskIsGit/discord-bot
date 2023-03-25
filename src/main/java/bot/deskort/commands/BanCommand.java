@@ -7,6 +7,7 @@ public class BanCommand extends Command{
     public BanCommand(String... aliases){
         super(aliases);
         requiresAuth = true;
+        description = "Bans user";
     }
 
     @Override

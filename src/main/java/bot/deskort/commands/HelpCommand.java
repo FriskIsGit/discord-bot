@@ -1,9 +1,11 @@
 package bot.deskort.commands;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class HelpCommand extends Command{
-
+    private static final char new_line = '\n';
     public HelpCommand(String... aliases){
         super(aliases);
         description = "Prints information about commands or a command\n" +
@@ -19,16 +21,30 @@ public class HelpCommand extends Command{
         }
         Command command = Commands.get().command(args[0]);
         if(command == null){
-            actions.messageChannel(message.getChannel(), args[0] + " doesn't map to any command");
+            actions.messageChannel(message.getChannel(), "`" + args[0] + "` doesn't map to any command");
             return;
         }
-        actions.messageChannel(message.getChannel(), createInformationAboutCommand(command));
+        actions.sendEmbed(message.getChannel(), createEmbedForCommand(command));
     }
 
-    private String createInformationAboutCommand(Command command){
-        return "Aliases: " + formatAliases(command.aliases) + '\n' +
-                "Desc: " + command.description +  '\n' +
-                "Enabled: " + command.enabled + '\n';
+    private MessageEmbed createEmbedForCommand(Command command){
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        String aliases = formatAliases(command.aliases).toString();
+        String desc = command.description;
+        String usage = command.usage;
+        String enabled = String.valueOf(command.enabled);
+        String requiresAuth = String.valueOf(command.requiresAuth);
+
+        embedBuilder.addField(new MessageEmbed.Field("Aliases", aliases,false));
+        if(!desc.isEmpty()){
+            embedBuilder.addField(new MessageEmbed.Field("Description", desc,false));
+        }
+        if(!usage.isEmpty()){
+            embedBuilder.addField(new MessageEmbed.Field("Usage", usage,false));
+        }
+        embedBuilder.addField(new MessageEmbed.Field("Enabled", enabled,true));
+        embedBuilder.addField(new MessageEmbed.Field("Sudo required", requiresAuth,true));
+        return embedBuilder.build();
     }
 
     private String createInformationOnAllCommands(){
@@ -38,6 +54,7 @@ public class HelpCommand extends Command{
             if(!command.enabled){
                 continue;
             }
+            //
             info.append("Aliases: ").append(formatAliases(command.aliases)).append('|').append('\n');
             info.append("Desc: ").append(command.description).append('|').append('\n');
             info.append("Enabled: ").append(command.enabled).append('|').append('\n');

@@ -18,8 +18,8 @@ public class JoinCommand extends Command{
     private static final boolean allowCrossGuildJoins = true;
     public JoinCommand(String... aliases){
         super(aliases);
-        description = "Joins channel which user is in or channel with specified name\n" +
-                "Example use case: join `partial_name`";
+        description = "Joins channel which user is in or channel with specified name\n";
+        usage = "join `partial_name`\n";
     }
 
     @Override

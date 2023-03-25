@@ -10,6 +10,7 @@ public abstract class Command{
     protected static Actions actions;
     protected String[] aliases;
     protected String description = "";
+    protected String usage = "";
     protected boolean enabled = true;
     protected boolean requiresAuth = false;
     protected boolean triggerableByBot = false;
@@ -35,17 +36,19 @@ public abstract class Command{
 
     //call execute to go through checks first
     public void execute(String commandName, MessageReceivedEvent message, String... args){
-        if(!enabled){
-            actions.messageChannel(message.getChannel(), "The command is not enabled at this time");
-            return;
-        }
+        boolean authorAuthorized = Bot.AUTHORIZED_USERS.contains(message.getAuthor().getIdLong());
         if(requiresAuth){
-            boolean authorAuthorized = Bot.AUTHORIZED_USERS.contains(message.getAuthor().getIdLong());
             if(!authorAuthorized){
                 actions.messageChannel(message.getChannel(), "You must be authorized to use this command");
                 return;
             }
         }
+
+        if(!enabled && !authorAuthorized){
+            actions.messageChannel(message.getChannel(), "The command is not enabled at this time");
+            return;
+        }
+
         if(!triggerableByBot){
             boolean isBot = message.getAuthor().isBot();
             if(isBot){
@@ -54,6 +57,10 @@ public abstract class Command{
             }
         }
         executeImpl(commandName, message, args);
+        timesExecuted++;
+    }
+    public void executeUnrestricted(String commandName, String... args){
+        executeImpl(commandName, null, args);
         timesExecuted++;
     }
     protected abstract void executeImpl(String commandName, MessageReceivedEvent message, String... args);

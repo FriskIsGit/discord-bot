@@ -20,30 +20,33 @@ public class SongsCommand extends Command{
         AudioManager audioManager = message.getGuild().getAudioManager();
         AudioPlayer player = AudioPlayer.addSendingHandlerIfNull(audioManager);
         String[] fileNames = player.audioDirectory.list();
-        if(fileNames != null && fileNames.length > 0) {
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-            embedBuilder.setTitle("Available tracks");
-            embedBuilder.setColor(Color.BLUE);
-            StringBuilder stringBuilder = new StringBuilder();
-            int tracks = 0;
-            for (String file : fileNames){
-                String name = FileSeeker.getNameWithoutExtension(file);
-                String ext = FileSeeker.getExtension(file);
-                if(name.isEmpty() || ext.isEmpty() || !AudioPlayer.isExtensionSupported(ext)){
-                    continue;
-                }
-                tracks++;
-                stringBuilder.append(name);
-                stringBuilder.append('\n');
-                if(tracks%26 == 0){
-                    embedBuilder.addField(new MessageEmbed.Field("", stringBuilder.toString(),true));
-                    stringBuilder = new StringBuilder();
-                }
-            }
-            if(stringBuilder.length() != 0){
-                embedBuilder.addField(new MessageEmbed.Field("", stringBuilder.toString(),true));
-            }
-            actions.sendEmbed(message.getChannel(), embedBuilder.build());
+        if(fileNames == null || fileNames.length < 1){
+            actions.messageChannel(message.getChannel(), "No songs available");
+            return;
         }
+
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Available tracks");
+        embedBuilder.setColor(Color.BLUE);
+        StringBuilder stringBuilder = new StringBuilder();
+        int tracks = 0;
+        for (String file : fileNames){
+            String name = FileSeeker.getNameWithoutExtension(file);
+            String ext = FileSeeker.getExtension(file);
+            if(name.isEmpty() || ext.isEmpty() || !AudioPlayer.isExtensionSupported(ext)){
+                continue;
+            }
+            tracks++;
+            stringBuilder.append(name);
+            stringBuilder.append('\n');
+            if(tracks%26 == 0){
+                embedBuilder.addField(new MessageEmbed.Field("", stringBuilder.toString(),true));
+                stringBuilder = new StringBuilder();
+            }
+        }
+        if(stringBuilder.length() != 0){
+            embedBuilder.addField(new MessageEmbed.Field("", stringBuilder.toString(),true));
+        }
+        actions.sendEmbed(message.getChannel(), embedBuilder.build());
     }
 }

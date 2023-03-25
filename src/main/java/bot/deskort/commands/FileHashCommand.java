@@ -22,7 +22,6 @@ public class FileHashCommand extends Command{
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
         MessageChannelUnion channel = message.getChannel();
-        //TODO //>file sha256
         List<Message.Attachment> attachments = message.getMessage().getAttachments();
         if(args.length == 0){
             actions.messageChannel(channel, "No hashing algorithm specified");
@@ -34,9 +33,9 @@ public class FileHashCommand extends Command{
         }
         Message.Attachment attachment = attachments.get(0);
         File tempDir = new File("tmp");
-        boolean madeDir = tempDir.mkdir();
+        tempDir.mkdir();
         File temp = new File("tmp/temp_file");
-        boolean deletion = temp.delete();
+        temp.delete();
         try{
             temp = attachment.getProxy().downloadToFile(temp).get(10, TimeUnit.SECONDS);
         }catch (InterruptedException | ExecutionException | TimeoutException e){
@@ -56,7 +55,7 @@ public class FileHashCommand extends Command{
         }catch (IllegalStateException exc){
             actions.messageChannel(channel, exc.getMessage());
         }finally{
-            deletion = temp.delete();
+            temp.delete();
             tempDir.deleteOnExit();
         }
     }

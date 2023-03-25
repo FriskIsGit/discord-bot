@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -16,10 +17,7 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Actions{
@@ -38,6 +36,14 @@ public class Actions{
     }
 
     public boolean banUser(User user, Guild guildOfOrigin){
+        if(user == null){
+            System.err.println("user == null");
+            return false;
+        }
+        if(guildOfOrigin == null){
+            System.err.println("guildOfOrigin == null");
+            return false;
+        }
         try{
             guildOfOrigin.ban(user, 0, TimeUnit.SECONDS).queue();
         }catch (HierarchyException hierarchyExc){
@@ -47,6 +53,14 @@ public class Actions{
         return true;
     }
     public boolean unbanUser(User user, Guild guildOfOrigin){
+        if(user == null){
+            System.err.println("user == null");
+            return false;
+        }
+        if(guildOfOrigin == null){
+            System.err.println("guildOfOrigin == null");
+            return false;
+        }
         try{
             guildOfOrigin.unban(user).queue();
         }catch (HierarchyException hierarchyExc){
@@ -117,6 +131,16 @@ public class Actions{
         return null;
     }
 
+    public Guild getGuildById(long id){
+        List<Guild> guilds = jdaInterface.getGuilds();
+        for (Guild guild : guilds){
+            if(guild.getIdLong() == id){
+                return guild;
+            }
+        }
+        return null;
+    }
+
     public void messageChannel(TextChannel txtChannel, String msgText){
         if(txtChannel == null) return;
         int msgLength = msgText.length();
@@ -126,9 +150,10 @@ public class Actions{
         }
         else if(msgLength>2000){
             int parts = msgLength/2000 + 1;
-            String [] messagesArr = new String[parts];
+            String[] messagesArr = new String[parts];
             for(int i = 0, offset = 0; i<messagesArr.length; i++, offset+=2000){
-                messagesArr[i] = msgText.substring(offset, Math.min(msgLength, offset+2000));
+                int endIndex = Math.min(msgLength, offset+2000);
+                messagesArr[i] = msgText.substring(offset, endIndex);
             }
 
             for(String msg : messagesArr){
@@ -138,11 +163,11 @@ public class Actions{
     }
 
     public void messageChannel(long channelId, String msgText){
-        messageChannel(jdaInterface.getTextChannelById(channelId),msgText);
+        messageChannel(jdaInterface.getTextChannelById(channelId), msgText);
     }
 
     public void messageChannel(MessageChannel txtChannel, String msgText){
-        messageChannel((TextChannel) txtChannel,msgText);
+        messageChannel((TextChannel) txtChannel, msgText);
     }
 
     public void sendAsMessageBlock(MessageChannel txtChannel, String msgText){
@@ -161,7 +186,8 @@ public class Actions{
             int parts = msgLength/2000 + 1;
             String [] messagesArr = new String[parts];
             for(int i = 0, offset = 0; i<messagesArr.length; i++, offset+=1994){
-                messagesArr[i] = msgText.substring(offset, Math.min(msgLength, offset+1994));
+                int endIndex = Math.min(msgLength, offset+1994);
+                messagesArr[i] = msgText.substring(offset, endIndex);
             }
 
             for(String msg : messagesArr){
@@ -237,6 +263,13 @@ public class Actions{
                         System.out.println("Current channel: " + textChannel);
                     else System.out.println("In dm: " + dmId);
                 }
+                default:
+                    String[] remainingArgs = Commands.splitIntoTerms(args[1]);
+                    try{
+                        Commands.get().command(args[0]).executeUnrestricted(args[0], remainingArgs);
+                    }catch (Exception exc){
+                        System.err.println(exc.getMessage());
+                    }
             }
         }
         System.out.println("Exited chat permanently");
@@ -303,5 +336,15 @@ public class Actions{
             serverNames.add(guild.getName());
         }
         return serverNames;
+    }
+
+    public List<Long> getServerIds(){
+        List<Guild> guilds = jdaInterface.getGuilds();
+        List<Long> ids = new ArrayList<>(guilds.size());
+        for (Guild guild : guilds){
+            ids.add(guild.getIdLong());
+            System.out.println(guild.getName());
+        }
+        return ids;
     }
 }
