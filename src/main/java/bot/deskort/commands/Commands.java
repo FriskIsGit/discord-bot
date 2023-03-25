@@ -82,6 +82,11 @@ final public class Commands{
             }
         }
     }
+    public void addToMap(Command command){
+        for(String name : command.aliases){
+            commandsMap.put(name, command);
+        }
+    }
 
     public boolean hasCommand(String alias){
         return commandsMap.containsKey(alias);

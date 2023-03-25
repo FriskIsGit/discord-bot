@@ -149,7 +149,23 @@ public class EventsListener extends ListenerAdapter{
 
     private void printReceivedMessage(){
         String authorName = messageEvent.getAuthor().getName(), channelName = messageEvent.getChannel().getName();
+        if(messageText.length() == 0){
+            messageText = attachmentsToString();
+        }
         System.out.println("[" +channelName+ "]  " + authorName + ": " + messageText);
+    }
+
+    private String attachmentsToString(){
+        List<Message.Attachment> attachments = messageEvent.getMessage().getAttachments();
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < attachments.size(); i++){
+            Message.Attachment attachment = attachments.get(i);
+            str.append(attachment.getUrl());
+            if(i != attachments.size() - 1){
+                str.append(' ');
+            }
+        }
+        return str.toString();
     }
 
     public void sendCommunistMessage(){
