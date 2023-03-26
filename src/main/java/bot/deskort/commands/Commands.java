@@ -16,7 +16,7 @@ final public class Commands{
             new PurgeCommand("purge"),
             new PlayCommand("play", "p"),
             new JoinCommand("join", "j"),
-            new HelpCommand("help"),
+            new HelpCommand("help", "commands"),
             new ModifyCommand("modify"),
             new UptimeCommand("uptime"),
             new LeaveCommand("leave", "l"),
