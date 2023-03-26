@@ -78,11 +78,11 @@ public class Youtube{
         }
         return new YoutubeVideoInfo(videoInfo);
     }
-    public File downloadFile(AudioFormat audioFormat){
-        Response<File> response = downloader.downloadVideoFile(new RequestVideoFileDownload(audioFormat));
+    public File downloadFile(Format anyFormat, int timeoutSeconds){
+        Response<File> response = downloader.downloadVideoFile(new RequestVideoFileDownload(anyFormat));
         File audioFile = null;
         try{
-            audioFile = response.data(20, TimeUnit.SECONDS);
+            audioFile = response.data(timeoutSeconds, TimeUnit.SECONDS);
         }catch (TimeoutException timeoutExc){
             timeoutExc.printStackTrace();
         }

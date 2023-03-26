@@ -54,6 +54,8 @@ public class YoutubeCommand extends Command{
             UserResponse response = userRequest.executeRequest(youtubeRequest);
             if(response.success && response.hasFile){
                 actions.sendFile(message.getChannel(), response.fileAttachment);
+            }else if(response.success){
+                actions.messageChannel(message.getChannel(), response.message);
             }else{
                 actions.messageChannel(message.getChannel(), "Request failed, reason: " + response.message);
             }
