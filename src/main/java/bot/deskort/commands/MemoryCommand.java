@@ -13,6 +13,7 @@ public class MemoryCommand extends Command{
     private static final double MEGA_BYTE = 1024*1024D;
     public MemoryCommand(String... aliases){
         super(aliases);
+        description = "Displays a memory management panel";
     }
 
     @Override

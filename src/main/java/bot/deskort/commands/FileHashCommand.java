@@ -16,7 +16,9 @@ import java.util.concurrent.TimeoutException;
 public class FileHashCommand extends Command{
     public FileHashCommand(String... aliases){
         super(aliases);
-        description = "Hashes file";
+        description = "Hashes file attached to the message\n" +
+                      "using specified algorithm\n";
+        usage = "file `hashing_algorithm`";
     }
 
     @Override

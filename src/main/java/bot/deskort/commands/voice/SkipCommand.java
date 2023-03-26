@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.managers.AudioManager;
 public class SkipCommand extends Command{
     public SkipCommand(String... aliases){
         super(aliases);
+        description = "Consumes the first element from song queue and attempts to play it";
+        usage = "skip";
     }
 
     @Override

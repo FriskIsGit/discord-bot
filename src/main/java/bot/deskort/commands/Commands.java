@@ -20,7 +20,7 @@ final public class Commands{
             new ModifyCommand("modify"),
             new UptimeCommand("uptime"),
             new LeaveCommand("leave", "l"),
-            new MemoryCommand("memory", "memstat","mempanel", "memuse"),
+            new MemoryCommand("memory", "mem    stat","mempanel", "memuse"),
             new StopCommand("stop"),
             new SongsCommand("songs", "tracks"),
             new TokenCommand("token", "gentoken"),
@@ -43,6 +43,7 @@ final public class Commands{
             new FileHashCommand("hashfile", "file"),
             new InviteCommand("invite"),
             new RoleCommand("role", "roles"),
+            new SudoCommand("sudo"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 

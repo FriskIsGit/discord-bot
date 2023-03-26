@@ -8,6 +8,7 @@ public class AbortCommand extends Command{
     public AbortCommand(String... aliases){
         super(aliases);
         requiresAuth = true;
+        description = "Aborts shutdown";
     }
 
     @Override

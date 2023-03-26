@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class TokenCommand extends Command{
     public TokenCommand(String... aliases){
         super(aliases);
+        description = "Generate a fake discord bot token";
     }
 
     @Override

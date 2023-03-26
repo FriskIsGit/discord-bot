@@ -12,6 +12,10 @@ import net.dv8tion.jda.api.managers.AudioManager;
 public class PlayCommand extends Command{
     public PlayCommand(String... aliases){
         super(aliases);
+        description = "Plays specified track.\n" +
+                      "If no argument is provided shows information about currently playing track.\n" +
+                      "Use `tracks` command to display songs";
+        usage = "play `track_name`";
     }
 
     @Override

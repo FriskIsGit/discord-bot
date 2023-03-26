@@ -96,21 +96,9 @@ public class MessageProcessor{
 
     final String HELP_MESSAGE =
             " [Available commands]\n" +
-            " purge <amount> - channel based purge (each channel has its own deque, incorporates retrieving history when needed)\n" +
-            " warp <voiceChannelName> - warps you to a voice channel (provided you're in one already)\n" +
-            " join <partialName> - if left blank bot will attempt to join message author\n" +
-            " leave - disconnects bot from channel\n" +
-            " play <track> - makes bot play its 48Khz 16bit stereo 2channel 4bytes/frame BIG.ENDIAN PCM Signed opus encoded audio\n" +
-            " stop - ends playback of the current song\n" +
-            " tracks - displays all available tracks, some may be distorted\n" +
-            " queue <track> - enqueues specified track, if name was not provided - displays the queue\n" +
             " skip - consumes the first song in queue and loads it\n" +
             " loop - self explanatory\n" +
             " sha <text> - oen of many hashing algorithms (e.g. md5, sha256)\n" +
-            " mempanel - display memory management panel\n" +
-            " uptime\n" +
-            " len <text>\n - display text length" +
-            " cat <number>\n - display HTTP status codes" +
             " [Youtube Commands] <format_number> index at which it appears counting from the top (0-indexed)\n" +
             " ytinfo <videoID/link> retrieves information about the youtube video, displaying available formats\n" +
             " ytaudio <videoID/link> <format_number> retrieves audio file in specified format\n" +

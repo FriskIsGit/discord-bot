@@ -1,19 +1,20 @@
 package bot.music.youtube;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class UserResponse{
     public boolean success;
     public boolean hasFile = false;
-    public String message;
+    public String[] message;
     public File fileAttachment;
 
-    private UserResponse(String message, boolean success){
+    private UserResponse(boolean success, String... message){
         this.success = success;
         this.message = message;
     }
 
-    private UserResponse(String message, File file){
+    private UserResponse(File file, String... message){
         this.success = true;
         this.message = message;
         if(file != null){
@@ -21,21 +22,21 @@ public class UserResponse{
         }
         this.fileAttachment = file;
     }
-    public static UserResponse fail(String message){
-        return new UserResponse(message, false);
+    public static UserResponse fail(String... message){
+        return new UserResponse(false, message);
     }
-    public static UserResponse success(String message){
-        return new UserResponse(message, true);
+    public static UserResponse success(String... message){
+        return new UserResponse(true, message);
     }
-    public static UserResponse success(String message, File file){
-        return new UserResponse(message, file);
+    public static UserResponse success(File file, String... message){
+        return new UserResponse(file, message);
     }
 
     @Override
     public String toString(){
         return "UserResponse{" +
                 "success=" + success +
-                ", message='" + message + '\'' +
+                ", message='" + Arrays.toString(message) + '\'' +
                 ", fileAttachment=" + fileAttachment +
                 '}';
     }

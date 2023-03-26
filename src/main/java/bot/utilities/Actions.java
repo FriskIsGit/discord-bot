@@ -199,11 +199,9 @@ public class Actions{
     public void sendAsMessageBlock(long channelId, String msgText){
         sendAsMessageBlock(jdaInterface.getTextChannelById(channelId),msgText);
     }
-    public void chatWithBot(MessageChannel textChannel){
-        if(textChannel == null)
-            return;
-
-        boolean inServer = true;
+    public void chatWithBot(){
+        MessageChannel textChannel = null;
+        boolean inServer = false;
         long dmId = 0;
         String input;
 
@@ -221,6 +219,7 @@ public class Actions{
             String[] args = Commands.doubleTermSplit(input, Bot.PREFIX_OFFSET);
             switch (args[0]){
                 case "cc":
+                    System.out.println("CC");
                     MessageChannel nextChannel = findChannel(input);
                     if(nextChannel != null){
                         textChannel = nextChannel;
@@ -275,9 +274,6 @@ public class Actions{
         System.out.println("Exited chat permanently");
     }
 
-    public void chatWithBot(String textChannelPartialName){
-        chatWithBot(getTextChannel(textChannelPartialName));
-    }
 
     public void messageUser(long userId, String messageContent){
         User user = jdaInterface.getUserById(userId);

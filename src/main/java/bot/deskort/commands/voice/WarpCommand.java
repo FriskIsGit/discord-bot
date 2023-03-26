@@ -15,6 +15,8 @@ import java.util.Objects;
 public class WarpCommand extends Command{
     public WarpCommand(String... aliases){
         super(aliases);
+        description = "Moves you to another channel";
+        usage = "warp `channel`";
     }
 
     @Override

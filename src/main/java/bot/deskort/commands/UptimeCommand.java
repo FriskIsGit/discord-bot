@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class UptimeCommand extends Command{
     public UptimeCommand(String... aliases){
         super(aliases);
-        description = "Uptime";
+        description = "Time since bot was launched";
     }
 
     @Override

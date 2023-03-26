@@ -44,7 +44,7 @@ public class HelpCommand extends Command{
             embedBuilder.addField("Description", desc,false);
         }
         if(!usage.isEmpty()){
-            embedBuilder.addField("Usage", usage,false);
+            embedBuilder.addField("Usage examples", usage,false);
         }
         embedBuilder.addField("Enabled", enabled,true);
         embedBuilder.addField("Sudo required", requiresAuth,true);

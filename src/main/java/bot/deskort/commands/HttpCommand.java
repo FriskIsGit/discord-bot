@@ -6,6 +6,8 @@ public class HttpCommand extends Command{
     private static final String httpCatAddress = "https://http.cat/";
     public HttpCommand(String... aliases){
         super(aliases);
+        description = "Displays HTTP status codes as cats";
+        usage = "http `code`";
     }
 
     @Override

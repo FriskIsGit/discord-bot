@@ -8,6 +8,7 @@ public class BanCommand extends Command{
         super(aliases);
         requiresAuth = true;
         description = "Bans user";
+        usage = "ban `user_id`";
     }
 
     @Override

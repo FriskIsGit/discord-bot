@@ -41,12 +41,14 @@ public class UserRequest{
     }
 
     private UserResponse infoResponse(YoutubeVideoInfo ytVideoInfo){
-        String msg = ytVideoInfo.detailsToString() + '\n' +
-                ytVideoInfo.getAvailableVideoFormats() + '\n' +
-                ytVideoInfo.getAvailableVideoFormats() + '\n' +
-                ytVideoInfo.getAvailableVideoWithAudioFormats() + '\n' +
-                "Alleged best formats: \n" + ytVideoInfo.bestFormatsToString();
-        return UserResponse.success(msg);
+        String[] messages = {
+                ytVideoInfo.detailsToString(),
+                ytVideoInfo.getAvailableAudioFormats(),
+                ytVideoInfo.getAvailableVideoFormats(),
+                ytVideoInfo.getAvailableVideoWithAudioFormats(),
+                "Alleged best formats: \n" + ytVideoInfo.bestFormatsToString()
+        };
+        return UserResponse.success(messages);
     }
 
     private UserResponse downloadImpl(StreamType type, YoutubeVideoInfo info, int formatNumber){
@@ -93,7 +95,7 @@ public class UserRequest{
         System.out.println("Absolute path for new file: " + video.getAbsolutePath());
         System.out.println("Time taken on download: " + millisTaken);
 
-        return UserResponse.success("File downloaded (" + millisTaken + ')', video);
+        return UserResponse.success(video, "File downloaded (" + millisTaken + ')');
     }
 
     private double getFormatSize(Format format){

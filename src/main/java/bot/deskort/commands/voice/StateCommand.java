@@ -9,6 +9,7 @@ public class StateCommand extends Command{
 
     public StateCommand(String... aliases){
         super(aliases);
+        description = "Determines whether the bot has an audio connection open in this guild";
     }
 
     @Override

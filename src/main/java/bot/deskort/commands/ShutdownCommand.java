@@ -8,12 +8,13 @@ public class ShutdownCommand extends Command{
     public ShutdownCommand(String... aliases){
         super(aliases);
         requiresAuth = true;
+        description = "Schedules a shutdown";
     }
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
         ShutdownTimer shutdownTimer = Bot.getShutdownTimer();
-        if(args.length == 0){
+        if(args.length == 1){
             int seconds = ShutdownTimer.parseToSeconds(Commands.mergeTerms(args));
             if(seconds == -1){
                 actions.sendAsMessageBlock(message.getChannel(), "Shutdown argument failure");

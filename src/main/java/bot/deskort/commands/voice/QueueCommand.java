@@ -10,6 +10,9 @@ import net.dv8tion.jda.api.managers.AudioManager;
 public class QueueCommand extends Command{
     public QueueCommand(String... aliases){
         super(aliases);
+        description = "Appends track to the end of song queue\n" +
+                      "Displays queue if name isn't specified";
+        usage = "queue `track_name`";
     }
 
     @Override
