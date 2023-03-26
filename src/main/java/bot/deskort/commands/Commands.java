@@ -149,7 +149,6 @@ final public class Commands{
         int len = arr.length;
         boolean hasToken = false, inQuotes = false;
         for (int i = fromIndex; i<len; i++){
-            boolean hasNext = i+1 < len;
             boolean isLast = i == len-1;
             switch (arr[i]){
                 case ' ':
@@ -201,7 +200,6 @@ final public class Commands{
                         terms.add(term);
                         //end
                         break;
-
                     }
                     if(hasToken){
                         break;
@@ -223,18 +221,6 @@ final public class Commands{
         final int[] index = {0};
         terms.forEach((el) -> res[index[0]++] = el);
         return res;
-    }
-
-    public static String backtrackNonSpace(char[] arr, int low, int high){
-        if(high < 0 || low < 0 || arr.length <= high){
-            return "";
-        }
-        for (int i = high; low <= i ; i--){
-            if(arr[i] != ' '){
-                return new String(arr, low, i-low + 1);
-            }
-        }
-        return "";
     }
 
     public static String[] splitIntoTerms(String text){
