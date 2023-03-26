@@ -19,6 +19,8 @@ public class PurgeCommand extends Command{
     public PurgeCommand(String... aliases){
         super(aliases);
         requiresAuth = true;
+        description = "Purges/deletes messages from channel";
+        usage = "purge `quantity`";
         msgProcessor = MessageProcessor.get();
         PURGE_CAP = Bot.getConfig().purgeCap;
     }
@@ -53,7 +55,7 @@ public class PurgeCommand extends Command{
         String lastMessageId = msgProcessor.popAndPurgeLastMessages(channel, deqAmount);
         amount = amount - deqAmount;
 
-        boolean retrieved = false;
+        boolean retrieved = false, exhausted = false;
         long start = -1, end= -1;
         if(amount > 0){
             retrieved = true;
@@ -64,15 +66,21 @@ public class PurgeCommand extends Command{
             for (int h = 0; h < maxedHistories; h++){
                 MessageHistory.MessageRetrieveAction retrieveHistoryAction = MessageHistory.getHistoryBefore(channel,lastMessageId).limit(100);
                 List<Message> aHistory = retrieveHistoryAction.complete().getRetrievedHistory();
+                if(aHistory.size() == 0){
+                    exhausted = true;
+                    break;
+                }
                 //almost always lastIndex == 99
                 int lastIndex = aHistory.size()-1;
                 lastMessageId = aHistory.get(lastIndex).getId();
                 historiesList.addAll(aHistory);
             }
             //add leftovers
-            MessageHistory.MessageRetrieveAction retrieveHistoryAction = MessageHistory.getHistoryBefore(channel,lastMessageId).limit(amount%100);
-            List<Message> aHistory = retrieveHistoryAction.complete().getRetrievedHistory();
-            historiesList.addAll(aHistory);
+            if(!exhausted){
+                MessageHistory.MessageRetrieveAction retrieveHistoryAction = MessageHistory.getHistoryBefore(channel,lastMessageId).limit(amount%100);
+                List<Message> aHistory = retrieveHistoryAction.complete().getRetrievedHistory();
+                historiesList.addAll(aHistory);
+            }
 
             List<CompletableFuture<Void>> completableFutureList = channel.purgeMessages(historiesList);
             MessageProcessor.completeInFuture(completableFutureList);
