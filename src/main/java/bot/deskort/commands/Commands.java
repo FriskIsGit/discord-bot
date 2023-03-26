@@ -1,7 +1,6 @@
 package bot.deskort.commands;
 
 import bot.deskort.commands.voice.*;
-import net.dv8tion.jda.api.entities.Invite;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +30,7 @@ final public class Commands{
             new LoopCommand("loop"),
             new HttpCommand("cat", "httpcat", "http"),
             new LengthCommand("len", "length"),
-            new QueueCommand("q", "queue"),
+            new QueueCommand("queue", "q"),
             new SkipCommand("skip"),
             new WarpCommand("warp"),
             new AuditLogCommand("auditlog"),
@@ -43,6 +42,7 @@ final public class Commands{
             new ClearSongsCommand("clearsongs", "clrsongs"),
             new FileHashCommand("hashfile", "file"),
             new InviteCommand("invite"),
+            new RoleCommand("role", "roles"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
@@ -128,39 +128,127 @@ final public class Commands{
         return res;
     }
 
-    //returns an array of length at least 1
+    /**
+     * Parsing rules: <br>
+     * Subsequent whitespaces are ignored.
+     * If quotation marks are used they should be non-empty, otherwise,
+     * they'll be treated as a single term.
+     * If they are never closed they'll be treated as part of a term.
+     * @param text string to parse
+     * @param fromIndex index to begin splitting from
+     * @return array of terms split by aforementioned rules,
+     * the array returned is guaranteed to have length of at least one
+     */
     public static String[] splitIntoTerms(String text, int fromIndex){
         if(fromIndex < 0 || text.length() <= fromIndex){
             return new String[]{""};
         }
         ArrayList<String> terms = new ArrayList<>(8);
-        text = text.trim();
-        char[] arr = text.toCharArray();
-        boolean expectingWhitespace = true;
-        for (int i = fromIndex; i<arr.length; i++){
 
-            if(expectingWhitespace && arr[i] == ' '){
-                terms.add(text.substring(fromIndex,i));
-                expectingWhitespace = false;
-            }else if(!expectingWhitespace && arr[i] != ' '){
-                fromIndex = i;
-                expectingWhitespace = true;
-            }
-            if(i == arr.length-1){
-                terms.add(text.substring(fromIndex,arr.length));
-                break;
+        char[] arr = text.toCharArray();
+        int len = arr.length;
+        boolean hasToken = false, inQuotes = false;
+        for (int i = fromIndex; i<len; i++){
+            boolean hasNext = i+1 < len;
+            boolean isLast = i == len-1;
+            switch (arr[i]){
+                case ' ':
+                    if(hasToken && !inQuotes){
+                        String term = text.substring(fromIndex, i);
+                        terms.add(term);
+                        hasToken = false;
+                    }
+                    //never closed
+                    else if(inQuotes && isLast){
+                        //go back since the initial assumption was incorrect
+                        i = fromIndex;
+                        inQuotes = false;
+                        break;
+                    }
+                    break;
+                case '"':
+                    if(hasToken && !inQuotes){
+                        break;
+                    }
+                    if(inQuotes){
+                        //wants to close quotes
+                        if(isLast || arr[i+1] == ' '){
+                            //"quote";"quote" ;
+                            String qTerm = text.substring(fromIndex+1, i);
+                            if(!qTerm.isEmpty()){
+                                terms.add(qTerm);
+                                hasToken = false;
+                            }
+                        }
+                        //carry on
+                        //"quote"what;"quote""what";
+                        inQuotes = false;
+                        break;
+                    }
+                    inQuotes = true;
+                    hasToken = true;
+                    fromIndex = i;
+                    break;
+                default:
+                    if(hasToken && isLast){
+                        if(inQuotes){
+                            //unclosed
+                            i = fromIndex;
+                            inQuotes = false;
+                            break;
+                        }
+                        String term = text.substring(fromIndex, len);
+                        terms.add(term);
+                        //end
+                        break;
+
+                    }
+                    if(hasToken){
+                        break;
+                    }
+                    hasToken = true;
+                    if(isLast){
+                        //last singular char token
+                        terms.add(Character.toString(arr[i]));
+                    }
+                    fromIndex = i;
+                    break;
             }
         }
         if(terms.size() == 0){
             return new String[]{""};
         }
+
         String[] res = new String[terms.size()];
         final int[] index = {0};
         terms.forEach((el) -> res[index[0]++] = el);
         return res;
     }
+
+    public static String backtrackNonSpace(char[] arr, int low, int high){
+        if(high < 0 || low < 0 || arr.length <= high){
+            return "";
+        }
+        for (int i = high; low <= i ; i--){
+            if(arr[i] != ' '){
+                return new String(arr, low, i-low + 1);
+            }
+        }
+        return "";
+    }
+
     public static String[] splitIntoTerms(String text){
         return splitIntoTerms(text, 0);
     }
 
+    public static String[] shrink(String[] arr, int fromIndex){
+        if(fromIndex < 0 || arr.length <= fromIndex){
+            return new String[0];
+        }
+        String[] freshArr = new String[arr.length - fromIndex];
+        for (int i = fromIndex, f = 0; i < arr.length; i++, f++){
+            freshArr[f] = arr[i];
+        }
+        return freshArr;
+    }
 }
