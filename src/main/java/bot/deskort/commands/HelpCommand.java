@@ -55,6 +55,7 @@ public class HelpCommand extends Command{
         EmbedBuilder embed = new EmbedBuilder();
         Command[] commands = Commands.get().commands;
         List<Command> authCommands = new ArrayList<>();
+        List<Command> voiceCommands = new ArrayList<>();
         List<Command> userCommands = new ArrayList<>();
         for(Command command : commands){
             if(!command.enabled){
@@ -62,20 +63,29 @@ public class HelpCommand extends Command{
             }
             if(command.requiresAuth){
                 authCommands.add(command);
+            }else if(command.getClass().getName().contains("voice")){
+                voiceCommands.add(command);
             }else{
                 userCommands.add(command);
             }
         }
         StringBuilder str = new StringBuilder();
+        for(Command command : userCommands){
+            str.append(' ').append(command.aliases[0]);
+        }
+        embed.addField(new MessageEmbed.Field("User commands", str.toString(),true));
+        str.setLength(0);
+        for(Command command : voiceCommands){
+            str.append(' ').append(command.aliases[0]);
+        }
+        embed.addField(new MessageEmbed.Field("Voice commands", str.toString(),true));
+        str.setLength(0);
         for(Command command : authCommands){
             str.append(' ').append(command.aliases[0]);
         }
         embed.addField(new MessageEmbed.Field("Auth commands", str.toString(),true));
         str.setLength(0);
-        for(Command command : userCommands){
-            str.append(' ').append(command.aliases[0]);
-        }
-        embed.addField(new MessageEmbed.Field("User commands", str.toString(),true));
+
 
         return embed.build();
     }

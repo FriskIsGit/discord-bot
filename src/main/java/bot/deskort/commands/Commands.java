@@ -28,7 +28,7 @@ final public class Commands{
             new ShutdownCommand("shutdown"),
             new AbortCommand("abort"),
             new LoopCommand("loop"),
-            new HttpCommand("cat", "httpcat", "http"),
+            new HttpCommand( "httpcat", "http"),
             new LengthCommand("len", "length"),
             new QueueCommand("queue", "q"),
             new SkipCommand("skip"),
@@ -44,6 +44,7 @@ final public class Commands{
             new InviteCommand("invite"),
             new RoleCommand("role", "roles"),
             new SudoCommand("sudo"),
+            new URLCommand("url" , "link", "links"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 

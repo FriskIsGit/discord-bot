@@ -105,8 +105,7 @@ public class MessageProcessor{
             " ytvideo <videoID/link> <format_number> retrieves video file in specified format\n" +
             " ytviau <videoID/link> <format_number> retrieves video with audio in specified format\n";
 
-    public void deleteRequestMessage(){
-        Message msgToDelete = message.getMessage();
+    public void deleteRequestMessage(Message msgToDelete){
         msgToDelete.delete().queue();
         channelIdsToMessageDeques.get(msgToDelete.getChannel().getIdLong()).removeLast();
     }

@@ -39,7 +39,7 @@ public class PurgeCommand extends Command{
         }
 
         if(amount > PURGE_CAP || amount<1){
-            msgProcessor.deleteRequestMessage();
+            msgProcessor.deleteRequestMessage(message.getMessage());
             return;
         }
         //include purge request message
