@@ -4,7 +4,10 @@ import bot.deskort.commands.MemoryCommand;
 import bot.music.AudioPlayer;
 import bot.utilities.LeaverTimer;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildUnbanEvent;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceEvent;
@@ -16,6 +19,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class EventsListener extends ListenerAdapter{
     private final HashMap<Guild, LeaverTimer> guildsToTimers;
@@ -93,6 +97,13 @@ public class EventsListener extends ListenerAdapter{
             }
         }
     }
+
+    private void moveBack(GenericGuildVoiceEvent voiceEvent){
+        Member member = voiceEvent.getMember();
+        AudioChannel ac = ((GuildVoiceUpdateEvent) voiceEvent).getChannelLeft();
+        guildOfOrigin.moveVoiceMember(member, ac).queueAfter(1, TimeUnit.SECONDS);
+    }
+
     private String toString(Member member){
         return member.getUser().getAsTag();
     }

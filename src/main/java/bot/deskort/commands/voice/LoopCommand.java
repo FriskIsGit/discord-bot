@@ -13,11 +13,7 @@ public class LoopCommand extends Command{
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
         AudioManager audioManager = message.getGuild().getAudioManager();
-        AudioPlayer audioPlayer = (AudioPlayer) audioManager.getSendingHandler();
-        if(audioPlayer ==  null){
-            audioPlayer = new AudioPlayer();
-            audioManager.setSendingHandler(audioPlayer);
-        }
+        AudioPlayer audioPlayer = AudioPlayer.addSendingHandlerIfNull(audioManager);
         boolean isLooping = audioPlayer.switchLooping();
         actions.messageChannel(message.getChannel(), "**Looping set to " + isLooping + "**");
     }

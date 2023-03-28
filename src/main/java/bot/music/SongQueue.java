@@ -49,6 +49,10 @@ public class SongQueue{
         playlist.clear();
     }
 
+    public String[] toStringArray(){
+        return playlist.toArray(new String[0]);
+    }
+
     @Override
     public String toString(){
         StringBuilder songs = new StringBuilder();

@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class ClearSongsCommand extends Command{
     public ClearSongsCommand(String... aliases){
         super(aliases);
+        description = "Removes loaded tracks from memory";
         requiresAuth = true;
     }
 

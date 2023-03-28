@@ -11,7 +11,7 @@ public class UnbanCommand extends Command{
         requiresAuth = true;
         description = "Unbans user by id or mention";
         usage = "unban `userId`\n" +
-                "unban <mention>\n" +
+                "unban `@mention`\n" +
                 "unban `userId` `guildId`";
     }
 
