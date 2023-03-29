@@ -45,6 +45,7 @@ public final class Commands{
             new RoleCommand("role", "roles"),
             new SudoCommand("sudo"),
             new URLCommand("url" , "link", "links"),
+            new CompareCommand("compare", "comp", "diff"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 

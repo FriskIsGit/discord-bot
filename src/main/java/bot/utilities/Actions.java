@@ -123,17 +123,18 @@ public class Actions{
     }
 
     public void messageChannel(TextChannel txtChannel, String msgText){
-        if(txtChannel == null) return;
-        int msgLength = msgText.length();
+        if(txtChannel == null || msgText.isEmpty())
+            return;
+        int length = msgText.length();
 
-        if(2000>=msgLength && msgLength>0 && !msgText.startsWith("\n")){
+        if(2000 >= length && !msgText.startsWith("\n")){
             txtChannel.sendMessage(msgText).queue();
         }
-        else if(msgLength>2000){
-            int parts = msgLength/2000 + 1;
+        else if(length > 2000){
+            int parts = length/2000 + 1;
             String[] messagesArr = new String[parts];
             for(int i = 0, offset = 0; i<messagesArr.length; i++, offset+=2000){
-                int endIndex = Math.min(msgLength, offset+2000);
+                int endIndex = Math.min(length, offset+2000);
                 messagesArr[i] = msgText.substring(offset, endIndex);
             }
 

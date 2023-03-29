@@ -19,11 +19,11 @@ import java.util.concurrent.TimeUnit;
 //singleton
 public class MessageProcessor{
     private static MessageProcessor messageProcessor;
-    public static final List<Button> interactiveButtons = new ArrayList<>(Arrays.asList(
+    public static final Button[] interactiveButtons = {
             Button.primary("clrsongs",  "Free songs from memory"),
             Button.primary("gc",        "Run GC"),
             Button.primary("refresh",   "Refresh")
-    ));
+    };
     private final Actions actions;
 
     public final HashMap<Long, MessageDeque> channelIdsToMessageDeques = new HashMap<>();

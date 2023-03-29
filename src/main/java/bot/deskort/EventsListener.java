@@ -40,10 +40,11 @@ public class EventsListener extends ListenerAdapter{
     @Override
     public void onMessageUpdate(MessageUpdateEvent messageEdited) {
         String editedRawContent = messageEdited.getMessage().getContentRaw();
-        String authorName = messageEdited.getAuthor().getName();
+        String authorName = messageEdited.getAuthor().getAsTag();
         boolean isBot = messageEdited.getAuthor().isBot();
         if(editedRawContent.length() > 0){
-            System.out.println(authorName + "(bot:" + isBot + ") edited their message in [" + messageEdited.getChannel().getName() + "] to " + editedRawContent);
+            System.out.println(authorName + "(bot:" + isBot + ")" +
+                    " edited their message in [" + messageEdited.getChannel().getName() + "] to " + editedRawContent);
         }
     }
 
@@ -79,7 +80,7 @@ public class EventsListener extends ListenerAdapter{
         //voice channel presence events
 
         if (voiceEvent instanceof GuildVoiceUpdateEvent){
-            resolveVoiceEventInTheFuture(thisAudioManager);
+            scheduleTimerForTheFuture(thisAudioManager);
             GuildVoiceUpdateEvent updateEvent = (GuildVoiceUpdateEvent) voiceEvent;
             boolean moved = true;
             if(updateEvent.getNewValue() == null){
@@ -106,7 +107,7 @@ public class EventsListener extends ListenerAdapter{
     private String toString(Member member){
         return member.getUser().getAsTag();
     }
-    private void resolveVoiceEventInTheFuture(final AudioManager audioManager){
+    private void scheduleTimerForTheFuture(final AudioManager audioManager){
         //connection is delayed to
         TimerTask futureTask = new TimerTask(){
             @Override

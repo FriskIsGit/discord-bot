@@ -15,7 +15,6 @@ public class ConsoleChat{
     private boolean inServer = false, looping = true;
     private TextChannel currentChannel = null;
     private long dmId = 0;
-    private String input;
 
     private final Actions actions;
 
@@ -29,7 +28,7 @@ public class ConsoleChat{
 
     public void beginChat(){
         while(looping) {
-            input = scanner.nextLine();
+            String input = scanner.nextLine();
             if(input.equals("exit")){
                 quit();
                 break;
