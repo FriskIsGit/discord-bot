@@ -95,24 +95,16 @@ public class Actions{
         }
     }
 
-    public MessageChannel getMessageChannel(String partialName){
-        List<Guild> serversList = jdaInterface.getGuilds();
-        for(Guild guild : serversList){
-            List<GuildChannel> listOfChannels = guild.getChannels();
-            for(GuildChannel channel : listOfChannels){
-                if(channel.getName().contains(partialName)){
-                    if(channel instanceof MessageChannel){
-                        return (MessageChannel) channel;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     public TextChannel getTextChannel(String partialName){
         List<TextChannel> textChannels = jdaInterface.getTextChannels();
         for (TextChannel textChannel : textChannels){
+            //if an exact match exists match to it first
+            if (textChannel.getName().equals(partialName)){
+                return textChannel;
+            }
+        }
+        for (TextChannel textChannel : textChannels){
+            //if an exact match exists match to it first
             if (textChannel.getName().contains(partialName)){
                 return textChannel;
             }

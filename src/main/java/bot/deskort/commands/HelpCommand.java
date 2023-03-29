@@ -10,6 +10,7 @@ import java.util.List;
 
 public class HelpCommand extends Command{
     private static final Color niceGreen = new Color(34,139,34);
+    private static final Color skyBlue = new Color(0,191,255);
     public HelpCommand(String... aliases){
         super(aliases);
         description = "Prints information about commands or a command";
@@ -86,7 +87,7 @@ public class HelpCommand extends Command{
         embed.addField(new MessageEmbed.Field("Auth commands", str.toString(),true));
         str.setLength(0);
 
-
+        embed.setColor(skyBlue);
         return embed.build();
     }
 

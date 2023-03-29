@@ -3,9 +3,8 @@ package bot.utilities;
 import bot.deskort.Bot;
 import bot.deskort.commands.Command;
 import bot.deskort.commands.Commands;
-import bot.utilities.Actions;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 import java.io.File;
 import java.util.Scanner;
@@ -14,7 +13,7 @@ public class ConsoleChat{
     private final Scanner scanner = new Scanner(System.in);
 
     private boolean inServer = false, looping = true;
-    private MessageChannel currentChannel = null;
+    private TextChannel currentChannel = null;
     private long dmId = 0;
     private String input;
 
@@ -50,7 +49,7 @@ public class ConsoleChat{
             String[] args = Commands.doubleTermSplit(input, Bot.PREFIX_OFFSET);
             switch (args[0]){
                 case "cc":
-                    changeChannel();
+                    changeChannel(args);
                     break;
                 case "lc":
                     listChannels(args);
@@ -115,17 +114,11 @@ public class ConsoleChat{
         System.out.println(server.getTextChannels());
     }
 
-    private MessageChannel findChannel(String msg){
-        int index = msg.indexOf(' ') + 1;
-        if(index == 0){
-            return null;
+    private void changeChannel(String[] args){
+        if(args.length == 0 || args[1].isEmpty()){
+            return;
         }
-        String channelPartialName = msg.substring(index);
-        return actions.getMessageChannel(channelPartialName);
-    }
-
-    private void changeChannel(){
-        MessageChannel nextChannel = findChannel(input);
+        TextChannel nextChannel = actions.getTextChannel(args[1]);
         if(nextChannel != null){
             currentChannel = nextChannel;
             System.out.println("Moved to: " + nextChannel.getName());

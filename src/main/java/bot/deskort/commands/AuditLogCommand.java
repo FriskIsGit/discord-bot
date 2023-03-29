@@ -12,23 +12,30 @@ public class AuditLogCommand extends Command{
     public AuditLogCommand(String... aliases){
         super(aliases);
         requiresAuth = true;
+        description = "Retrieves audit log entries";
+        usage = "auditlog `action_type` `limit`\n" +
+                "auditlog `action_type`";
     }
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
-        //<prefix>auditlog <actionType> <limit>
+        if(args.length == 0){
+            return;
+        }
         ActionType actionType = AuditLog.toActionType(args[0]);
         if(actionType == null){
+            actions.messageChannel(message.getChannel(), "Action type mismatch: " + args[0]);
             return;
         }
         int limit = 50;
-        if(!args[1].isEmpty()){
+        if(args.length == 2){
             try{
                 limit = Integer.parseInt(args[1]);
             }catch (NumberFormatException nfExc){
                 return;
             }
         }
+        //this command needs improvements for better readability
         List<AuditLogEntry> entryList = AuditLog.retrieveFromAuditLog(actionType, limit, message.getGuild());
         StringBuilder entriesBuilder = new StringBuilder(128);
         entriesBuilder.append("Retrieved ").append(entryList.size()).append(" entries of type ").append(actionType).append('\n');

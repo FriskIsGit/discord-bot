@@ -147,7 +147,7 @@ public class EmergencyListener extends ListenerAdapter{
 
     private void messageAuthorizedUsers(User responsibleUser){
         String emergencyMessage = "Emergency triggered"
-                + " by "  + responsibleUser.getName()
+                + " by "  + responsibleUser.getAsTag()
                 + " (id: " + responsibleUser.getIdLong() + ")";
         Actions actions = Bot.getActions();
         for (long id : Bot.AUTHORIZED_USERS){

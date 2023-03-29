@@ -74,14 +74,19 @@ public class AuditLog{
         text = text.toLowerCase(Locale.ENGLISH);
         switch (text){
             case "ban":
+            case "bans":
                 return ActionType.BAN;
             case "unban":
+            case "unbans":
                 return ActionType.UNBAN;
             case "kick":
+            case "kicks":
                 return ActionType.KICK;
             case "move":
+            case "moves":
                 return ActionType.MEMBER_VOICE_MOVE;
             case "bulk":
+            case "bulks":
                 return ActionType.MESSAGE_BULK_DELETE;
             case "roleupdate":
             case "role_update":
@@ -90,8 +95,11 @@ public class AuditLog{
             case "channel_delete":
                 return ActionType.CHANNEL_DELETE;
             case "msgdelete":
+            case "msgdeleted":
             case "messagedelete":
+            case "messagedeleted":
             case "message_delete":
+            case "message_deleted":
                 return ActionType.MESSAGE_DELETE;
             case "unknown":
                 return ActionType.UNKNOWN;
