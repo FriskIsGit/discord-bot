@@ -40,9 +40,16 @@ public class Bot{
     public static void initialize() throws InterruptedException{
         JDABuilder jdaBuilder;
         config = BotConfig.readConfig();
+        if(!config.exists){
+            System.out.println("Config file not found.");
+        }
         Bot.PREFIX = config.prefix == null ? Bot.PREFIX : config.prefix;
         Bot.PREFIX_OFFSET = Bot.PREFIX.length();
 
+        if(!config.hasToken()){
+            System.out.println("Token is null, exiting..");
+            System.exit(0);
+        }
         jdaBuilder = JDABuilder.createDefault(config.token);
         jdaBuilder.addEventListeners(new EmergencyListener(jdaBuilder));
         //voice limits
@@ -55,7 +62,7 @@ public class Bot{
         LAUNCH_TIME = System.currentTimeMillis();
         actions = new Actions();
         shutdownTimer = new ShutdownTimer();
-        //permissions = new util.Permissions();
+
         BOT_ID = jdaInterface.getSelfUser().getIdLong();
         jdaInterface.addEventListener(new EventsListener());
         messageProcessor = MessageProcessor.get();

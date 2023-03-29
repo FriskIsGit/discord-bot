@@ -1,7 +1,7 @@
 package bot.deskort.commands;
 
 import bot.deskort.Bot;
-import bot.deskort.MessageDeque;
+import bot.utilities.MessageDeque;
 import bot.deskort.MessageProcessor;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;

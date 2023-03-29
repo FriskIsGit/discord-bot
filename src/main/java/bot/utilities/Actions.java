@@ -23,10 +23,8 @@ import java.util.concurrent.TimeUnit;
 public class Actions{
     private final static int MB_8 = 8388608;
     private final JDA jdaInterface;
-    private final Scanner scanner;
     public Actions(){
         jdaInterface = Bot.getJDAInterface();
-        scanner = new Scanner(System.in);
     }
     public void sendEmbed(MessageChannelUnion channel, MessageEmbed embed){
         if(embed == null){
@@ -95,15 +93,6 @@ public class Actions{
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    protected MessageChannel findChannel(String msg){
-        int index = msg.indexOf(' ') + 1;
-        if(index == 0){
-            return null;
-        }
-        String channelPartialName = msg.substring(index);
-        return getMessageChannel(channelPartialName);
     }
 
     public MessageChannel getMessageChannel(String partialName){
@@ -199,81 +188,6 @@ public class Actions{
     public void sendAsMessageBlock(long channelId, String msgText){
         sendAsMessageBlock(jdaInterface.getTextChannelById(channelId),msgText);
     }
-    public void chatWithBot(){
-        MessageChannel textChannel = null;
-        boolean inServer = false;
-        long dmId = 0;
-        String input;
-
-        outer:
-        while(true) {
-            input = scanner.nextLine();
-            if(!input.startsWith(Bot.PREFIX)){
-                if(inServer){
-                    messageChannel(textChannel, input);
-                }else{
-                    this.messageUser(dmId, input);
-                }
-                continue;
-            }
-            String[] args = Commands.doubleTermSplit(input, Bot.PREFIX_OFFSET);
-            switch (args[0]){
-                case "cc":
-                    System.out.println("CC");
-                    MessageChannel nextChannel = findChannel(input);
-                    if(nextChannel != null){
-                        textChannel = nextChannel;
-                        System.out.println("Moved to: " + nextChannel.getName());
-                        inServer = true;
-                    }
-                    break;
-                case "lc":
-                    //server name required
-                    Guild server = getServerIgnoreCase(args[1]);
-                    if (server == null){
-                        continue;
-                    }
-                    System.out.println(server.getTextChannels());
-                    break;
-                case "dm":
-                    //user id required
-                    try{
-                        dmId = Long.parseLong(args[1]);
-                        System.out.println("Switched to dm, id: " + dmId);
-                        inServer = false;
-                    }catch (NumberFormatException numFormatExc){
-                        System.out.println("Failed to parse id");
-                    }
-                    break;
-                case "file":
-                    //file path
-                    File file = new File(args[1]);
-                    if(inServer){
-                        sendFile(textChannel, file);
-                    }else{
-                        sendFileToUser(dmId, file);
-                    }
-                    break;
-                case "exit":
-                    //exit chat
-                    break outer;
-                case "where": {
-                    if (inServer)
-                        System.out.println("Current channel: " + textChannel);
-                    else System.out.println("In dm: " + dmId);
-                }
-                default:
-                    String[] remainingArgs = Commands.splitIntoTerms(args[1]);
-                    try{
-                        Commands.get().command(args[0]).executeUnrestricted(args[0], remainingArgs);
-                    }catch (Exception exc){
-                        System.err.println(exc.getMessage());
-                    }
-            }
-        }
-        System.out.println("Exited chat permanently");
-    }
-
 
     public void messageUser(long userId, String messageContent){
         User user = jdaInterface.getUserById(userId);

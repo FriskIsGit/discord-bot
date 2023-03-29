@@ -1,4 +1,5 @@
 import bot.deskort.Bot;
+import bot.utilities.ConsoleChat;
 
 class BotRunner{
     public static void main(String[] args){
@@ -10,7 +11,7 @@ class BotRunner{
         System.out.println("Threads active: " + Thread.activeCount());
         System.out.println("Bot prefix: " + Bot.PREFIX);
 
-        Thread chatThread = new Thread(() -> Bot.getActions().chatWithBot());
+        Thread chatThread = new Thread(() -> new ConsoleChat().beginChat());
         chatThread.start();
     }
 }

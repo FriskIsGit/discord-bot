@@ -1,4 +1,4 @@
-package bot.deskort;
+package bot.utilities;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

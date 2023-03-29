@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 //singleton
-final public class Commands{
+public final class Commands{
     private static Commands instance;
 
     //it can be public since the map will be already populated
@@ -237,9 +237,7 @@ final public class Commands{
             return new String[0];
         }
         String[] freshArr = new String[arr.length - fromIndex];
-        for (int i = fromIndex, f = 0; i < arr.length; i++, f++){
-            freshArr[f] = arr[i];
-        }
+        System.arraycopy(arr, fromIndex, freshArr, 0, freshArr.length);
         return freshArr;
     }
 }

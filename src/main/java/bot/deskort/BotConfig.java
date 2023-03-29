@@ -18,6 +18,11 @@ public class BotConfig{
     public File audioDirectory;
 
     public BotConfig(){
+        exists = true;
+    }
+
+    public boolean hasToken(){
+        return token != null;
     }
 
     public static BotConfig notExists(){
@@ -30,7 +35,6 @@ public class BotConfig{
         FileSeeker fileSeeker = new FileSeeker("config.json");
         String configPath = fileSeeker.findTargetPath();
         if(configPath.isEmpty()){
-            System.out.println("config.json file not found");
             return BotConfig.notExists();
         }
         JSONObject data = parseJSON(configPath);
@@ -50,8 +54,8 @@ public class BotConfig{
             }else{
                 config.audioDirectory = new File(audioDir);
             }
-        }catch(JSONException jsonExc){
-            System.err.println("JSON config error");
+        }catch(JSONException e){
+            System.err.println(e.getMessage());
         }
         return config;
     }

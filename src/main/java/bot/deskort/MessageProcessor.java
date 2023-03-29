@@ -6,7 +6,6 @@ import bot.utilities.*;
 
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
@@ -73,7 +72,7 @@ public class MessageProcessor{
             if(commandName.isEmpty()){
                 return;
             }
-            Command command = bot.deskort.commands.Commands.get().command(commandName);
+            Command command = Commands.get().command(commandName);
             if(command == null){
                 return;
             }
@@ -82,9 +81,7 @@ public class MessageProcessor{
                 command.execute(commandName, message);
             }
             else{
-                String[] args = new String[allSplit.length - 1];
-                System.arraycopy(allSplit, 1, args, 0, args.length);
-                command.execute(commandName, message, args);
+                command.execute(commandName, message, Commands.shrink(allSplit, 1));
             }
         }
         else if(messageText.startsWith("$") && !messageText.startsWith("$$")){
