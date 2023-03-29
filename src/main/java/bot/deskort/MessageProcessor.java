@@ -94,17 +94,6 @@ public class MessageProcessor{
         }
     }
 
-    final String HELP_MESSAGE =
-            " [Available commands]\n" +
-            " skip - consumes the first song in queue and loads it\n" +
-            " loop - self explanatory\n" +
-            " sha <text> - oen of many hashing algorithms (e.g. md5, sha256)\n" +
-            " [Youtube Commands] <format_number> index at which it appears counting from the top (0-indexed)\n" +
-            " ytinfo <videoID/link> retrieves information about the youtube video, displaying available formats\n" +
-            " ytaudio <videoID/link> <format_number> retrieves audio file in specified format\n" +
-            " ytvideo <videoID/link> <format_number> retrieves video file in specified format\n" +
-            " ytviau <videoID/link> <format_number> retrieves video with audio in specified format\n";
-
     public void deleteRequestMessage(Message msgToDelete){
         msgToDelete.delete().queue();
         channelIdsToMessageDeques.get(msgToDelete.getChannel().getIdLong()).removeLast();

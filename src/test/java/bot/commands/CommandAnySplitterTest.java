@@ -202,8 +202,10 @@ public class CommandAnySplitterTest{
     @Test
     public void whitespacesInQuotes2(){
         String input = "\"x a z\"last";
-        String[] expected = {"\"x a z\"last"};
+        String[] expected = {"\"x", "a", "z\"last"};
         String[] output = Commands.splitIntoTerms(input, 0);
+        printArr(expected);
+        printArr(output);
         assertArrayEquals(expected, output);
     }
     @Test
@@ -281,6 +283,66 @@ public class CommandAnySplitterTest{
         String input = "\"quote\" ";
         String[] expected = {"quote"};
         String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void youSure1(){
+        String input = "\"q\" \"wtv\"";
+        String[] expected = {"q", "wtv"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void youSure2(){
+        String input = "\"op\" \" \"hey\"";
+        String[] expected = {"op", "\"", "hey"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        printArr(expected);
+        printArr(output);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void youSure2_5(){
+        String input = "\" \"hey\"";
+        String[] expected = {"\"", "hey"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        printArr(expected);
+        printArr(output);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void youSure3(){
+        String input = "1 \" 2def";
+        String[] expected = {"1", "\"", "2def"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void youSure4(){
+        String input = "\"1\" \" \"2\"";
+        String[] expected = {"1", "\"", "2"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void youSure5(){
+        String input = "\"1\" \" 2";
+        String[] expected = {"1", "\"", "2"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void mergedQuotes1(){
+        String input = "\"1st\"\"2nd";
+        String[] expected = {"\"1st\"\"2nd"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void mergedQuotes2FromIndex(){
+        String input = "until o\"z\"w";
+        String[] expected = {"ntil", "o\"z\"w"};
+        String[] output = Commands.splitIntoTerms(input, 1);
         assertArrayEquals(expected, output);
     }
 

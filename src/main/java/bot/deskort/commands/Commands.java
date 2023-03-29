@@ -131,11 +131,12 @@ final public class Commands{
     }
 
     /**
-     * Parsing rules: <br>
-     * Subsequent whitespaces are ignored.
-     * If quotation marks are used they should be non-empty, otherwise,
-     * they'll be treated as a single term.
-     * If they are never closed they'll be treated as part of a term.
+     * Splits character sequence where the delimiter is any number of whitespaces.
+     * During parsing following rules apply: <br>
+     * - any trailing or leading whitespaces are ignored unless they're placed inside quotes <br>
+     * - if quotation marks are used they should be non-empty and de-nested otherwise,
+     * they'll be treated as a single term. <br>
+     * - if they are never closed they'll be treated as part of another term or a single term.
      * @param text string to parse
      * @param fromIndex index to begin splitting from
      * @return array of terms split by aforementioned rules,
@@ -146,7 +147,6 @@ final public class Commands{
             return new String[]{""};
         }
         ArrayList<String> terms = new ArrayList<>(8);
-
         char[] arr = text.toCharArray();
         int len = arr.length;
         boolean hasToken = false, inQuotes = false;
@@ -180,6 +180,9 @@ final public class Commands{
                                 terms.add(qTerm);
                                 hasToken = false;
                             }
+                        }else{
+                            //another quote was opened with a proceeding non-whitespace char
+                            i = fromIndex;
                         }
                         //carry on
                         //"quote"what;"quote""what";
