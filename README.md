@@ -3,7 +3,7 @@
 ### Custom design:
 > Commands' design is modular where each command extends the 'Command' class. <br>
   Aliases are passed to command's constructor instead of using reflection and annotations. <br>
-  On commands initialization the map of aliases is populated with keys (all aliases) to improve lookup times. <br>
+  On commands initialization the command map is populated with keys (all aliases) to improve lookup times. <br>
   Messages from users are parsed regardless of the number of whitespaces between arguments,
   while also accounting for arguments inside quotes that is treating them as one. <br>
   Playing youtube's dash format with m4a extension is not yet possible since such
