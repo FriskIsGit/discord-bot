@@ -28,23 +28,28 @@ public class AudioTrack{
 
         try{
             String extFormat = audioFileFormat(PATH);
-            if(extFormat.equals("mp3")){
-                System.out.println("-Attempting mp3 conversion-");
-                AudioConversionResult result = AudioConverter.convertMP3FileToRaw(PATH);
-                if(result == null) return;
-                songBytes = result.bytes;
-                audioStream = result.audioInputStream;
-            }else if(extFormat.equals("m4a") || extFormat.equals("mp4")){
-                AudioConversionResult result = AudioConverter.convertM4AToRaw(PATH);
-                if(result == null) return;
-                songBytes = result.bytes;
-                audioStream = result.audioInputStream;
-            }else{
-                audioStream = AudioSystem.getAudioInputStream(new File(path));
-                songBytes = Files.readAllBytes(Paths.get(path));
-                songBytes = AudioConverter.removeWAVMetadata(songBytes);
+            AudioConversionResult result;
+            switch (extFormat){
+                case "mp3":
+                    System.out.println("-Attempting mp3 conversion-");
+                    result = AudioConverter.convertMP3FileToRaw(PATH);
+                    if(result == null) return;
+                    songBytes = result.bytes;
+                    audioStream = result.audioInputStream;
+                    break;
+                case "m4a":
+                case "mp4":
+                    result = AudioConverter.convertM4AToRaw(PATH);
+                    if(result == null) return;
+                    songBytes = result.bytes;
+                    audioStream = result.audioInputStream;
+                    break;
+                default:
+                    audioStream = AudioSystem.getAudioInputStream(new File(path));
+                    songBytes = Files.readAllBytes(Paths.get(path));
+                    songBytes = AudioConverter.removeWAVMetadata(songBytes);
             }
-            AudioConversionResult result = AudioConverter.target48Hz(audioStream);
+            result = AudioConverter.target48Hz(audioStream);
             songBytes = result.bytes != null ? result.bytes : songBytes;
             audioStream = result.audioInputStream;
         }catch (UnsupportedAudioFileException uafExc){
