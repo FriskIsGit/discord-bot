@@ -15,13 +15,15 @@ public class RoleCommand extends Command{
                       "For multi-term role names enclose them in quotation marks";
         usage = "role add `user_id` `role_name`\n" +
                 "role remove `user_id` `role_name`\n" +
+                "role add `user_id` `role_name` `guild_id`\n" +
+                "role remove `user_id` `role_name` `guild_id`\n" +
                 "role list";
     }
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
         if(args.length == 1){
-            if(args[0].equals("list")){
+            if(args[0].equals("list") || args[0].equals("ls")){
                 String roles = rolesToString(message.getGuild());
                 actions.messageChannel(message.getChannel(), roles);
             }
@@ -38,21 +40,33 @@ public class RoleCommand extends Command{
             actions.messageChannel(message.getChannel(), "User couldn't be retrieved");
             return;
         }
-        Guild guild = message.getGuild();
+
+        Guild guild = message != null ? message.getGuild() : null;
+        if(args.length == 4){
+            guild = jda.getGuildById(args[3]);
+        }
+
+        if(guild == null){
+            System.out.println("Not enough arguments or guild id is incorrect.");
+            return;
+        }
+
         List<Role> roles = guild.getRoles();
         Role targetRole = null;
         for(Role role : roles){
             String roleName = role.getName();
-            if(roleName.equals("@everyone")){
+            if(roleName.equals("@everyone"))
                 continue;
-            }
+
             if(roleName.equals(args[2])){
                 targetRole = role;
                 break;
             }
         }
         if(targetRole == null){
-            actions.messageChannel(message.getChannel(), "Role wasn't found");
+            if(message != null)
+                actions.messageChannel(message.getChannel(), "Role wasn't found");
+
             return;
         }
         if(args[0].equals("add")){

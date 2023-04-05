@@ -29,6 +29,9 @@ public class ConsoleChat{
     public void beginChat(){
         while(looping) {
             String input = scanner.nextLine();
+            if(input.isEmpty()){
+                continue;
+            }
             if(input.equals("exit")){
                 quit();
                 break;
