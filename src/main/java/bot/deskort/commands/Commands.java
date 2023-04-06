@@ -17,7 +17,7 @@ public final class Commands{
             new PlayCommand("play", "p"),
             new JoinCommand("join", "j"),
             new HelpCommand("help", "commands"),
-            new ModifyCommand("modify"),
+            new ManageCommand("modify"),
             new UptimeCommand("uptime"),
             new LeaveCommand("leave", "l"),
             new MemoryCommand("memory", "mem    stat","mempanel", "memuse"),

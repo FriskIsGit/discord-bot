@@ -17,7 +17,8 @@ public class RoleCommand extends Command{
                 "role remove `user_id` `role_name`\n" +
                 "role add `user_id` `role_name` `guild_id`\n" +
                 "role remove `user_id` `role_name` `guild_id`\n" +
-                "role list";
+                "role list\n" +
+                "role ls";
     }
 
     @Override

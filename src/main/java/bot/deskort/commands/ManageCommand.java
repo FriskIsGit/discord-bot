@@ -4,22 +4,22 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class ModifyCommand extends Command{
+public class ManageCommand extends Command{
     private static final String ENABLED = "enabled", AUTH = "requiresAuth", EXECUTIONS = "timesExecuted", DESC = "description";
-    public ModifyCommand(String... aliases){
+    public ManageCommand(String... aliases){
         super(aliases);
         requiresAuth = true;
         description = "Allows command modifications at runtime\n" +
                       "Symbol definitions:\n " +
                       "`op`  - set/get\n" +
                       "`var` - enabled/requiresAuth/timesExecuted/description";
-        usage = "modify `command_alias` `op` `var` `new_value`\n" +
-                "modify `command_alias` `op` `var`";
+        usage = "manage `command_alias` `op` `var` `new_value`\n" +
+                "manage `command_alias` `op` `var`";
     }
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
-        if(args.length < 4){
+        if(args.length < 3){
             return;
         }
         Command command = Commands.get().command(args[0]);
@@ -39,7 +39,12 @@ public class ModifyCommand extends Command{
                 actions.messageChannel(message.getChannel(), "No opcode matched");
                 return;
         }
-        String varName = null;
+
+        if(!isGet && args.length != 4){
+            return;
+        }
+
+        String varName;
         switch (args[2]){
             case AUTH:
                 if(isGet){
