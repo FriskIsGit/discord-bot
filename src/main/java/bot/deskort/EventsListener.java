@@ -185,7 +185,7 @@ public class EventsListener extends ListenerAdapter{
         channel.sendMessage(msgText).queue();
     }
 
-    final static String [] RESPONSES_CHINESE = {
+    final static String[] RESPONSES_CHINESE = {
             "Pinchiren",
             "早上好中国 现在我有冰淇淋 我很喜欢冰淇淋 但是 《速度与激情9》 比冰淇淋",
             "《速度与激情…",

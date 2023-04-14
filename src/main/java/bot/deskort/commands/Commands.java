@@ -17,7 +17,7 @@ public final class Commands{
             new PlayCommand("play", "p"),
             new JoinCommand("join", "j"),
             new HelpCommand("help", "commands"),
-            new ManageCommand("modify"),
+            new ManageCommand("manage"),
             new UptimeCommand("uptime"),
             new LeaveCommand("leave", "l"),
             new MemoryCommand("memory", "mem    stat","mempanel", "memuse"),
@@ -40,12 +40,13 @@ public final class Commands{
             new LogCommand("logs"),
             new GCCommand("gc"),
             new ClearSongsCommand("clearsongs", "clrsongs"),
-            new FileHashCommand("hashfile", "file"),
+            new FileHashCommand("hashfile", "file", "filehash"),
             new InviteCommand("invite"),
             new RoleCommand("role", "roles"),
             new SudoCommand("sudo"),
             new URLCommand("url" , "link", "links"),
             new CompareCommand("compare", "comp", "diff"),
+            new ConvertCommand("convert"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 

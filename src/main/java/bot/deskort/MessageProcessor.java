@@ -122,19 +122,19 @@ public class MessageProcessor{
             return;
         }
         String command = messageText.substring(messageText.indexOf("$") + 1);
-        Process procBuilder = null;
+        Process proc = null;
         try{
-            procBuilder = run.exec(command);
-            procBuilder.waitFor(3, TimeUnit.SECONDS);
+            proc = run.exec(command);
+            proc.waitFor(3, TimeUnit.SECONDS);
         }catch (IOException | InterruptedException ioException){
             ioException.printStackTrace();
             System.err.println("Execution error for command: " + command);
         }
-        if (procBuilder == null){
+        if (proc == null){
             System.err.println("Process is null");
             return;
         }
-        InputStream inputStream = procBuilder.getInputStream();
+        InputStream inputStream = proc.getInputStream();
 
         //InputStream errorStream = procBuilder.getErrorStream();
         String stringedStream = streamToString(50_000, inputStream);
@@ -153,7 +153,7 @@ public class MessageProcessor{
 
     public static String streamToString(int initialSize, InputStream inputStream){
         String output;
-        byte [] buffer = new byte[initialSize];
+        byte[] buffer = new byte[initialSize];
         try {
             int offset = 0;
             while (inputStream.available() != 0) {
@@ -162,7 +162,7 @@ public class MessageProcessor{
                     int currentRead = inputStream.read(buffer, offset, available);
                     offset += currentRead;
                 }else{
-                    byte [] tempBuffer = new byte[buffer.length<<1];
+                    byte[] tempBuffer = new byte[buffer.length<<1];
                     System.arraycopy(buffer,0,tempBuffer,0,offset);
                     buffer = tempBuffer;
                     tempBuffer = null;
@@ -176,8 +176,8 @@ public class MessageProcessor{
         }
         return null;
     }
-    private static String bytesToStr(byte [] bytes, int offset){
-        char [] charArr = new char[offset];
+    private static String bytesToStr(byte[] bytes, int offset){
+        char[] charArr = new char[offset];
         for(int i = 0; i<offset; i++){
             charArr[i] = (char)bytes[i];
         }

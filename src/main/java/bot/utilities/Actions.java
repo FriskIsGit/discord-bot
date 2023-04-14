@@ -70,10 +70,14 @@ public class Actions{
 
     public void sendFile(MessageChannel channel, File fileToSend){
         if(fileToSend == null){
-            System.out.println("Given file was null");
+            System.err.println("Given file was null");
             return;
         }
-        byte [] bytes;
+        if(!fileToSend.exists()){
+            System.err.println("Given file doesn't exist");
+            return;
+        }
+        byte[] bytes;
         try{
             bytes = Files.readAllBytes(fileToSend.toPath());
         }catch (IOException ioException){
@@ -166,7 +170,7 @@ public class Actions{
         }
         else if(msgLength>2000){
             int parts = msgLength/2000 + 1;
-            String [] messagesArr = new String[parts];
+            String[] messagesArr = new String[parts];
             for(int i = 0, offset = 0; i<messagesArr.length; i++, offset+=1994){
                 int endIndex = Math.min(msgLength, offset+1994);
                 messagesArr[i] = msgText.substring(offset, endIndex);

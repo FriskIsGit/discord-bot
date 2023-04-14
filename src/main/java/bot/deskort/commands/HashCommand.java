@@ -7,6 +7,9 @@ public class HashCommand extends Command{
 
     public HashCommand(String... aliases){
         super(aliases);
+        description = "Returns hash digest of a sequence";
+        usage = "sha1 `sequence`\n" +
+                "md5 `sequence`";
     }
 
     @Override
