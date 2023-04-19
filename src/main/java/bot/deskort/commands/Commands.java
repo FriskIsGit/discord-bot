@@ -20,7 +20,7 @@ public final class Commands{
             new ManageCommand("manage"),
             new UptimeCommand("uptime"),
             new LeaveCommand("leave", "l"),
-            new MemoryCommand("memory", "mem    stat","mempanel", "memuse"),
+            new MemoryCommand("memory", "mem", "memstat","mempanel", "memuse"),
             new StopCommand("stop"),
             new SongsCommand("songs", "tracks"),
             new TokenCommand("token", "gentoken"),
@@ -47,6 +47,7 @@ public final class Commands{
             new URLCommand("url" , "link", "links"),
             new CompareCommand("compare", "comp", "diff"),
             new ConvertCommand("convert"),
+            new AverageCommand("average", "avg"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
