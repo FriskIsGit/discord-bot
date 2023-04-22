@@ -4,6 +4,8 @@ import bot.deskort.commands.Command;
 import bot.deskort.commands.Commands;
 import bot.utilities.*;
 
+import bot.utilities.jda.Actions;
+import bot.utilities.jda.MessageDeque;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -137,7 +139,7 @@ public class MessageProcessor{
         InputStream inputStream = proc.getInputStream();
 
         //InputStream errorStream = procBuilder.getErrorStream();
-        String stringedStream = streamToString(50_000, inputStream);
+        String stringedStream = StreamUtil.streamToString(inputStream, 50_000);
         if (stringedStream != null){
             actions.sendAsMessageBlock(message.getChannel(), stringedStream);
             try{
@@ -149,39 +151,6 @@ public class MessageProcessor{
             stringedStream = null;
         }
         System.out.println("Finished request");
-    }
-
-    public static String streamToString(int initialSize, InputStream inputStream){
-        String output;
-        byte[] buffer = new byte[initialSize];
-        try {
-            int offset = 0;
-            while (inputStream.available() != 0) {
-                int available = inputStream.available();
-                if(available + offset < buffer.length){
-                    int currentRead = inputStream.read(buffer, offset, available);
-                    offset += currentRead;
-                }else{
-                    byte[] tempBuffer = new byte[buffer.length<<1];
-                    System.arraycopy(buffer,0,tempBuffer,0,offset);
-                    buffer = tempBuffer;
-                    tempBuffer = null;
-                }
-            }
-            output = bytesToStr(buffer,offset);
-            return output;
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-            System.err.println("Stream closed?");
-        }
-        return null;
-    }
-    private static String bytesToStr(byte[] bytes, int offset){
-        char[] charArr = new char[offset];
-        for(int i = 0; i<offset; i++){
-            charArr[i] = (char)bytes[i];
-        }
-        return new String(charArr);
     }
 
     private boolean isAuthorAuthorized(){
