@@ -1,5 +1,6 @@
 package bot.deskort.commands;
 
+import bot.deskort.commands.custom.AICommand;
 import bot.deskort.commands.voice.*;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public final class Commands{
             new ShutdownCommand("shutdown"),
             new AbortCommand("abort"),
             new LoopCommand("loop"),
-            new HttpCommand( "httpcat", "http"),
+            new HttpCommand( "httpcat", "http", "cat"),
             new LengthCommand("len", "length"),
             new QueueCommand("queue", "q"),
             new SkipCommand("skip"),
@@ -48,6 +49,7 @@ public final class Commands{
             new CompareCommand("compare", "comp", "diff"),
             new ConvertCommand("convert"),
             new AverageCommand("average", "avg"),
+            new AICommand("openai", "ai21"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
