@@ -16,6 +16,7 @@
 - purging messages
 - downloading youtube videos/audio
 - emergency listener (listens for suspicious events)
+- AI21 API
 ***
 ### Dependencies used:
  - tritonus libs (sample rate conversion),
@@ -26,6 +27,7 @@ although not used directly in code, they're a supplement for existing methods
  - sealedtx/java-youtube-downloader to retrieve youtube content
  - fastjson (json parser)
  - junit (tests)
+ - apache httpclient fluent API (requests)
 
 ### Sources:
  - http://www.tritonus.org/plugins.html
@@ -41,4 +43,6 @@ although not used directly in code, they're a supplement for existing methods
 - create a custom logger
 - add seek command for audio playback
 
-![embed](img/embed.png)
+![embed_play](img/embed_play.png)
+***
+![embed_ai21](img/embed_ai21.png)
