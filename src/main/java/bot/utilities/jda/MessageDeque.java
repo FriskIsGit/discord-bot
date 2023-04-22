@@ -1,4 +1,4 @@
-package bot.utilities;
+package bot.utilities.jda;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

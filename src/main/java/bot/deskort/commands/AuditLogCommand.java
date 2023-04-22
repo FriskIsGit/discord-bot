@@ -1,6 +1,6 @@
 package bot.deskort.commands;
 
-import bot.utilities.AuditLog;
+import bot.utilities.jda.AuditLog;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.User;

@@ -1,6 +1,6 @@
 package bot.deskort.commands;
 
-import bot.utilities.MessageDeque;
+import bot.utilities.jda.MessageDeque;
 import bot.deskort.MessageProcessor;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

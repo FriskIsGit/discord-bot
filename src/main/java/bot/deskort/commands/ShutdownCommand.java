@@ -1,7 +1,7 @@
 package bot.deskort.commands;
 
 import bot.deskort.Bot;
-import bot.utilities.ShutdownTimer;
+import bot.utilities.jda.ShutdownTimer;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class ShutdownCommand extends Command{

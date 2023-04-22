@@ -1,8 +1,8 @@
 package bot.deskort.emergency;
 
 import bot.deskort.Bot;
-import bot.utilities.Actions;
-import bot.utilities.AuditLog;
+import bot.utilities.jda.Actions;
+import bot.utilities.jda.AuditLog;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;

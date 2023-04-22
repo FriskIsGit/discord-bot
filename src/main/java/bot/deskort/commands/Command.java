@@ -1,7 +1,7 @@
 package bot.deskort.commands;
 
 import bot.deskort.Bot;
-import bot.utilities.Actions;
+import bot.utilities.jda.Actions;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -36,7 +36,7 @@ public abstract class Command{
 
     //call execute to go through checks first
     public void execute(String commandName, MessageReceivedEvent message, String... args){
-        boolean authorAuthorized = Bot.AUTHORIZED_USERS.contains(message.getAuthor().getIdLong());
+        boolean authorAuthorized = isAuthorized(message.getAuthor().getIdLong());
         if(requiresAuth){
             if(!authorAuthorized){
                 actions.messageChannel(message.getChannel(), "You must be authorized to use this command");
@@ -59,6 +59,11 @@ public abstract class Command{
         executeImpl(commandName, message, args);
         timesExecuted++;
     }
+
+    public boolean isAuthorized(long idLong){
+        return Bot.AUTHORIZED_USERS.contains(idLong);
+    }
+
     public void executeUnrestricted(String commandName, String... args){
         executeImpl(commandName, null, args);
         timesExecuted++;

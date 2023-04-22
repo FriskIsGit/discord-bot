@@ -1,23 +1,13 @@
 package bot.deskort;
 
 import bot.deskort.emergency.EmergencyListener;
-import bot.music.AudioPlayer;
-import bot.utilities.ShutdownTimer;
+import bot.utilities.jda.ShutdownTimer;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import org.json.JSONException;
-import org.json.JSONObject;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import bot.utilities.Actions;
-import bot.utilities.FileSeeker;
+import bot.utilities.jda.Actions;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,7 +25,7 @@ public class Bot{
     private static MessageProcessor messageProcessor;
     private static BotConfig config;
     private static ShutdownTimer shutdownTimer;
-    //private static bot.utilities.Permissions permissions;
+    //private static bot.utilities.jda.Permissions permissions;
 
     public static void initialize() throws InterruptedException{
         JDABuilder jdaBuilder;
@@ -67,7 +57,6 @@ public class Bot{
         jdaInterface.addEventListener(new EventsListener());
         messageProcessor = MessageProcessor.get();
     }
-
 
     public static JDA getJDAInterface(){
         return jdaInterface;

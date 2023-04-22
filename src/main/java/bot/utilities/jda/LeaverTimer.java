@@ -1,4 +1,4 @@
-package bot.utilities;
+package bot.utilities.jda;
 
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.managers.AudioManager;

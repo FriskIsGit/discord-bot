@@ -1,7 +1,7 @@
 package bot.deskort.emergency;
 
 import bot.deskort.Bot;
-import bot.utilities.Actions;
+import bot.utilities.jda.Actions;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;

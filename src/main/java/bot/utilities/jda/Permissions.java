@@ -1,4 +1,4 @@
-package bot.utilities;
+package bot.utilities.jda;
 
 import bot.deskort.Bot;
 import net.dv8tion.jda.api.JDA;

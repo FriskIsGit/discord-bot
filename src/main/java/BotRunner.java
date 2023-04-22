@@ -1,5 +1,5 @@
 import bot.deskort.Bot;
-import bot.utilities.ConsoleChat;
+import bot.utilities.jda.ConsoleChat;
 
 class BotRunner{
     public static void main(String[] args){
