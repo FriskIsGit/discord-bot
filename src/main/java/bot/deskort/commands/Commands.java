@@ -1,6 +1,7 @@
 package bot.deskort.commands;
 
 import bot.deskort.commands.custom.AICommand;
+import bot.deskort.commands.filebin.FileBinCommand;
 import bot.deskort.commands.voice.*;
 
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public final class Commands{
             new ConvertCommand("convert"),
             new AverageCommand("average", "avg"),
             new AICommand("openai", "ai21"),
+            new FileBinCommand("filebin", "fb"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 

@@ -1,4 +1,4 @@
-package bot.deskort.commands.custom;
+package bot.utilities.requests;
 
 import java.util.Iterator;
 import java.util.List;

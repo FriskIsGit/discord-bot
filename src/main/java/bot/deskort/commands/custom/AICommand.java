@@ -2,19 +2,16 @@ package bot.deskort.commands.custom;
 
 import bot.deskort.commands.Command;
 import bot.utilities.Option;
-import bot.utilities.StreamUtil;
+import bot.utilities.requests.JsonBody;
+import bot.utilities.requests.SimpleResponse;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.client.fluent.Response;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,6 +98,8 @@ public class AICommand extends Command{
             if(!isModel && !isTask){
                 return;
             }
+            //attempt to format code if requested
+            boolean isCode = args.length == 3 && args[2].startsWith("-code");
 
             phrase = args[1];
             if(isTask){
@@ -109,7 +108,7 @@ public class AICommand extends Command{
                         .addHeader("Accept", "application/json")
                         .addHeader("Content-Type", "application/json");
                 JsonBody params = adaptJsonBodyToTask(task);
-                Option<SimpleResponse> maybeResponse = performRequest(request, params);
+                Option<SimpleResponse> maybeResponse = SimpleResponse.performRequest(request, params);
                 if(!maybeResponse.isSome()){
                     actions.sendEmbed(
                             channel,
@@ -139,7 +138,7 @@ public class AICommand extends Command{
                         .addPair("prompt", phrase)
                         .addPair("maxTokens", 512);
 
-                Option<SimpleResponse> maybeResponse = performRequest(request, paramsBody);
+                Option<SimpleResponse> maybeResponse = SimpleResponse.performRequest(request, paramsBody);
                 if(!maybeResponse.isSome()){
                     actions.sendEmbed(
                             channel,
@@ -148,6 +147,7 @@ public class AICommand extends Command{
                     return;
                 }
                 SimpleResponse response = maybeResponse.unwrap();
+                System.out.println(response.body);
                 if(response.code != 200){
                     actions.sendEmbed(
                             channel,
@@ -155,12 +155,14 @@ public class AICommand extends Command{
                     );
                     return;
                 }
-                System.out.println(response);
                 JSONObject jsonResponse = JSONObject.parseObject(response.body);
                 JSONArray arr = jsonResponse.getJSONArray("completions");
                 JSONObject firstEl = arr.getJSONObject(0);
                 JSONObject data = firstEl.getJSONObject("data");
                 String text = data.getString("text");
+                if(isCode){
+                    //text = CodeFormatter.format(text);
+                }
                 actions.sendEmbed(channel, createInfoEmbed("Response", text));
             }
         }
@@ -309,7 +311,7 @@ public class AICommand extends Command{
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer " + OPENAI_KEY);
 
-        SimpleResponse response = performRequest(request).expect("Simple response is null");
+        SimpleResponse response = SimpleResponse.performRequest(request).expect("Simple response is null");
         System.out.println(response);
         JSONObject jsonBody = JSONObject.parseObject(response.body);
         JSONArray modelsArr = jsonBody.getJSONArray("data");
@@ -328,34 +330,6 @@ public class AICommand extends Command{
         //release sockets
     }
 
-    private static Option<SimpleResponse> performRequest(Request request, JsonBody jsonBody) {
-        if(jsonBody != null)
-            request.bodyByteArray(jsonBody.getBytes());
-
-        InputStream responseAsStream = null;
-        try{
-            Response response = request.execute();
-            HttpResponse consumedResponse = response.returnResponse();
-            int code = consumedResponse.getStatusLine().getStatusCode();
-            responseAsStream = consumedResponse.getEntity().getContent();
-            SimpleResponse simpleResponse = new SimpleResponse(code, StreamUtil.streamToString(responseAsStream));
-            return Option.of(simpleResponse);
-        }catch (IOException e){
-            e.printStackTrace();
-            return Option.none();
-        }finally{
-            if(responseAsStream != null){
-                try{
-                    responseAsStream.close();
-                }catch (IOException ignored){
-                }
-            }
-        }
-    }
-
-    private static Option<SimpleResponse> performRequest(Request request) {
-        return performRequest(request, null);
-    }
 }
 
 enum AITask{
@@ -375,21 +349,6 @@ enum AITask{
         return endpoint;
     }
 
-}
-
-class SimpleResponse{
-    public int code;
-    public String body;
-
-    public SimpleResponse(int code, String body){
-        this.code = code;
-        this.body = body;
-    }
-
-    @Override
-    public String toString(){
-        return "[" + code + "]\n" + body;
-    }
 }
 
 class Model{
