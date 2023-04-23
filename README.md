@@ -12,11 +12,12 @@
 ### Some functionalities:
 
 - playback of local audio files (supported formats: wav, mp3, snd, aiff, aifc, au)
+- AI21 API
+- filebin API
 - song queue
 - purging messages
 - downloading youtube videos/audio
 - emergency listener (listens for suspicious events)
-- AI21 API
 ***
 ### Dependencies used:
  - tritonus libs (sample rate conversion),
@@ -46,3 +47,5 @@ although not used directly in code, they're a supplement for existing methods
 ![embed_play](img/embed_play.png)
 ***
 ![embed_ai21](img/embed_ai21.png)
+***
+![embed_filebin](img/embed_filebin.png)
