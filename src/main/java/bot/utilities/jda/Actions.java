@@ -1,15 +1,12 @@
 package bot.utilities.jda;
 
 import bot.deskort.Bot;
-import bot.deskort.commands.Commands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -21,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Actions{
-    private final static int MB_8 = 8388608;
+    private final static int MEGABYTES_25 = 26214400;
     private final JDA jdaInterface;
     public Actions(){
         jdaInterface = Bot.getJDAInterface();
@@ -84,8 +81,8 @@ public class Actions{
             ioException.printStackTrace();
             return;
         }
-        if(bytes.length > MB_8){
-            channel.sendMessage("8MBs exceeded").queue();
+        if(bytes.length > MEGABYTES_25){
+            channel.sendMessage("25MBs exceeded").queue();
             return;
         }
 
