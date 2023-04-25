@@ -14,7 +14,7 @@ import java.awt.*;
 public class YoutubeCommand extends Command{
     private static final Color niceGreen = new Color(34,139,34);
     private static final Color crimson = new Color(220,20,60);
-    private final Youtube youtube = new Youtube();
+
     public YoutubeCommand(String... aliases){
         super(aliases);
         description = "Retrieves information about youtube videos or downloads them\n";
@@ -62,8 +62,7 @@ public class YoutubeCommand extends Command{
 
         new Thread(() -> {
             MessageChannelUnion channel = message.getChannel();
-            UserRequest userRequest = new UserRequest(youtube);
-            UserResponse response = userRequest.executeRequest(youtubeRequest);
+            UserResponse response = UserRequest.executeRequest(youtubeRequest);
             if(response.success && response.hasFile){
                 actions.sendFile(channel, response.fileAttachment);
             }

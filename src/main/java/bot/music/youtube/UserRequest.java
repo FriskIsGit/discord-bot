@@ -13,18 +13,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+//internal singleton
 public class UserRequest{
-    public final static int DOWNLOAD_SIZE_LIMIT_MB = 100;
+    public static final int DOWNLOAD_SIZE_LIMIT_MB = 100;
+    private static UserRequest userRequest;
 
     private final Youtube youtube;
     private final YoutubeDownloader youtubeDownloader;
 
-    public UserRequest(Youtube youtube){
-        this.youtube = youtube;
+    private UserRequest(){
+        this.youtube = new Youtube();
         this.youtubeDownloader = youtube.getDownloader();
     }
 
-    public UserResponse executeRequest(YoutubeRequest request){
+    public static UserResponse executeRequest(YoutubeRequest request){
+        if(userRequest == null){
+            userRequest = new UserRequest();
+        }
+        return userRequest.executeRequestImpl(request);
+    }
+
+    private UserResponse executeRequestImpl(YoutubeRequest request){
         if(request.type == StreamType.NONE){
             return UserResponse.fail("Invalid request");
         }
