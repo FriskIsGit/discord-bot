@@ -345,6 +345,83 @@ public class CommandAnySplitterTest{
         String[] output = Commands.splitIntoTerms(input, 1);
         assertArrayEquals(expected, output);
     }
+    @Test
+    public void codeFormat(){
+        String input = "-for ja \"#include \"Enter int2\"";
+        String[] expected = {"-for", "ja", "\"#include", "Enter int2"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void graveAccent1(){
+        String input = "st 1 `i see \"string\"`";
+        String[] expected = {"st", "1", "i see \"string\""};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void graveAsPartOfAnArgument(){
+        String input = "token`grave \"`";
+        String[] expected = {"token`grave", "\"`"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void closingGraveHasRules(){
+        String input = "token `two `three";
+        String[] expected = {"token", "`two", "`three"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void validClosingGrave(){
+        String input = "to `open ` close";
+        String[] expected = {"to", "open ", "close"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void graveInQuotes(){
+        String input = "to \"`in quotes ` close\"";
+        String[] expected = {"to", "`in quotes ` close"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void quotesInGrave(){
+        String input = "then `He said \"Ok.. we gon see\".`";
+        String[] expected = {"then", "He said \"Ok.. we gon see\"."};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void standAloneQuote(){
+        String input = "to \" unclosed ";
+        String[] expected = {"to", "\"", "unclosed"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void unclosedQuoteAndGrave(){
+        String input = "to \"neverClosed `hey mate`";
+        String[] expected = {"to", "\"neverClosed", "hey mate"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void complexInput(){
+        String input = "ab \"cd? `ef \"gh `";
+        String[] expected = {"ab", "\"cd?", "ef \"gh "};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
+    @Test
+    public void leftOutGrave(){
+        String input = "ab false`open `";
+        String[] expected = {"ab", "false`open", "`"};
+        String[] output = Commands.splitIntoTerms(input, 0);
+        assertArrayEquals(expected, output);
+    }
 
     private static void printArr(String[] arr){
         System.out.println(Arrays.toString(arr));

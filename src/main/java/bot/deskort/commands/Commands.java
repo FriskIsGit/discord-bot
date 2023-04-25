@@ -138,14 +138,28 @@ public final class Commands{
     }
 
     /**
-     * Splits character sequence where the delimiter is any number of whitespaces.
-     * During parsing following rules apply: <br>
-     * - any trailing or leading whitespaces are ignored unless they're placed inside quotes <br>
-     * - if quotation marks are used they should be non-empty and de-nested otherwise,
-     * they'll be treated as a single term. <br>
-     * - if they are never closed they'll be treated as part of another term or a single term.
-     * @param text string to parse
+     * Splits character sequence where the delimiter is any number of whitespaces. <br>
+     * <b>During parsing following rules apply:</b> <br>
+     * <ol>
+     *     <li>Any trailing or leading whitespaces are ignored unless placed inside quotes.</li>
+     *     <li>Quotation mark rules:</li>
+     *     <ul>
+     *         <li>should be non-empty and de-nested otherwise, they'll become a single term.</li>
+     *         <li>if never closed they'll become part of another term or a single term.</li>
+     *     </ul>
+     *     <li>Grave accent rules:</li>
+     *     <ul>
+     *          <li>accept all characters placed inside any valid outer two as one argument</li>
+     *          <li>opening grave accent must be preceded with a whitespace,
+     *              otherwise it will be treated as part of the current token</li>
+     *          <li>closing grave accent must either be followed by a whitespace or the text should end with a grave,
+     *              otherwise it will be treated as part of the current or next token</li>
+     *          <li>if grave accent is opened after a quote was opened then the grave will be part of the quote term</li>
+     *          <li>there can only be one grave term in given text, since only the outer graves are considered</li>
+     *     </ul>
+     * </ol>
      * @param fromIndex index to begin splitting from
+     * @param text string to parse
      * @return array of terms split by aforementioned rules,
      * the array returned is guaranteed to have length of at least one
      */
@@ -157,9 +171,11 @@ public final class Commands{
         char[] arr = text.toCharArray();
         int len = arr.length;
         boolean hasToken = false, inQuotes = false;
+        boolean triedGrave = false;
         for (int i = fromIndex; i<len; i++){
             boolean isLast = i == len-1;
-            switch (arr[i]){
+            char c = arr[i];
+            switch (c){
                 case ' ':
                     if(hasToken && !inQuotes){
                         String term = text.substring(fromIndex, i);
@@ -201,7 +217,19 @@ public final class Commands{
                     fromIndex = i;
                     break;
                 default:
-                    if(hasToken && isLast){
+                    if(!triedGrave && c == '`'){
+                        if(!hasToken){
+                            triedGrave = true;
+                            int grave = lastValidGrave(arr);
+                            if(grave != -1 && grave != i){
+                                String graveTerm = text.substring(i+1, grave);
+                                terms.add(graveTerm);
+                                i = grave;
+                                break;
+                            }
+                        }
+                    }
+                    if(isLast && hasToken){
                         if(inQuotes){
                             //unclosed
                             i = fromIndex;
@@ -219,7 +247,7 @@ public final class Commands{
                     hasToken = true;
                     if(isLast){
                         //last singular char token
-                        terms.add(Character.toString(arr[i]));
+                        terms.add(Character.toString(c));
                     }
                     fromIndex = i;
                     break;
@@ -233,6 +261,20 @@ public final class Commands{
         final int[] index = {0};
         terms.forEach((el) -> res[index[0]++] = el);
         return res;
+    }
+
+    //looks for a valid closing grave, if not found returns -1
+    private static int lastValidGrave(char[] arr){
+        int lastIndex = arr.length - 1;
+        for (int i = lastIndex; i > -1; i--){
+            if(arr[i] == '`'){
+                if(i == lastIndex)
+                    return lastIndex;
+                if(arr[i+1] == ' ')
+                    return i;
+            }
+        }
+        return -1;
     }
 
     public static String[] splitIntoTerms(String text){
