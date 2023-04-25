@@ -3,6 +3,11 @@ package bot.utilities.requests;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Simple json body builder with a fluent design.
+ * Based on pairs of properties and values
+ * Double quotation marks or reverse slash characters in string values are escaped before put into the body.
+ */
 public class JsonBody{
     private final StringBuilder body = new StringBuilder();
     private boolean hasTokens = false;
@@ -20,7 +25,7 @@ public class JsonBody{
             body.append(',');
         }
         body.append('"').append(property).append("\":");
-        body.append('"').append(value).append('"');
+        body.append('"').append(escape(value)).append('"');
         hasTokens = true;
         return this;
     }
@@ -60,6 +65,15 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
+    public JsonBody addPair(String property, long value){
+        if(hasTokens){
+            body.append(',');
+        }
+        body.append('"').append(property).append("\":");
+        body.append(value);
+        hasTokens = true;
+        return this;
+    }
     public JsonBody addPair(String property, JsonBody jsonBody){
         if(hasTokens){
             body.append(',');
@@ -79,7 +93,8 @@ public class JsonBody{
         int i = 0;
         while(iterator.hasNext()){
             i++;
-            body.append('\"').append(iterator.next()).append('\"');
+            String el = escape(iterator.next());
+            body.append('\"').append(el).append('\"');
             if(i != size)
                 body.append(',');
         }
@@ -100,6 +115,24 @@ public class JsonBody{
     public void clear(){
         hasTokens = false;
         body.setLength(1);
+    }
+
+    private static String escape(String str){
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < str.length(); i++){
+            char c = str.charAt(i);
+            switch (c){
+                case '\\':
+                    builder.append("\\\\");
+                    break;
+                case '"':
+                    builder.append("\\\"");
+                    break;
+                default:
+                    builder.append(c);
+            }
+        }
+        return builder.toString();
     }
 
     @Override

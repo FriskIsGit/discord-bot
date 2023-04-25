@@ -13,7 +13,12 @@ public class HelpCommand extends Command{
     private static final Color skyBlue = new Color(0,191,255);
     public HelpCommand(String... aliases){
         super(aliases);
-        description = "Prints information about commands or a command";
+        description = "Prints information about commands or a command\n" +
+                      "Arguments provided to the commands can be passed:\n" +
+                      "- alone,\n" +
+                      "- in double quotation marks (space-separated arguments),\n" +
+                      "- in grave accent (accepting all characters)\n" +
+                      "Only one engraved argument can be passed to a command.";
         usage = "help `command_alias`";
     }
 

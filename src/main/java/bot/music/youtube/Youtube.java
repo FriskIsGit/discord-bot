@@ -7,7 +7,6 @@ import youtube_lib.downloader.downloader.request.RequestVideoInfo;
 import youtube_lib.downloader.downloader.request.RequestVideoStreamDownload;
 import youtube_lib.downloader.downloader.response.Response;
 import youtube_lib.downloader.model.videos.VideoInfo;
-import youtube_lib.downloader.model.videos.formats.AudioFormat;
 import youtube_lib.downloader.model.videos.formats.Format;
 
 import java.io.ByteArrayOutputStream;
@@ -97,5 +96,4 @@ public class Youtube{
         //return new RequestVideoStreamDownload(null,null);
         return null;
     }
-
 }

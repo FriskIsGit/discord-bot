@@ -39,7 +39,7 @@ public class UserRequest{
         }
         YoutubeVideoInfo ytVideoInfo = youtube.getVideoInformation(request.videoId);
         if(ytVideoInfo == null){
-            return UserResponse.fail("Unable to get info about video (check the URL)");
+            return UserResponse.fail("Unable to get info about video (check the URL or try again)");
         }
 
         if(request.type == StreamType.INFO){
@@ -111,10 +111,6 @@ public class UserRequest{
         Long duration = format.duration();
         Integer bitrate = format.bitrate();
         return YoutubeVideoInfo.bitrateToSizeAsDouble(duration, bitrate);
-    }
-
-    private static String formatExceededMessage(double formatSize){
-        return "Format size of "  + String.format("%.2f", formatSize) + " MBs exceeds " + DOWNLOAD_SIZE_LIMIT_MB;
     }
 
     private VideoWithAudioFormat findWorstBitrate(List<VideoWithAudioFormat> availableFormats){
