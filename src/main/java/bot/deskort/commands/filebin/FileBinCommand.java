@@ -20,17 +20,17 @@ import java.util.concurrent.TimeoutException;
 
 public class FileBinCommand extends Command{
     private static final String FILE_BIN_NET = "https://filebin.net";
-    private static final int socketTimeoutSeconds = 2;
-    private static final int connectTimeoutSeconds = 10;
+    private static final int socketTimeoutSeconds = 4, connectTimeoutSeconds = 6, downloadTimeoutSeconds = 15;
     private static final RandomString randomString = new RandomString(true, true, true);
 
     private MessageChannelUnion channel;
     public FileBinCommand(String... aliases){
         super(aliases);
         description = "Manages filebin API, performs uploads, deletions or retrievals.\n" +
-                      "*Timeouts*: \n" +
-                      "socketTimeout: " + socketTimeoutSeconds + "s\n" +
-                      "connectTimeout: " + connectTimeoutSeconds + "s";
+                      "**Timeouts**: \n" +
+                      "- downloadTimeout - " + downloadTimeoutSeconds + "s\n" +
+                      "- socketTimeout - " + socketTimeoutSeconds + "s\n" +
+                      "- connectTimeout - " + connectTimeoutSeconds + "s\n";
         usage = "filebin post <file_attachment>\n" +
                 "filebin upload <file_attachment>\n" +
                 "filebin info `bin_id`\n" +
@@ -67,7 +67,7 @@ public class FileBinCommand extends Command{
                 if(!success){
                     break;
                 }
-                BinPostResult bin = postOnFileBin(temp, attachment.getFileName());
+                BinPostResult bin = doFileBinPost(temp, attachment.getFileName());
                 temp.delete();
                 if(!bin.responseOption.isSome()){
                     actions.sendEmbed(channel, createInfoEmbed("No response", ""));
@@ -102,6 +102,7 @@ public class FileBinCommand extends Command{
                 actions.sendEmbed(channel, createBinEmbed(info));
                 break;
             case "delete":
+            case "del":
                 if(args.length == 1){
                     actions.sendEmbed(channel, createInfoEmbed("No bin_id provided", "Not enough arguments"));
                     break;
@@ -133,21 +134,38 @@ public class FileBinCommand extends Command{
     }
 
     private Option<SimpleResponse> doFileBinGet(String bin){
+        if(bin.startsWith(FILE_BIN_NET)){
+            bin = extractId(bin);
+        }
+
         Request request = Request.Get(FILE_BIN_NET + '/' + bin)
                 .addHeader("Accept", "application/json");
         return SimpleResponse.performRequest(request);
     }
 
+    private String extractId(String bin){
+        int linkLen = bin.length();
+        int start = FILE_BIN_NET.length() + 1;
+        int end = bin.indexOf('/', start);
+        if(start >= linkLen){
+            throw new IllegalArgumentException("Bin does not contain an id");
+        }
+        if(end == -1){
+            end = linkLen;
+        }
+        return bin.substring(start, end);
+    }
+
     private boolean downloadAttachment(Message.Attachment attachment, File temp){
         try{
-            temp = attachment.getProxy().downloadToFile(temp).get(10, TimeUnit.SECONDS);
+            attachment.getProxy().downloadToFile(temp).get(downloadTimeoutSeconds, TimeUnit.SECONDS);
         }catch (InterruptedException | ExecutionException | TimeoutException e){
             actions.messageChannel(channel, "Job timed out");
             return false;
         }
         return true;
     }
-    public static BinPostResult postOnFileBin(File file, String filename){
+    public static BinPostResult doFileBinPost(File file, String filename){
         String bin = randomString.nextString(8);
         String url = FILE_BIN_NET + '/' + bin + '/' + filename;
         Request request = Request.Post(FILE_BIN_NET + '/' + bin + '/' + filename)
