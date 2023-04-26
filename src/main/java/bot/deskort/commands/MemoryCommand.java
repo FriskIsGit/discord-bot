@@ -3,6 +3,7 @@ package bot.deskort.commands;
 import bot.music.AudioPlayer;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.Color;
@@ -11,17 +12,43 @@ import static bot.deskort.MessageProcessor.interactiveButtons;
 
 public class MemoryCommand extends Command{
     private static final double MEGA_BYTE = 1024*1024D;
+
     public MemoryCommand(String... aliases){
         super(aliases);
-        description = "Displays a memory management panel";
+        description = "Displays a memory management panel if no argument is provided\n" +
+                      "Arguments: gc, clear_songs.";
+        usage = "mem\n" +
+                "mem gc\n" +
+                "mem clear_songs";
     }
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
-        message.getChannel()
-                .sendMessageEmbeds(createMemoryEmbed())
-                .setActionRow(interactiveButtons)
-                .queue();
+        if(message == null){
+            return;
+        }
+        MessageChannelUnion channel = message.getChannel();
+        if(args.length == 0){
+            channel.sendMessageEmbeds(createMemoryEmbed())
+                    .setActionRow(interactiveButtons)
+                    .queue();
+            return;
+        }
+        switch (args[0]){
+            case "clrsongs":
+            case "clearsongs":
+            case "clear_songs":
+                AudioPlayer.clearAudioTracksFromMemory();
+                break;
+            case "gc":
+                System.gc();
+                break;
+            default:
+                channel.sendMessageEmbeds(createMemoryEmbed())
+                        .setActionRow(interactiveButtons)
+                        .queue();
+                break;
+        }
     }
     public static MessageEmbed createMemoryEmbed(){
         EmbedBuilder embedBuilder = new EmbedBuilder();

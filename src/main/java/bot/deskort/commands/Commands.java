@@ -40,8 +40,6 @@ public final class Commands{
             new StateCommand("state", "vcstate"),
             new RegainCommand("regain"),
             new LogCommand("logs"),
-            new GCCommand("gc"),
-            new ClearSongsCommand("clearsongs", "clrsongs"),
             new FileHashCommand("hashfile", "file", "filehash"),
             new InviteCommand("invite"),
             new RoleCommand("role", "roles"),
