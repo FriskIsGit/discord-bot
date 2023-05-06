@@ -2,6 +2,7 @@ package bot.deskort.commands.custom;
 
 import bot.deskort.commands.Command;
 import bot.utilities.Option;
+import bot.utilities.formatters.JavaFormatter;
 import bot.utilities.requests.JsonBody;
 import bot.utilities.requests.SimpleResponse;
 import com.alibaba.fastjson.JSONArray;
@@ -99,9 +100,11 @@ public class AICommand extends Command{
                 return;
             }
             //attempt to format code if requested
-            boolean isCode = args.length == 3 && args[2].startsWith("-code");
+            boolean isCode = args.length == 3 && args[2].startsWith("-");
 
             phrase = args[1];
+
+            actions.sendEmbed(channel, createInfoEmbed("Command issued", ""));
             if(isTask){
                 Request request = Request.Post(task.getEndpoint())
                         .addHeader("Authorization", "Bearer " + AI21_KEY)
@@ -125,7 +128,7 @@ public class AICommand extends Command{
                     );
                     return;
                 }
-                System.out.println(response);
+
                 String content = extractRelevantContentFromResponse(task, response);
                 actions.sendEmbed(channel, createInfoEmbed(task.toString(), content));
             }else{
@@ -161,7 +164,7 @@ public class AICommand extends Command{
                 JSONObject data = firstEl.getJSONObject("data");
                 String text = data.getString("text");
                 if(isCode){
-                    //text = CodeFormatter.format(text);
+                    text = formatBrokenCode(text, args[2]);
                 }
                 actions.sendEmbed(channel, createInfoEmbed("Response", text));
             }
@@ -175,6 +178,14 @@ public class AICommand extends Command{
             }
             return;
         }
+    }
+
+    private String formatBrokenCode(String text, String lang){
+        int index = text.indexOf("Copy code");
+
+        return text.substring(index + 9) +
+                "```" + lang + '\n' +
+                JavaFormatter.format(text) + "```";
     }
 
     private String extractRelevantContentFromResponse(AITask task, SimpleResponse response){

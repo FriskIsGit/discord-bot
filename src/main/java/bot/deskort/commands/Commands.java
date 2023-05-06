@@ -50,6 +50,7 @@ public final class Commands{
             new AverageCommand("average", "avg"),
             new AICommand("openai", "ai21"),
             new FileBinCommand("filebin", "fb"),
+            new FormatCommand("format"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
