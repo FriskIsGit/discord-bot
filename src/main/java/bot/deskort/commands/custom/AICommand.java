@@ -164,7 +164,7 @@ public class AICommand extends Command{
                 JSONObject data = firstEl.getJSONObject("data");
                 String text = data.getString("text");
                 if(isCode){
-                    text = formatBrokenCode(text, args[2]);
+                    text = formatBrokenCode(text, args[2].substring(1));
                 }
                 actions.sendEmbed(channel, createInfoEmbed("Response", text));
             }
@@ -182,10 +182,19 @@ public class AICommand extends Command{
 
     private String formatBrokenCode(String text, String lang){
         int index = text.indexOf("Copy code");
-
-        return text.substring(index + 9) +
-                "```" + lang + '\n' +
-                JavaFormatter.format(text) + "```";
+        if(index == -1){
+            index = text.indexOf("import");
+            if(index < 0){
+                index = text.indexOf("class");
+            }
+            if(index < 0){
+                index = 0;
+            }
+        }else{
+            index += 9;
+        }
+        return "```" + lang + '\n' +
+                JavaFormatter.format(text.substring(index)) + "```";
     }
 
     private String extractRelevantContentFromResponse(AITask task, SimpleResponse response){
