@@ -69,7 +69,8 @@ public class JavaTokenizer{
                     break;
                 case '@':
                     int annotationEnd = annotationEnd();
-                    tokens.add(TextToken.as(COLON, subArray(i, annotationEnd)));
+                    tokens.add(TextToken.as(ANNOTATION, subArray(i, annotationEnd)));
+                    i = annotationEnd-1;
                     break;
                 case ',':
                     tokens.add(TextToken.as(COMMA, ','));

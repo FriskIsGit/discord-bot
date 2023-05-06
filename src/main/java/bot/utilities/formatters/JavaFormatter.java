@@ -20,7 +20,7 @@ public class JavaFormatter{
 
     private String format(){
         List<TextToken> tokens = JavaTokenizer.tokenize(code);
-/*        for(TextToken textToken : tokens){
+        /*for(TextToken textToken : tokens){
             System.out.println(textToken.token + " " + textToken.text());
         }*/
         for (TextToken textToken : tokens){
@@ -168,6 +168,13 @@ public class JavaFormatter{
                         content.append(' ');
                     }
                     content.append('=');
+                    break;
+                case ANNOTATION:
+                    if (newLine){
+                        applyTab();
+                    }
+                    newLine = true;
+                    content.append(textToken.text()).append('\n');
                     break;
                 case COLON:
                     if (newLine){
