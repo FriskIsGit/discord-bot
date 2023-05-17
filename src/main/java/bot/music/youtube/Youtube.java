@@ -1,19 +1,18 @@
 package bot.music.youtube;
 
-import youtube_lib.downloader.Config;
-import youtube_lib.downloader.YoutubeDownloader;
-import youtube_lib.downloader.downloader.request.RequestVideoFileDownload;
-import youtube_lib.downloader.downloader.request.RequestVideoInfo;
-import youtube_lib.downloader.downloader.request.RequestVideoStreamDownload;
-import youtube_lib.downloader.downloader.response.Response;
-import youtube_lib.downloader.model.videos.VideoInfo;
-import youtube_lib.downloader.model.videos.formats.Format;
+import youtube_lib.Config;
+import youtube_lib.YoutubeDownloader;
+import youtube_lib.downloader.request.RequestVideoFileDownload;
+import youtube_lib.downloader.request.RequestVideoInfo;
+import youtube_lib.downloader.request.RequestVideoStreamDownload;
+import youtube_lib.downloader.response.Response;
+import youtube_lib.model.videos.VideoInfo;
+import youtube_lib.model.videos.formats.Format;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 
 public class Youtube{
     private final YoutubeDownloader downloader;

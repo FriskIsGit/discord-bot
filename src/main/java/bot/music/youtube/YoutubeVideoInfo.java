@@ -1,11 +1,11 @@
 package bot.music.youtube;
 
-import youtube_lib.downloader.model.videos.VideoDetails;
-import youtube_lib.downloader.model.videos.VideoInfo;
-import youtube_lib.downloader.model.videos.formats.AudioFormat;
-import youtube_lib.downloader.model.videos.formats.Format;
-import youtube_lib.downloader.model.videos.formats.VideoFormat;
-import youtube_lib.downloader.model.videos.formats.VideoWithAudioFormat;
+import youtube_lib.model.videos.VideoDetails;
+import youtube_lib.model.videos.VideoInfo;
+import youtube_lib.model.videos.formats.AudioFormat;
+import youtube_lib.model.videos.formats.Format;
+import youtube_lib.model.videos.formats.VideoFormat;
+import youtube_lib.model.videos.formats.VideoWithAudioFormat;
 
 import java.util.List;
 import java.util.stream.Collectors;
