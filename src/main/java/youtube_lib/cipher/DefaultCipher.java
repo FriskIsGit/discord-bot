@@ -1,10 +1,9 @@
 package youtube_lib.cipher;
 
-
 import java.util.List;
 import java.util.Map;
 
-public class DefaultCipher implements Cipher {
+public class DefaultCipher{
 
     private final Map<String, CipherFunction> functionsMap;
     private final List<JsFunction> functions;
@@ -14,7 +13,6 @@ public class DefaultCipher implements Cipher {
         this.functions = transformFunctions;
     }
 
-    @Override
     public String getSignature(String cipheredSignature) {
         char[] signature = cipheredSignature.toCharArray();
         for (JsFunction jsFunction : functions) {

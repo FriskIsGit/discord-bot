@@ -11,6 +11,8 @@ import youtube_lib.downloader.request.Request;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.zip.GZIPInputStream;
@@ -58,7 +60,7 @@ public class DownloaderImpl implements Downloader {
                 urlConnection.setRequestMethod(request.getMethod());
                 if (request.getBody() != null) {
                     urlConnection.setDoOutput(true);
-                    try (OutputStreamWriter outputWriter = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8")){
+                    try (OutputStreamWriter outputWriter = new OutputStreamWriter(urlConnection.getOutputStream(), StandardCharsets.UTF_8)){
                         outputWriter.write(request.getBody());
                         outputWriter.flush();
                     }
@@ -87,7 +89,7 @@ public class DownloaderImpl implements Downloader {
                     if (config.isCompressionEnabled() && "gzip".equals(urlConnection.getHeaderField("content-encoding"))) {
                         in = new GZIPInputStream(in);
                     }
-                    br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+                    br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
                     String inputLine;
                     while ((inputLine = br.readLine()) != null)
                         result.append(inputLine).append('\n');
@@ -150,7 +152,7 @@ public class DownloaderImpl implements Downloader {
         Format format = request.getFormat();
         File outputFile = request.getOutputFile();
         YoutubeCallback<File> callback = request.getCallback();
-        OutputStream os = new FileOutputStream(outputFile);
+        OutputStream os = Files.newOutputStream(outputFile.toPath());
 
         download(request, format, os);
         if (callback != null) {
@@ -255,12 +257,12 @@ public class DownloaderImpl implements Downloader {
         }
     }
 
-    // Copies as many bytes as possible then closes input stream
+    // Copies as many bytes as possible, then closes input stream
     private static long copyAndCloseInput(InputStream is, OutputStream os, byte[] buffer, long offset, long totalLength, final YoutubeCallback<?> listener) throws IOException {
         long done = 0;
 
         try {
-            int read = 0;
+            int read;
             long lastProgress = offset == 0 ? 0 : (offset * 100) / totalLength;
 
             while ((read = is.read(buffer)) != -1) {
@@ -271,8 +273,8 @@ public class DownloaderImpl implements Downloader {
                 done += read;
                 long progress = ((offset + done) * 100) / totalLength;
                 if (progress > lastProgress) {
-                    if (listener instanceof YoutubeProgressCallback) {
-                        ((YoutubeProgressCallback<?>) listener).onDownloading((int) progress);
+                    if (listener != null) {
+                        listener.onDownloading((int) progress);
                     }
                     lastProgress = progress;
                 }
@@ -287,7 +289,7 @@ public class DownloaderImpl implements Downloader {
         long done = 0;
 
         try {
-            int count = 0;
+            int count;
             while ((count = is.read(buffer)) != -1) {
                 if (Thread.interrupted()) {
                     throw new CancellationException();

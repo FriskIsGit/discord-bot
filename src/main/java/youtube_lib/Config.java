@@ -1,10 +1,9 @@
 package youtube_lib;
 
 import youtube_lib.downloader.proxy.ProxyAuthenticator;
-import youtube_lib.downloader.proxy.ProxyCredentials;
-import youtube_lib.downloader.proxy.ProxyCredentialsImpl;
 
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +77,7 @@ public class Config {
 
     public void setProxy(String host, int port, String userName, String password) {
         if (ProxyAuthenticator.getDefault() == null) {
-            ProxyAuthenticator.setDefault(new ProxyAuthenticator(new ProxyCredentialsImpl()));
+            ProxyAuthenticator.setDefault(new ProxyAuthenticator());
         }
         proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
         ProxyAuthenticator.addAuthentication(host, port, userName, password);
@@ -88,7 +87,7 @@ public class Config {
         this.executorService = executorService;
     }
 
-    public void setProxyAuthenticator(ProxyCredentials credentials) {
+    public void setProxyAuthenticator(Map<String, PasswordAuthentication> credentials) {
         ProxyAuthenticator.setDefault(new ProxyAuthenticator(credentials));
     }
 
@@ -141,7 +140,7 @@ public class Config {
 
         public Builder proxy(String host, int port, String userName, String password) {
             if (ProxyAuthenticator.getDefault() == null) {
-                ProxyAuthenticator.setDefault(new ProxyAuthenticator(new ProxyCredentialsImpl()));
+                ProxyAuthenticator.setDefault(new ProxyAuthenticator());
             }
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
             ProxyAuthenticator.addAuthentication(host, port, userName, password);
@@ -153,7 +152,7 @@ public class Config {
             return this;
         }
 
-        public Builder proxyCredentialsManager(ProxyCredentials credentials) {
+        public Builder proxyCredentialsManager(Map<String, PasswordAuthentication> credentials) {
             ProxyAuthenticator.setDefault(new ProxyAuthenticator(credentials));
             return this;
         }

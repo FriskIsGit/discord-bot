@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class CachedCipherFactory implements CipherFactory {
+public class CachedCipherFactory {
 
     private static final String[] INITIAL_FUNCTION_PATTERNS = new String[]{
             "\\b[cs]\\s*&&\\s*[adf]\\.set\\([^,]+\\s*,\\s*encodeURIComponent\\s*\\(\\s*([a-zA-Z0-9$]+)\\(",
@@ -36,11 +36,11 @@ public class CachedCipherFactory implements CipherFactory {
             Pattern.compile("\\w+\\[(\\\"\\w+\\\")\\]\\(\\w,(\\d+)\\)")
     };
 
-    private Downloader downloader;
+    private final Downloader downloader;
 
-    private List<Pattern> knownInitialFunctionPatterns = new ArrayList<>();
-    private Map<Pattern, CipherFunction> functionsEquivalentMap = new HashMap<>();
-    private Map<String, Cipher> ciphers = new HashMap<>();
+    private final List<Pattern> knownInitialFunctionPatterns = new ArrayList<>();
+    private final Map<Pattern, CipherFunction> functionsEquivalentMap = new HashMap<>();
+    private final Map<String, DefaultCipher> ciphers = new HashMap<>();
 
     public CachedCipherFactory(Downloader downloader) {
         this.downloader = downloader;
@@ -58,19 +58,18 @@ public class CachedCipherFactory implements CipherFactory {
         addFunctionEquivalent(FUNCTION_SWAP3_PATTERN, swapFunctionV2);
     }
 
-    @Override
     public void addInitialFunctionPattern(int priority, String regex) {
         knownInitialFunctionPatterns.add(priority, Pattern.compile(regex));
     }
 
-    @Override
+
     public void addFunctionEquivalent(String regex, CipherFunction function) {
         functionsEquivalentMap.put(Pattern.compile(regex), function);
     }
 
-    @Override
-    public Cipher createCipher(String jsUrl) throws YoutubeException {
-        Cipher cipher = ciphers.get(jsUrl);
+
+    public DefaultCipher createCipher(String jsUrl) throws YoutubeException {
+        DefaultCipher cipher = ciphers.get(jsUrl);
 
         if (cipher == null) {
             Response<String> response = downloader.downloadWebpage(new RequestWebpage(jsUrl));

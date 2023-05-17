@@ -64,7 +64,7 @@ public class RequestSearchResult extends Request<RequestSearchResult, SearchResu
             System.arraycopy(FORCED_DATA, 0, bytes, i, FORCED_DATA.length);
         }
         
-        String encoded = Base64Encoder.getInstance().encodeToString(bytes);
+        String encoded = Base64Encoder.encodeToString(bytes);
         return encoded.replace("=", "%253D");
     }
 

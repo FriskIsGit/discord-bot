@@ -2,20 +2,26 @@ package youtube_lib.downloader.proxy;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProxyAuthenticator extends Authenticator {
 
     private static volatile ProxyAuthenticator instance;
 
-    private final ProxyCredentials proxyCredentials;
+    private final Map<String, PasswordAuthentication> credentials;
 
-    public ProxyAuthenticator(ProxyCredentials proxyCredentials) {
-        this.proxyCredentials = proxyCredentials;
+    public ProxyAuthenticator(Map<String, PasswordAuthentication> credentials) {
+        this.credentials = credentials;
+    }
+    public ProxyAuthenticator() {
+        this.credentials = new ConcurrentHashMap<>();
     }
 
     @Override
     public PasswordAuthentication getPasswordAuthentication() {
-        return proxyCredentials.getAuthentication(getRequestingHost(), getRequestingPort());
+        String key = getRequestingHost() + ":" + getRequestingPort();
+        return credentials.get(key);
     }
 
     public static synchronized void setDefault(ProxyAuthenticator authenticator) {
@@ -31,7 +37,7 @@ public class ProxyAuthenticator extends Authenticator {
         if (instance == null) {
             throw new NullPointerException("ProxyAuthenticator instance is null. Use ProxyAuthenticator.setDefault() to init");
         }
-        instance.proxyCredentials.addAuthentication(host, port, userName, password);
+        instance.credentials.put(host + ":" + port, new PasswordAuthentication(userName, password.toCharArray()));
     }
 
 }

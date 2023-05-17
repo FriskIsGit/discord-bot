@@ -12,8 +12,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import youtube_lib.YoutubeException;
 import youtube_lib.YoutubeException.BadPageException;
-import youtube_lib.cipher.Cipher;
-import youtube_lib.cipher.CipherFactory;
+import youtube_lib.cipher.CachedCipherFactory;
+import youtube_lib.cipher.DefaultCipher;
 import youtube_lib.downloader.Downloader;
 import youtube_lib.Config;
 import youtube_lib.downloader.YoutubeCallback;
@@ -37,9 +37,9 @@ public class ParserImpl implements Parser {
     private final Config config;
     private final Downloader downloader;
     private final Extractor extractor;
-    private final CipherFactory cipherFactory;
+    private final CachedCipherFactory cipherFactory;
 
-    public ParserImpl(Config config, Downloader downloader, Extractor extractor, CipherFactory cipherFactory) {
+    public ParserImpl(Config config, Downloader downloader, Extractor extractor, CachedCipherFactory cipherFactory) {
         this.config = config;
         this.downloader = downloader;
         this.extractor = extractor;
@@ -283,7 +283,7 @@ public class ParserImpl implements Parser {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                Cipher cipher = cipherFactory.createCipher(jsUrl);
+                DefaultCipher cipher = cipherFactory.createCipher(jsUrl);
 
                 String signature = cipher.getSignature(s);
                 String decipheredUrl = urlWithSig + "&sig=" + signature;

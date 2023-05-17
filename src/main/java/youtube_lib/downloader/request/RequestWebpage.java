@@ -1,6 +1,6 @@
 package youtube_lib.downloader.request;
 
-public class RequestWebpage extends RequestRaw<RequestWebpage> {
+public class RequestWebpage extends Request<RequestWebpage, String>{
 
     protected final String url;
     private final String method;
@@ -16,7 +16,6 @@ public class RequestWebpage extends RequestRaw<RequestWebpage> {
         this.body = body;
     }
 
-    @Override
     public String getDownloadUrl() {
         return url;
     }

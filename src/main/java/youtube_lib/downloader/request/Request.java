@@ -2,14 +2,13 @@ package youtube_lib.downloader.request;
 
 import youtube_lib.downloader.YoutubeCallback;
 import youtube_lib.downloader.proxy.ProxyAuthenticator;
-import youtube_lib.downloader.proxy.ProxyCredentialsImpl;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class Request<T extends Request<T, S>, S> {
+public abstract class Request<T, S> {
     protected Map<String, String> headers;
     private YoutubeCallback<S> callback;
     private boolean async;
@@ -23,7 +22,7 @@ public abstract class Request<T extends Request<T, S>, S> {
 
     public T proxy(String host, int port, String userName, String password) {
         if (ProxyAuthenticator.getDefault() == null) {
-            ProxyAuthenticator.setDefault(new ProxyAuthenticator(new ProxyCredentialsImpl()));
+            ProxyAuthenticator.setDefault(new ProxyAuthenticator());
         }
         this.proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
         ProxyAuthenticator.addAuthentication(host, port, userName, password);
