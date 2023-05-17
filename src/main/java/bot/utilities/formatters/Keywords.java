@@ -16,7 +16,7 @@ public class Keywords{
                         "public", "return", "short", "static",
                         "strictfp", "super", "switch", "synchronized",
                         "this", "throw", "throws", "transient",
-                        "try", "void", "volatile", "while"
+                        "try", "var", "void", "volatile", "while"
                 };
             case C:
                 return new String[]{
