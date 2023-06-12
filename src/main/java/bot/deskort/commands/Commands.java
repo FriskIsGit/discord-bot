@@ -53,6 +53,7 @@ public final class Commands{
             new FileBinCommand("filebin", "fb"),
             new FormatCommand("format"),
             new LyricsCommand("lyrics", "genius"),
+            new HaltCommand("halt"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 

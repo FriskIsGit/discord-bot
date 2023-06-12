@@ -1,6 +1,7 @@
 package bot.utilities.jda;
 
 import bot.deskort.Bot;
+import com.sun.xml.internal.ws.util.CompletedFuture;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
@@ -15,10 +16,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Actions{
     private final static int MEGABYTES_25 = 26214400;
+    private final List<CompletableFuture<Message>> messageCache = new ArrayList<>(64);
     private final JDA jdaInterface;
     public Actions(){
         jdaInterface = Bot.getJDAInterface();
@@ -27,7 +30,8 @@ public class Actions{
         if(embed == null){
             return;
         }
-        channel.sendMessageEmbeds(embed).queue();
+        CompletableFuture<Message> msgPromise = channel.sendMessageEmbeds(embed).submit();
+        messageCache.add(msgPromise);
     }
 
     public boolean banUser(User user, Guild guildOfOrigin){
@@ -41,8 +45,8 @@ public class Actions{
         }
         try{
             guildOfOrigin.ban(user, 0, TimeUnit.SECONDS).queue();
-        }catch (HierarchyException hierarchyExc){
-            System.err.println(hierarchyExc.getMessage());
+        }catch (HierarchyException e){
+            System.err.println(e.getMessage());
             return false;
         }
         return true;
@@ -58,8 +62,8 @@ public class Actions{
         }
         try{
             guildOfOrigin.unban(user).queue();
-        }catch (HierarchyException hierarchyExc){
-            System.err.println(hierarchyExc.getMessage());
+        }catch (HierarchyException e){
+            System.err.println(e.getMessage());
             return false;
         }
         return true;
@@ -129,7 +133,8 @@ public class Actions{
         int length = msgText.length();
 
         if(2000 >= length && !msgText.startsWith("\n")){
-            txtChannel.sendMessage(msgText).queue();
+            CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msgText).submit();
+            messageCache.add(msgPromise);
         }
         else if(length > 2000){
             int parts = length/2000 + 1;
@@ -140,7 +145,8 @@ public class Actions{
             }
 
             for(String msg : messagesArr){
-                txtChannel.sendMessage(msg).queue();
+                CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msg).submit();
+                messageCache.add(msgPromise);
             }
         }
     }
@@ -160,7 +166,8 @@ public class Actions{
 
         if(1994 >= msgLength && msgLength>0){
             try{
-                txtChannel.sendMessage("```" + msgText + "```").queue();
+                CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msgText + "```").submit();
+                messageCache.add(msgPromise);
             }catch (InsufficientPermissionException insufficientPermExc){
                 System.err.println("Lacking permission MESSAGE_SEND");
             }
@@ -174,13 +181,14 @@ public class Actions{
             }
 
             for(String msg : messagesArr){
-                txtChannel.sendMessage("```" + msg + "```").queue();
+                CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msg + "```").submit();
+                messageCache.add(msgPromise);
             }
         }
     }
 
     public void sendAsMessageBlock(long channelId, String msgText){
-        sendAsMessageBlock(jdaInterface.getTextChannelById(channelId),msgText);
+        sendAsMessageBlock(jdaInterface.getTextChannelById(channelId), msgText);
     }
 
     public void messageUser(long userId, String messageContent){
@@ -194,6 +202,17 @@ public class Actions{
             userDM.sendMessage(messageContent).queue();
         }catch (Exception exc){
             System.err.println("Cannot message user: " + exc);
+        }
+    }
+
+    public void clearQueuedMessages(){
+        for (int i = 0; i < messageCache.size(); i++){
+            CompletableFuture<Message> promise = messageCache.get(i);
+            if (!promise.isDone()){
+                //useless boolean value
+                promise.cancel(false);
+            }
+            messageCache.remove(i--);
         }
     }
 
