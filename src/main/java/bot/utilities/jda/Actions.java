@@ -1,7 +1,6 @@
 package bot.utilities.jda;
 
 import bot.deskort.Bot;
-import com.sun.xml.internal.ws.util.CompletedFuture;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
@@ -139,7 +138,7 @@ public class Actions{
         else if(length > 2000){
             int parts = length/2000 + 1;
             String[] messagesArr = new String[parts];
-            for(int i = 0, offset = 0; i<messagesArr.length; i++, offset+=2000){
+            for(int i = 0, offset = 0; i < messagesArr.length; i++, offset+=2000){
                 int endIndex = Math.min(length, offset+2000);
                 messagesArr[i] = msgText.substring(offset, endIndex);
             }
@@ -164,11 +163,11 @@ public class Actions{
             return;
         int msgLength = msgText.length();
 
-        if(1994 >= msgLength && msgLength>0){
+        if(1994 >= msgLength && msgLength > 0){
             try{
                 CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msgText + "```").submit();
                 messageCache.add(msgPromise);
-            }catch (InsufficientPermissionException insufficientPermExc){
+            }catch (InsufficientPermissionException e){
                 System.err.println("Lacking permission MESSAGE_SEND");
             }
         }
@@ -201,7 +200,7 @@ public class Actions{
         try{
             userDM.sendMessage(messageContent).queue();
         }catch (Exception exc){
-            System.err.println("Cannot message user: " + exc);
+            System.err.println("Cannot message user.\n" + exc);
         }
     }
 
@@ -234,7 +233,7 @@ public class Actions{
                 userDM.sendFiles(upload).queue();
                 System.out.println("Sending file..");
             }catch (IOException e){
-                System.out.println("IOException occurred on file upload");
+                System.err.println("IOException occurred on file upload");
             }
         }catch (IllegalArgumentException iaExc){
             System.err.println("Cannot send file to user");
