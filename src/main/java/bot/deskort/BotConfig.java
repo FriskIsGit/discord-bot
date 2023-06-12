@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 
 public class BotConfig{
     public boolean exists;
-    public String token, prefix;
+    public String token, prefix, openAIToken, ai21Token, geniusToken;
     public int purgeCap = 500, maxDequeSize = 1000;
     public File audioDirectory;
 
@@ -46,6 +46,11 @@ public class BotConfig{
                 long userId = (Long) sudo;
                 Bot.AUTHORIZED_USERS.add(userId);
             }
+            JSONObject tokens = data.getJSONObject("tokens");
+            config.openAIToken = tokens.getString("open_ai_token");
+            config.ai21Token = tokens.getString("ai21_token");
+            config.geniusToken = tokens.getString("genius_token");
+
             config.purgeCap = data.getInt("purge_cap");
             config.maxDequeSize = data.getInt("message_cap_per_channel");
             String audioDir = data.getString("audio_dir");

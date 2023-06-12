@@ -5,40 +5,28 @@ import java.io.InputStream;
 
 public class StreamUtil{
     public static String streamToString(InputStream inputStream){
-        return streamToString(inputStream, 32768);
-    }
-
-    public static String streamToString(InputStream inputStream, int initialSize){
-        String output;
-        byte[] buffer = new byte[initialSize];
+        if(inputStream == null){
+            return "";
+        }
+        byte[] buffer = new byte[32768];
         try {
-            int offset = 0;
+            int writeOffset = 0;
             while (inputStream.available() != 0) {
                 int available = inputStream.available();
-                if(available + offset < buffer.length){
-                    int currentRead = inputStream.read(buffer, offset, available);
-                    offset += currentRead;
+                if(available + writeOffset < buffer.length){
+                    int currentRead = inputStream.read(buffer, writeOffset, available);
+                    writeOffset += currentRead;
                 }else{
                     byte[] tempBuffer = new byte[buffer.length<<1];
-                    System.arraycopy(buffer, 0, tempBuffer, 0, offset);
+                    System.arraycopy(buffer, 0, tempBuffer, 0, writeOffset);
                     buffer = tempBuffer;
                     tempBuffer = null;
                 }
             }
-            output = bytesToStr(buffer, offset);
-            return output;
+            return new String(buffer, 0, writeOffset);
         } catch (IOException ioe) {
             ioe.printStackTrace();
-            System.err.println("Stream closed?");
         }
         return null;
-    }
-
-    private static String bytesToStr(byte[] bytes, int offset){
-        char[] charArr = new char[offset];
-        for(int i = 0; i<offset; i++){
-            charArr[i] = (char)bytes[i];
-        }
-        return new String(charArr);
     }
 }

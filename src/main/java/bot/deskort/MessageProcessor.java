@@ -139,7 +139,7 @@ public class MessageProcessor{
         InputStream inputStream = proc.getInputStream();
 
         //InputStream errorStream = procBuilder.getErrorStream();
-        String stringedStream = StreamUtil.streamToString(inputStream, 50_000);
+        String stringedStream = StreamUtil.streamToString(inputStream);
         if (stringedStream != null){
             actions.sendAsMessageBlock(message.getChannel(), stringedStream);
             try{

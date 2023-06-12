@@ -1,7 +1,8 @@
 package bot.deskort.commands;
 
-import bot.deskort.commands.custom.AICommand;
+import bot.deskort.commands.ai.AICommand;
 import bot.deskort.commands.filebin.FileBinCommand;
+import bot.deskort.commands.lyrics.LyricsCommand;
 import bot.deskort.commands.voice.*;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public final class Commands{
             new AICommand("openai", "ai21"),
             new FileBinCommand("filebin", "fb"),
             new FormatCommand("format"),
+            new LyricsCommand("lyrics", "genius"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
@@ -65,23 +67,25 @@ public final class Commands{
         return instance;
     }
 
-    public static String mergeTerms(String[] terms, int fromIndex){
+    //from inclusive, to exclusive
+    public static String mergeTerms(String[] terms, int fromIndex, int toIndex){
         if(terms.length == 0){
             return "";
         }
         int totalLength = 0;
-        for (int i = fromIndex; i < terms.length; i++){
-            totalLength += terms[i].length();
+        for (int i = fromIndex; i < toIndex; i++){
+            totalLength += terms[i].length() + 1;
         }
         StringBuilder str = new StringBuilder(totalLength);
-        for (int i = fromIndex; i < terms.length; i++){
-            String term = terms[i];
-            str.append(term);
+        for (int i = fromIndex; i < toIndex; i++){
+            str.append(terms[i]);
+            if(i != toIndex - 1)
+                str.append(' ');
         }
         return str.toString();
     }
     public static String mergeTerms(String[] terms){
-        return mergeTerms(terms, 0);
+        return mergeTerms(terms, 0, terms.length);
     }
 
     private void populateMap(){

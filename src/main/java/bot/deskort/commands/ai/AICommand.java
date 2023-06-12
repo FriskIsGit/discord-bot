@@ -1,5 +1,6 @@
-package bot.deskort.commands.custom;
+package bot.deskort.commands.ai;
 
+import bot.deskort.Bot;
 import bot.deskort.commands.Command;
 import bot.utilities.Option;
 import bot.utilities.formatters.JavaFormatter;
@@ -18,12 +19,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class AICommand extends Command{
-    private static final String OPENAI_KEY = "";
-    private static final String AI21_KEY = "";
     private static final String GPT_MODEL_3_5 = "gpt-3.5-turbo-0301";
     private static final String OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
     public static final String AI21_J2_API = "https://api.ai21.com/studio/v1/j2-";
 
+    private final String OPENAI_KEY;
+    private final String AI21_KEY;
     private String phrase;
     private MessageChannelUnion channel;
     public AICommand(String... aliases){
@@ -47,6 +48,8 @@ public class AICommand extends Command{
                 "ai21 paraphrase `phrase`\n" +
                 "ai21 gec `phrase`\n" +
                 "openai models\n";
+        OPENAI_KEY = Bot.getConfig().openAIToken;
+        AI21_KEY = Bot.getConfig().ai21Token;
     }
 
     @Override
@@ -169,7 +172,6 @@ public class AICommand extends Command{
                 actions.sendEmbed(channel, createInfoEmbed("Response", text));
             }
         }
-
         else if(commandName.equals("openai")){
             if (args[0].equals("models")){
                 List<Model> models = retrieveOpenAIModels();
@@ -326,7 +328,7 @@ public class AICommand extends Command{
         return str.toString();
     }
 
-    private static List<Model> retrieveOpenAIModels(){
+    private List<Model> retrieveOpenAIModels(){
         Request request = Request.Get(OPENAI_MODELS_URL)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer " + OPENAI_KEY);
