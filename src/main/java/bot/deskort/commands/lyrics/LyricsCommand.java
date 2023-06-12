@@ -96,7 +96,6 @@ public class LyricsCommand extends Command{
         }
         String lyrics = scrapeLyrics(pageResponse.body);
         actions.sendAsMessageBlock(channel, lyrics);
-        System.out.println(lyrics);
     }
 
     private static String scrapeLyrics(String page){
@@ -106,10 +105,7 @@ public class LyricsCommand extends Command{
         final String INSTRUMENTAL = "This song is an instrumental";
         int fakeContainer = page.indexOf(CONTAINER);
         if(fakeContainer == -1){
-            if(page.contains(INSTRUMENTAL)){
-                return "This song is an instrumental";
-            }
-            return "";
+            return page.contains(INSTRUMENTAL) ? "This song is an instrumental" : "";
         }
         int lyricContainer = page.indexOf(CONTAINER, fakeContainer + 1);
         int textStart = page.indexOf('>', lyricContainer);
@@ -168,10 +164,27 @@ public class LyricsCommand extends Command{
                     break;
             }
         }
+
+        stripDigits(lyrics, 3);
         if(endsWith(lyrics, "Embed")){
-            lyrics.setLength(lyrics.length() -5);
+            lyrics.setLength(lyrics.length() - 5);
+        }
+        stripDigits(lyrics, 4);
+        if(endsWith(lyrics, "You might also like")){
+            lyrics.setLength(lyrics.length() - 19);
         }
         return lyrics.toString();
+    }
+
+    private static void stripDigits(StringBuilder str, final int quantity){
+        if(quantity <= 0)
+            return;
+        int currLen = str.length();
+        for (int i = currLen-1; i >= currLen - quantity && i > -1; i--){
+            if(Character.isDigit(str.charAt(i))){
+                str.setLength(i);
+            }
+        }
     }
 
     private static boolean endsWith(StringBuilder str, String seq){
