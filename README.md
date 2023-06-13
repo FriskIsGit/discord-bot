@@ -44,8 +44,10 @@ although not used directly in code, they're a supplement for existing methods
 - create a custom logger
 - add seek command for audio playback
 
-![embed_play](img/embed_play.png)
+|        Command info        |          Filebin           |
+|:--------------------------:|:--------------------------:|
+| ![](img/command_embed.png) | ![](img/filebin_embed.png) |
+
+![ai21](img/ai21_embed.png)
 ***
-![embed_ai21](img/embed_ai21.png)
-***
-![embed_filebin](img/embed_filebin.png)
+![song](img/song_embed.png)
