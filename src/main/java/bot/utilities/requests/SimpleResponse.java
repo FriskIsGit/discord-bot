@@ -8,8 +8,14 @@ import org.apache.http.client.fluent.Response;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SimpleResponse{
+    static {
+        //cookie warning fix
+        Logger.getLogger("org.apache.http.client.protocol.ResponseProcessCookies").setLevel(Level.OFF);
+    }
     public int code;
     public String body;
 
