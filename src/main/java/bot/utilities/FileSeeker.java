@@ -47,13 +47,13 @@ public class FileSeeker{
 
     private boolean stepDown(File currentDir){
         File[] files = currentDir.listFiles();
-        for(int i = 0; i<files.length; i++){
-            if (files[i].isDirectory()){
-                if(stepDown(files[i])){
+        for (File file : files){
+            if (file.isDirectory()){
+                if (stepDown(file)){
                     return true;
                 }
-            }else if(files[i].getName().startsWith(targetName)){
-                targetPath = files[i].getPath();
+            }else if (file.getName().startsWith(targetName)){
+                targetPath = file.getPath();
                 return true;
             }
         }
@@ -61,13 +61,13 @@ public class FileSeeker{
     }
     private boolean stepDownContains(File currentDir){
         File[] files = currentDir.listFiles();
-        for(int i = 0; i<files.length; i++){
-            if (files[i].isDirectory()){
-                if(stepDownContains(files[i])){
+        for (File file : files){
+            if (file.isDirectory()){
+                if (stepDownContains(file)){
                     return true;
                 }
-            }else if(getNameWithoutExtension(files[i].getName()).contains(targetName)){
-                targetPath = files[i].getPath();
+            }else if (getNameWithoutExtension(file.getName()).contains(targetName)){
+                targetPath = file.getPath();
                 return true;
             }
         }
@@ -80,11 +80,11 @@ public class FileSeeker{
      * @return nameWithoutExtension or empty string if name doesn't contain a dot
      */
     public static String getNameWithoutExtension(String absoluteName){
-        int index = absoluteName.indexOf('.');
-        if(index <= 0){
-            return "";
+        int index = absoluteName.lastIndexOf('.');
+        if(index <= 0 || index == absoluteName.length()-1){
+            return absoluteName;
         }
-        return absoluteName.substring(0,index);
+        return absoluteName.substring(0, index);
     }
     /**
      * method should account for hidden files prepended with a dot
@@ -92,10 +92,11 @@ public class FileSeeker{
      * @return extension or empty string if name doesn't contain extension
      */
     public static String getExtension(String absoluteName){
-        int index = absoluteName.indexOf('.');
-        if(index <= 0 || absoluteName.length()==index+1){
+        int index = absoluteName.lastIndexOf('.');
+        if(index <= 0 || absoluteName.length() == index+1){
             return "";
         }
+
         return absoluteName.substring(index+1);
     }
     public String getBasePath(){
