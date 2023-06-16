@@ -146,9 +146,11 @@ public class LyricsCommand extends Command{
                         lyrics.append('\'');
                     }
                     break;
-                case '\\':
-                case '\n':
-                case ';':
+                case 'q':
+                    if(page.startsWith("uot;", i + 1)){
+                        i += 4;
+                        lyrics.append('"');
+                    }
                     break;
                 case '>':
                     if (angleBrackets == 0){
@@ -165,6 +167,7 @@ public class LyricsCommand extends Command{
             }
         }
 
+        removeYouMightAlsoLike(lyrics);
         stripDigits(lyrics, 3);
         if(endsWith(lyrics, "Embed")){
             lyrics.setLength(lyrics.length() - 5);
@@ -174,6 +177,15 @@ public class LyricsCommand extends Command{
             lyrics.setLength(lyrics.length() - 19);
         }
         return lyrics.toString();
+    }
+
+    private static void removeYouMightAlsoLike(StringBuilder lyrics){
+        for (int i = 19; i < lyrics.length(); i++){
+            //commonly found before opening square bracket [
+            if(lyrics.charAt(i) == '[' && lyrics.substring(i-19, i).equals("You might also like")){
+                lyrics.replace(i-19, i, "");
+            }
+        }
     }
 
     private static void stripDigits(StringBuilder str, final int quantity){
