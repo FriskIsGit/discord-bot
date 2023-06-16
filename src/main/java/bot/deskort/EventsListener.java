@@ -162,6 +162,12 @@ public class EventsListener extends ListenerAdapter{
         if(messageText.length() == 0){
             messageText = attachmentsToString();
         }
+        int newLine = messageText.indexOf('\n');
+        if(newLine > -1){
+            int remaining = messageText.length() - newLine;
+            String more = " (+" + remaining + " more)";
+            messageText = messageText.substring(0, newLine) + more;
+        }
         System.out.println("[" +channelName+ "]  " + authorName + ": " + messageText);
     }
 
