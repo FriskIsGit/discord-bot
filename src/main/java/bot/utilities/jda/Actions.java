@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.File;
@@ -22,6 +21,7 @@ public class Actions{
     private final static int MEGABYTES_25 = 26214400;
     private final List<CompletableFuture<Message>> messageCache = new ArrayList<>(64);
     private final JDA jdaInterface;
+
     public Actions(){
         jdaInterface = Bot.getJDAInterface();
     }
@@ -131,22 +131,21 @@ public class Actions{
             return;
         int length = msgText.length();
 
-        if(2000 >= length && !msgText.startsWith("\n")){
+        if(2000 >= length){
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msgText).submit();
             messageCache.add(msgPromise);
+            return;
         }
-        else if(length > 2000){
-            int parts = length/2000 + 1;
-            String[] messagesArr = new String[parts];
-            for(int i = 0, offset = 0; i < messagesArr.length; i++, offset+=2000){
-                int endIndex = Math.min(length, offset+2000);
-                messagesArr[i] = msgText.substring(offset, endIndex);
-            }
+        int parts = length / 2000 + 1;
+        String[] messagesArr = new String[parts];
+        for(int i = 0, offset = 0; i < messagesArr.length; i++, offset+=2000){
+            int endIndex = Math.min(length, offset+2000);
+            messagesArr[i] = msgText.substring(offset, endIndex);
+        }
 
-            for(String msg : messagesArr){
-                CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msg).submit();
-                messageCache.add(msgPromise);
-            }
+        for(String msg : messagesArr){
+            CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msg).submit();
+            messageCache.add(msgPromise);
         }
     }
 
@@ -164,12 +163,8 @@ public class Actions{
         int msgLength = msgText.length();
 
         if(1994 >= msgLength && msgLength > 0){
-            try{
-                CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msgText + "```").submit();
-                messageCache.add(msgPromise);
-            }catch (InsufficientPermissionException e){
-                System.err.println("Lacking permission MESSAGE_SEND");
-            }
+            CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msgText + "```").submit();
+            messageCache.add(msgPromise);
         }
         else if(msgLength>2000){
             int parts = msgLength/2000 + 1;
@@ -194,14 +189,15 @@ public class Actions{
         User user = jdaInterface.getUserById(userId);
         //if not cached - retrieve
         if(user == null){
-            user = jdaInterface.retrieveUserById(userId).complete();
+            try{
+                user = jdaInterface.retrieveUserById(userId).complete();
+            }catch (RuntimeException unknownUser){
+                System.err.println("UNKNOWN USER");
+                return;
+            }
         }
         PrivateChannel userDM = user.openPrivateChannel().complete();
-        try{
-            userDM.sendMessage(messageContent).queue();
-        }catch (Exception exc){
-            System.err.println("Cannot message user.\n" + exc);
-        }
+        userDM.sendMessage(messageContent).queue();
     }
 
     public void clearQueuedMessages(){
@@ -219,7 +215,12 @@ public class Actions{
         User user = jdaInterface.getUserById(userId);
         //if not cached - retrieve
         if(user == null){
-            user = jdaInterface.retrieveUserById(userId).complete();
+            try{
+                user = jdaInterface.retrieveUserById(userId).complete();
+            }catch (RuntimeException unknownUser){
+                System.err.println("UNKNOWN USER");
+                return;
+            }
         }
         PrivateChannel userDM = user.openPrivateChannel().complete();
         try{

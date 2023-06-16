@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Scanner;
 
 public class ConsoleChat{
+    private final static int USER_ID_LEN = 18;
     private final Scanner scanner = new Scanner(System.in);
 
     private boolean inServer = false, looping = true;
@@ -58,8 +59,10 @@ public class ConsoleChat{
                     break;
                 case "dm":
                     switchToDm(args);
+                    break;
                 case "file":
                     sendFile(args);
+                    break;
                 case "where": {
                     if (inServer)
                         System.out.println("Current channel: " + currentChannel);
@@ -80,7 +83,6 @@ public class ConsoleChat{
                     }
             }
         }
-        System.out.println("Exited chat.");
     }
 
     private void sendFile(String[] args){
@@ -94,14 +96,18 @@ public class ConsoleChat{
     }
 
     private void switchToDm(String[] anySplit){
-        //user id required
-        try{
-            dmId = Long.parseLong(anySplit[1]);
-            System.out.println("Switched to dm, id: " + dmId);
-            inServer = false;
-        }catch (NumberFormatException numFormatExc){
-            System.out.println("Failed to parse id");
+        String toParse = anySplit[1];
+        if(!toParse.matches("[0-9]+")){
+            System.err.println("Provided ID is not numerical");
+            return;
         }
+        if(toParse.length() != USER_ID_LEN){
+            System.err.println("ID should be exactly 18 digits long");
+            return;
+        }
+        dmId = Long.parseLong(toParse);
+        System.out.println("Switched to dm, id: " + dmId);
+        inServer = false;
     }
 
     private void listChannels(String[] args){
