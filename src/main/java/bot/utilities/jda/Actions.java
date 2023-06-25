@@ -34,12 +34,7 @@ public class Actions{
     }
 
     public boolean banUser(User user, Guild guildOfOrigin){
-        if(user == null){
-            System.err.println("user == null");
-            return false;
-        }
-        if(guildOfOrigin == null){
-            System.err.println("guildOfOrigin == null");
+        if(user == null || guildOfOrigin == null){
             return false;
         }
         try{
@@ -51,16 +46,23 @@ public class Actions{
         return true;
     }
     public boolean unbanUser(User user, Guild guildOfOrigin){
-        if(user == null){
-            System.err.println("user == null");
-            return false;
-        }
-        if(guildOfOrigin == null){
-            System.err.println("guildOfOrigin == null");
+        if(user == null || guildOfOrigin == null){
             return false;
         }
         try{
             guildOfOrigin.unban(user).queue();
+        }catch (HierarchyException e){
+            System.err.println(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    public boolean kickUser(User user, Guild guildOfOrigin, String reason){
+        if(user == null || guildOfOrigin == null){
+            return false;
+        }
+        try{
+            guildOfOrigin.kick(user).reason(reason).queue();
         }catch (HierarchyException e){
             System.err.println(e.getMessage());
             return false;

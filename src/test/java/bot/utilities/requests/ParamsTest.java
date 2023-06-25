@@ -1,4 +1,4 @@
-package bot.utilities;
+package bot.utilities.requests;
 
 import bot.utilities.requests.Params;
 import org.junit.Test;

@@ -18,8 +18,8 @@ import java.util.Arrays;
 
 public class LyricsCommand extends Command{
     private static final int MIN_LEN_THRESHOLD = 3;
-    private static final String GENIUS_URL = "https://api.genius.com";
-    private static final String GENIUS_AUTH = "https://api.genius.com/oauth/authorize";
+    private static final String GENIUS_URL = "https://genius.com";
+    private static final String GENIUS_API_URL = "https://api.genius.com";
 
     private final String ACCESS_TOKEN;
     public LyricsCommand(String... aliases){
@@ -28,7 +28,8 @@ public class LyricsCommand extends Command{
                       "-all displays all initially retrieved songs";
         usage = "lyrics `title`\n" +
                 "lyrics `title` -a\n" +
-                "lyrics `title` -all\n";
+                "lyrics `title` -all\n" +
+                "lyrics `url`\n";
         ACCESS_TOKEN = Bot.getConfig().geniusToken;
     }
 
@@ -43,11 +44,27 @@ public class LyricsCommand extends Command{
             return;
         }
 
+        String url = args[0];
+        if(url.startsWith(GENIUS_URL)){
+            Request webpageRequest = Request.Get(url);
+            webpageRequest.addHeader("Accept", "text/html");
+            webpageRequest.addHeader("Accept-Language", "en-US;q=0.7");
+            webpageRequest.userAgent("Mozilla/5.0 Gecko/20100101");
+            SimpleResponse pageResponse = SimpleResponse.performRequest(webpageRequest).expect("No response");
+            if (pageResponse.code != 200){
+                //exception
+                return;
+            }
+            String lyrics = scrapeLyrics(pageResponse.body);
+            actions.sendAsMessageBlock(channel, lyrics);
+            return;
+        }
+
         int len = args.length;
         boolean all = len > 1 && (args[len-1].equals("-all") || args[len-1].equals("-a"));
         String song = all ? Commands.mergeTerms(args, 0, args.length-1) : Commands.mergeTerms(args);
 
-        Request request = Request.Get(GENIUS_URL + "/search?q=" + encode(song))
+        Request request = Request.Get(GENIUS_API_URL + "/search?q=" + encode(song))
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer " + ACCESS_TOKEN);
 
@@ -88,7 +105,7 @@ public class LyricsCommand extends Command{
         Request webpageRequest = Request.Get(mostAccurate.lyricsURL);
         webpageRequest.addHeader("Accept", "text/html");
         webpageRequest.addHeader("Accept-Language", "en-US;q=0.7");
-        webpageRequest.addHeader("User-Agent", "Mozilla/5.0 Gecko/20100101");
+        webpageRequest.userAgent("Mozilla/5.0 Gecko/20100101");
         SimpleResponse pageResponse = SimpleResponse.performRequest(webpageRequest).expect("No response");
         if (pageResponse.code != 200){
             //exception
@@ -144,12 +161,15 @@ public class LyricsCommand extends Command{
                     if (page.startsWith("#x27;", i + 1)){
                         i += 5;
                         lyrics.append('\'');
-                    }
-                    break;
-                case 'q':
-                    if(page.startsWith("uot;", i + 1)){
-                        i += 4;
+                    }else if(page.startsWith("quot;", i + 1)){
+                        i += 5;
                         lyrics.append('"');
+                    }else if(page.startsWith("apos;", i + 1)){
+                        i += 5;
+                        lyrics.append('\'');
+                    }
+                    else{
+                        lyrics.append('&');
                     }
                     break;
                 case '>':

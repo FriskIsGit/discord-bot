@@ -1,6 +1,5 @@
-package bot.utilities;
+package bot.utilities.requests;
 
-import bot.utilities.requests.JsonBody;
 import org.junit.Test;
 
 import java.util.Arrays;
