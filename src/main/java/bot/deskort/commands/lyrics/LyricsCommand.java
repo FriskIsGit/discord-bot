@@ -241,14 +241,18 @@ public class LyricsCommand extends Command{
         return accuracy(name.split(" "), target.split(" "));
     }
     public static int accuracy(String[] names, String[] targets){
+        for (int i = 0; i < names.length; i++) names[i] = names[i].toLowerCase();
+        for (int i = 0; i < targets.length; i++) targets[i] = targets[i].toLowerCase();
+
         int accuracy = 0;
         for (String q : names){
             for (String t : targets){
-                q = q.toLowerCase();
-                t = t.toLowerCase();
                 int tmp = matchingLen(q, t);
                 if (tmp >= MIN_LEN_THRESHOLD){
                     accuracy += tmp;
+                }
+                if(tmp >= q.length()){
+                    break;
                 }
             }
         }

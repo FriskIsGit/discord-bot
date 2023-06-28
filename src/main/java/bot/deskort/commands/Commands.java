@@ -43,7 +43,7 @@ public final class Commands{
             new RegainCommand("regain"),
             new LogCommand("logs"),
             new FileHashCommand("hashfile", "file", "filehash"),
-            new InviteCommand("invite"),
+            new InviteCommand("invite", "invites"),
             new RoleCommand("role", "roles"),
             new SudoCommand("sudo"),
             new URLCommand("url" , "link", "links"),

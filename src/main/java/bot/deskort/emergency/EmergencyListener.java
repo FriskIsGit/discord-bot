@@ -31,7 +31,7 @@ public class EmergencyListener extends ListenerAdapter{
     public static final int TRIGGER_DELAY_MS = 5000;
     public static final int EVENT_THRESHOLD = 3;
 
-    private static final HashMap<Long, EventQueue> userIdsToEvents = new HashMap<>(4);
+    private static final HashMap<Long, EventQueue> userIdsToEvents = new HashMap<>();
 
     public volatile boolean awaitKick = false;
     public volatile HashMap<Guild, AuditLogEntry> guildsToLastKicks = null;

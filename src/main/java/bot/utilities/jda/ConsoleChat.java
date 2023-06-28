@@ -63,6 +63,9 @@ public class ConsoleChat{
                 case "file":
                     sendFile(args);
                     break;
+                case "say":
+                    actions.messageChannel(currentChannel, args[1]);
+                    break;
                 case "where": {
                     if (inServer)
                         System.out.println("Current channel: " + currentChannel);

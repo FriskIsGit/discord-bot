@@ -18,7 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Actions{
-    private final static int MEGABYTES_25 = 26214400;
+    private static final int MEGABYTES_25 = 26214400;
+    private static final int MAX_CONTENT_LENGTH = Message.MAX_CONTENT_LENGTH;
+    private static final int SPLIT_LIMIT = 50;
     private final List<CompletableFuture<Message>> messageCache = new ArrayList<>(64);
     private final JDA jdaInterface;
 
@@ -133,22 +135,46 @@ public class Actions{
             return;
         int length = msgText.length();
 
-        if(2000 >= length){
+        if(MAX_CONTENT_LENGTH >= length){
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msgText).submit();
             messageCache.add(msgPromise);
             return;
         }
-        int parts = length / 2000 + 1;
-        String[] messagesArr = new String[parts];
-        for(int i = 0, offset = 0; i < messagesArr.length; i++, offset+=2000){
-            int endIndex = Math.min(length, offset+2000);
-            messagesArr[i] = msgText.substring(offset, endIndex);
-        }
 
-        for(String msg : messagesArr){
+        List<String> messageParts = smartPartition(msgText, MAX_CONTENT_LENGTH);
+        for(String msg : messageParts){
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msg).submit();
             messageCache.add(msgPromise);
         }
+    }
+
+    private List<String> smartPartition(String msgText, int SIZE_PER_MSG){
+        int length = msgText.length();
+        int partsEst = length / SIZE_PER_MSG + 1;
+        List<String> messageParts = new ArrayList<>(partsEst);
+        int lastSplit = 0;
+        int counter = 0;
+        while(counter++ < SPLIT_LIMIT){
+            int widestSplit = lastSplit + SIZE_PER_MSG;
+            if(widestSplit >= length){
+                String last = msgText.substring(lastSplit, length);
+                messageParts.add(last);
+                break;
+            }
+
+            int nextSplit = msgText.lastIndexOf('\n', widestSplit);
+            if(nextSplit == lastSplit){
+                //accounts for - not found case
+                String part = msgText.substring(lastSplit, widestSplit);
+                messageParts.add(part);
+                lastSplit = widestSplit;
+                continue;
+            }
+            String part = msgText.substring(lastSplit, nextSplit);
+            messageParts.add(part);
+            lastSplit = nextSplit;
+        }
+        return messageParts;
     }
 
     public void messageChannel(long channelId, String msgText){
@@ -160,26 +186,20 @@ public class Actions{
     }
 
     public void sendAsMessageBlock(MessageChannel txtChannel, String msgText){
-        if(txtChannel == null)
+        if(txtChannel == null || msgText.isEmpty())
             return;
         int msgLength = msgText.length();
 
-        if(1994 >= msgLength && msgLength > 0){
+        if(MAX_CONTENT_LENGTH-6 >= msgLength){
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msgText + "```").submit();
             messageCache.add(msgPromise);
+            return;
         }
-        else if(msgLength>2000){
-            int parts = msgLength/2000 + 1;
-            String[] messagesArr = new String[parts];
-            for(int i = 0, offset = 0; i<messagesArr.length; i++, offset+=1994){
-                int endIndex = Math.min(msgLength, offset+1994);
-                messagesArr[i] = msgText.substring(offset, endIndex);
-            }
 
-            for(String msg : messagesArr){
-                CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msg + "```").submit();
-                messageCache.add(msgPromise);
-            }
+        List<String> messageParts = smartPartition(msgText, MAX_CONTENT_LENGTH - 6);
+        for(String msg : messageParts){
+            CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msg + "```").submit();
+            messageCache.add(msgPromise);
         }
     }
 

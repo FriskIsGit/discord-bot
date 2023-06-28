@@ -18,27 +18,51 @@ public class RoleCommand extends Command{
                 "role add `user_id` `role_name` `guild_id`\n" +
                 "role remove `user_id` `role_name` `guild_id`\n" +
                 "role list\n" +
+                "role list `guild_id`\n" +
                 "role ls";
     }
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
-        if(args.length == 1){
-            if(args[0].equals("list") || args[0].equals("ls")){
-                String roles = rolesToString(message.getGuild());
+        if(args.length < 1){
+            return;
+        }
+        boolean msgNull = message == null;
+        if (args[0].equals("list") || args[0].equals("ls")){
+            Guild guild;
+            if (msgNull){
+                if (args.length == 1){
+                    return;
+                }
+                guild = jda.getGuildById(args[1]);
+            }else{
+                guild = message.getGuild();
+            }
+
+            if(guild == null){
+                return;
+            }
+
+            String roles = rolesToString(guild);
+            if(msgNull){
+                System.out.println(roles);
+            }else{
                 actions.messageChannel(message.getChannel(), roles);
             }
             return;
         }
+
         if(args.length < 3){
-            actions.messageChannel(message.getChannel(), "Not enough arguments");
+            if(!msgNull)
+                actions.messageChannel(message.getChannel(), "Not enough arguments");
             return;
         }
 
         long id = Long.parseLong(args[1]);
         User user = jda.retrieveUserById(id).complete();
         if(user == null){
-            actions.messageChannel(message.getChannel(), "User couldn't be retrieved");
+            if(!msgNull)
+                actions.messageChannel(message.getChannel(), "User couldn't be retrieved");
             return;
         }
 

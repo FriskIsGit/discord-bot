@@ -16,7 +16,7 @@ public class RussianCommand extends Command{
         if(args.length == 0){
             return;
         }
-        String text = args[0];
+        String text = String.join(" ", args);
         int textLen = text.length();
         StringBuilder converted = new StringBuilder(textLen);
         for (int i = 0; i < textLen; i++){
