@@ -1,16 +1,23 @@
 package bot.deskort.commands.lyrics;
 
 public class Scrapper{
+    private static final String GENIUS_CONTAINER = "Lyrics__Container-sc";
+    private static final String INSTRUMENTAL = "This song is an instrumental";
+    private static final String YET_TO_RELEASE = "Lyrics for this song have yet to be released";
     public static String scrapeGeniusLyrics(String page){
         if (page == null)
             return "";
-        final String CONTAINER = "Lyrics__Container-sc";
-        final String INSTRUMENTAL = "This song is an instrumental";
-        int fakeContainer = page.indexOf(CONTAINER);
+
+        int fakeContainer = page.indexOf(GENIUS_CONTAINER);
         if(fakeContainer == -1){
-            return page.contains(INSTRUMENTAL) ? "This song is an instrumental" : "";
+            if(page.contains(INSTRUMENTAL)){
+                return "This song is an instrumental";
+            }
+            if(page.contains(YET_TO_RELEASE)){
+                return "Lyrics for this song have yet to be released. Please check back once the song has been released.";
+            }
         }
-        int lyricContainer = page.indexOf(CONTAINER, fakeContainer + 1);
+        int lyricContainer = page.indexOf(GENIUS_CONTAINER, fakeContainer + 1);
         int textStart = page.indexOf('>', lyricContainer);
         StringBuilder lyrics = new StringBuilder();
         int angleBrackets = 0, divCounter = 1;
