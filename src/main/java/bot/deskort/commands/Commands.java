@@ -53,7 +53,7 @@ public final class Commands{
             new AICommand("openai", "ai21"),
             new FileBinCommand("filebin", "fb"),
             new FormatCommand("format"),
-            new LyricsCommand("lyrics", "genius", "ryricsu", "ryrics"),
+            new LyricsCommand("lyrics", "lyr", "ryricsu", "ryrics"),
             new HaltCommand("halt"),
             new RussianCommand("ru", "russian"),
             new Base64Command("enc64", "dec64", "de64", "en64", "un64"),
