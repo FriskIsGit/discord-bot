@@ -18,6 +18,9 @@ import java.util.Arrays;
 
 public class LyricsCommand extends Command{
     private static final int MIN_LEN_THRESHOLD = 3;
+    private static final boolean FAVOR_ANY_VIEWS = true;
+    private static final float FAVOR_FACTOR = 0.15f;
+
     private static final String GENIUS_URL = "https://genius.com";
     private static final String GENIUS_API_URL = "https://api.genius.com";
 
@@ -63,7 +66,7 @@ public class LyricsCommand extends Command{
         int len = args.length;
         boolean all = len > 1 && (args[len-1].equals("-all") || args[len-1].equals("-a"));
         String song = all ? Commands.mergeTerms(args, 0, args.length-1) : Commands.mergeTerms(args);
-
+        song = deGeniusify(song);
         Request request = Request.Get(GENIUS_API_URL + "/search?q=" + encode(song))
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer " + ACCESS_TOKEN);
@@ -116,13 +119,13 @@ public class LyricsCommand extends Command{
     }
 
     //name and target will be split into targets
-    public static int accuracy(String name, String target){
+    public static float accuracy(String name, String target){
         if(name.length() == 0 || target.length() == 0){
             return 0;
         }
         return accuracy(name.split(" "), target.split(" "));
     }
-    public static int accuracy(String[] names, String[] targets){
+    public static float accuracy(String[] names, String[] targets){
         for (int i = 0; i < names.length; i++) names[i] = names[i].toLowerCase();
         for (int i = 0; i < targets.length; i++) targets[i] = targets[i].toLowerCase();
 
@@ -138,11 +141,9 @@ public class LyricsCommand extends Command{
                 }
             }
         }
-        int[] lengths = {0, 0};
-        Arrays.stream(names).forEach(s -> lengths[0] += s.length());
-        Arrays.asList(targets).forEach(s -> lengths[1] += s.length());
-        accuracy = Math.min(accuracy, lengths[0]);
-        return Math.min(accuracy, lengths[1]);
+        int[] targetLen = new int[1];
+        Arrays.stream(targets).forEach(s -> targetLen[0] += s.length());
+        return Math.min((float)accuracy / targetLen[0], 1);
     }
 
     private static SongInfo selectMostAccurate(String name, SongInfo[] songs){
@@ -154,9 +155,11 @@ public class LyricsCommand extends Command{
         double max = 0;
         int index = -1;
         for (int i = 0; i < len; i++){
-            String title = songs[i].fullTitle;
-            accuracies[i] = accuracy(name, title);
-            accuracies[i] /= title.length();
+            SongInfo song = songs[i];
+            accuracies[i] = accuracy(name, song.fullTitle);
+            if(FAVOR_ANY_VIEWS && song.pageViews > 0){
+                accuracies[i] += FAVOR_FACTOR;
+            }
             if(accuracies[i] > max){
                 max = accuracies[i];
                 index = i;
@@ -171,8 +174,7 @@ public class LyricsCommand extends Command{
 
     public static int matchingLen(String str1, String str2){
         int score = 0;
-        int minLen = Math.min(str1.length(), str2.length());
-        for (int i = 0, j = 0; i < minLen && j < minLen; i++, j++){
+        for (int i = 0, j = 0; i < str1.length() && j < str2.length(); i++, j++){
             char chr1 = str1.charAt(i);
             char chr2 = str2.charAt(j);
             if(chr1 == chr2){
@@ -215,33 +217,45 @@ public class LyricsCommand extends Command{
         embed.appendDescription("\n" + song.lyricsURL);
         return embed.build();
     }
-}
+    private static String deGeniusify(String songName){
+        StringBuilder str = new StringBuilder();
+        boolean inRoundBrackets = false, inSquareBrackets = false;
+        int len = songName.length();
+        for (int i = 0; i < len; i++){
+            char chr = songName.charAt(i);
+            switch (chr){
+                case '-':
+                    if (i == 0 || i == len-1){
+                        continue;
+                    }
 
+                    if (songName.charAt(i-1) != ' '){
+                        str.append(' ');
+                    }
+                    str.append('-');
+                    if (i+1 < len && songName.charAt(i+1) != ' '){
+                        str.append(' ');
+                    }
 
-class SongInfo{
-    public int id;
-    public String fullTitle, lyricsURL, thumbnailURL, release;
-
-    //parses "result" key
-    public static SongInfo fromJson(JSONObject json){
-        SongInfo info = new SongInfo();
-        //artist_names is not an array
-        info.fullTitle = json.getString("artist_names") + " - " + json.getString("title");
-        info.thumbnailURL = json.getString("header_image_thumbnail_url");
-        info.lyricsURL = json.getString("url");
-        info.id = json.getInteger("id");
-        info.release = json.getString("release_date_for_display");
-        return info;
-    }
-
-    @Override
-    public String toString(){
-        return "SongInfo{" +
-                "id=" + id +
-                ", fullTitle='" + fullTitle + '\'' +
-                ", lyricsURL='" + lyricsURL + '\'' +
-                ", thumbnailURL='" + thumbnailURL + '\'' +
-                ", release=" + release +
-                '}';
+                    break;
+                case '[':
+                    inSquareBrackets = true;
+                    break;
+                case '(':
+                    inRoundBrackets = true;
+                    break;
+                case ')':
+                    inRoundBrackets = false;
+                    break;
+                case ']':
+                    inSquareBrackets = false;
+                    break;
+                default:
+                    if (!inRoundBrackets && !inSquareBrackets)
+                        str.append(chr);
+                    break;
+            }
+        }
+        return str.toString();
     }
 }

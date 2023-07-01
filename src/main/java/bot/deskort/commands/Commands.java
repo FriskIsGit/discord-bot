@@ -55,7 +55,7 @@ public final class Commands{
             new FormatCommand("format"),
             new LyricsCommand("lyrics", "lyr", "ryricsu", "ryrics"),
             new HaltCommand("halt"),
-            new RussianCommand("ru", "russian"),
+            new RussianCommand("rus", "ru", "russian"),
             new Base64Command("enc64", "dec64", "de64", "en64", "un64"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
