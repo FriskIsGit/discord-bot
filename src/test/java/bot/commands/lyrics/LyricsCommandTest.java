@@ -50,14 +50,4 @@ public class LyricsCommandTest{
     public void lilTest3(){
         assertEquals(0.25, LyricsCommand.accuracy("lil yachty poland", "Genius Brasil Traduções - Lil Yachty - Poland (Tradução em Português)"), 0.1f);
     }
-    @Test
-    public void matchingTest1(){
-        /*String query = "sabotg wjhisk";
-        int highest = LyricsCommand.accuracy(query, "sabotage whiskey");
-        assertTrue(highest > LyricsCommand.accuracy(query, "Dollypran - Napoli"));
-        int other = LyricsCommand.accuracy(query, "Czasin & ERASPE (Ft. Arczi Szajka, Arkadio, Arsen (PL), Bazi, Brodinio, Dos (PL), Foreman, Grabi, Gruszka, H.Kanino, Jota (PL), Kasia Godzisz, Kojot (POL), Krzysztof \"Chris Vane\" Kuchta, Normano, OWR, PeRJot, Peter (PL), Sabot, Tadek, Łukasz Batóg, Webster");
-        System.out.println("highest: " + highest);
-        System.out.println("OTHER: " + other);*/
-        //assertTrue(highest > other);
-    }
 }
