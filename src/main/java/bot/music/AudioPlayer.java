@@ -1,6 +1,6 @@
 package bot.music;
 
-import bot.deskort.Bot;
+import bot.core.Bot;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.Nullable;

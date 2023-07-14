@@ -1,6 +1,5 @@
 package bot.commands;
 
-import bot.deskort.commands.Commands;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;

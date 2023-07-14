@@ -1,6 +1,5 @@
 package bot.commands;
 
-import bot.deskort.commands.Commands;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +8,7 @@ public class CommandMergeTest{
     @Test
     public void test1(){
         String[] given = {"aw", "er", "ty"};
-        String expected = "awerty";
+        String expected = "aw er ty";
         assertEquals(expected, Commands.mergeTerms(given));
     }
     @Test

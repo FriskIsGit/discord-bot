@@ -1,6 +1,6 @@
 package bot.utilities.jda;
 
-import bot.deskort.Bot;
+import bot.core.Bot;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;

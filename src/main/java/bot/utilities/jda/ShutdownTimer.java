@@ -1,6 +1,6 @@
 package bot.utilities.jda;
 
-import bot.deskort.Bot;
+import bot.core.Bot;
 
 import java.util.Timer;
 import java.util.TimerTask;

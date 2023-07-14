@@ -1,8 +1,8 @@
 package bot.utilities.jda;
 
-import bot.deskort.Bot;
-import bot.deskort.commands.Command;
-import bot.deskort.commands.Commands;
+import bot.core.Bot;
+import bot.commands.Command;
+import bot.commands.Commands;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 

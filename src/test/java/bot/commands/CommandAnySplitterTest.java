@@ -1,7 +1,6 @@
 package bot.commands;
 
 import org.junit.Test;
-import bot.deskort.commands.Commands;
 
 import java.util.Arrays;
 

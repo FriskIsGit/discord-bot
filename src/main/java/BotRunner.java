@@ -1,4 +1,4 @@
-import bot.deskort.Bot;
+import bot.core.Bot;
 import bot.utilities.jda.ConsoleChat;
 
 class BotRunner{
