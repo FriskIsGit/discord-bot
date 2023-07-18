@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
 
 import java.time.Duration;
@@ -146,8 +147,14 @@ public class ChannelCommand extends Command{
                     actions.sendAsMessageBlock(message.getChannel(), "Nothing to delete");
                     return;
                 }
-                vc.delete().queue();
-                membersToChannels.remove(member.getIdLong());
+                try{
+                    vc.delete().complete();
+                }catch (Exception e){
+                    System.err.println("\"" + vc.getName() + "\" doesn't exist.");
+                }finally{
+                    membersToChannels.remove(member.getIdLong());
+                }
+
                 break;
             default:
                 break;
