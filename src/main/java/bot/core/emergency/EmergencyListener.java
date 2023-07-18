@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildBanEvent;
@@ -66,6 +67,7 @@ public class EmergencyListener extends ListenerAdapter{
         if(!isReady){
             return;
         }
+
         //timestamp is made when an event is received
         //much more accurate and reliable than audit log entry timestamps which tend to be displaced in time by approximately 10 seconds
         long eventTimestamp = System.currentTimeMillis();
@@ -77,6 +79,9 @@ public class EmergencyListener extends ListenerAdapter{
             User userResponsible = deletionEntry.getUser();
             System.out.println("Channel [" + channelDeleteEvent.getChannel().getName() + "] was deleted by " + Objects.requireNonNull(userResponsible).getName());
 
+            if(channelDeleteEvent.getChannelType() != ChannelType.TEXT){
+                return;
+            }
             resolveEvent(deletionEntry, eventTimestamp);
 
         }else if(anyEvent instanceof GuildBanEvent){
@@ -123,6 +128,9 @@ public class EmergencyListener extends ListenerAdapter{
 
     private void resolveEvent(User responsibleUser, long currentTimestamp){
         long userResponsibleId = responsibleUser.getIdLong();
+        if(userResponsibleId == Bot.BOT_ID){
+            return;
+        }
         EventQueue eventQueue;
         if(userIdsToEvents.containsKey(userResponsibleId)){
             eventQueue = userIdsToEvents.get(userResponsibleId);
