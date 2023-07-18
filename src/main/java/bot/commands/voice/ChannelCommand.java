@@ -33,7 +33,8 @@ public class ChannelCommand extends Command{
                 "vc ban @mention\n" +
                 "vc size `size`\n" +
                 "vc rename `name`\n" +
-                "vc delete";
+                "vc del\n" +
+                "vc delete\n";
     }
 
     @Override
@@ -98,6 +99,34 @@ public class ChannelCommand extends Command{
                         guild.kickVoiceMember(participant).queue();
                     }
                 }
+                break;
+            case "unban":
+                if(vc == null){
+                    actions.sendAsMessageBlock(message.getChannel(), "Create a channel first");
+                    return;
+                }
+                if(args.length == 1){
+                    return;
+                }
+                allMentions = message.getMessage().getMentions().getMembers();
+
+                if(allMentions.size() == 0){
+                    if(args[1].length() != USER_ID_LEN){
+                        return;
+                    }
+                    Long id = castToLong(args[1]);
+                    if(id == null){
+                        return;
+                    }
+                    VoiceChannelManager vcManager = vc.getManager();
+                    vcManager.putMemberPermissionOverride(id, Permission.VOICE_CONNECT.getRawValue(), 0).queue();
+                    actions.sendAsMessageBlock(message.getChannel(), id + " permitted");
+                }else{
+                    Member theMentioned = allMentions.get(0);
+                    VoiceChannelManager vcManager = vc.getManager();
+                    vcManager.putMemberPermissionOverride(theMentioned.getIdLong(), Permission.VOICE_CONNECT.getRawValue(), 0).queue();
+                    actions.sendAsMessageBlock(message.getChannel(), theMentioned.getEffectiveName() + " permitted");
+                }
 
                 break;
             case "resize":
@@ -141,6 +170,7 @@ public class ChannelCommand extends Command{
                 vcManager = vc.getManager();
                 vcManager.setName(vcName).queue();
                 break;
+            case "del":
             case "delete":
             case "remove":
                 if(vc == null){
