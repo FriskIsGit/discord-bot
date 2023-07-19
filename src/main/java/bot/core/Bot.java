@@ -68,6 +68,9 @@ public class Bot{
     public static BotConfig getConfig(){
         return config;
     }
+    public static void setConfig(BotConfig newConfig){
+        config = newConfig;
+    }
     public static MessageProcessor getMessageProcessor(){
         return messageProcessor;
     }

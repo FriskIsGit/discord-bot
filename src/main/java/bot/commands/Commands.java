@@ -58,6 +58,7 @@ public final class Commands{
             new RussianCommand("rus", "ru", "russian"),
             new Base64Command("enc64", "dec64", "de64", "en64", "un64"),
             new ChannelCommand("vc"),
+            new ConfigCommand("config"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
