@@ -29,11 +29,13 @@ import java.util.Objects;
  */
 public class EmergencyListener extends ListenerAdapter{
 
+    public static final boolean BAN_USER_RESPONSIBLE = false;
     public static final int TRIGGER_DELAY_MS = 5000;
     public static final int EVENT_THRESHOLD = 3;
 
     private static final HashMap<Long, EventQueue> userIdsToEvents = new HashMap<>();
 
+    public volatile Guild currentGuild;
     public volatile boolean awaitKick = false;
     public volatile HashMap<Guild, AuditLogEntry> guildsToLastKicks = null;
     public boolean isReady = false;
@@ -74,6 +76,7 @@ public class EmergencyListener extends ListenerAdapter{
         if(anyEvent instanceof ChannelDeleteEvent){
 
             ChannelDeleteEvent channelDeleteEvent = (ChannelDeleteEvent)anyEvent;
+            currentGuild = channelDeleteEvent.getGuild();
             List<AuditLogEntry> channelDeletions = AuditLog.retrieveFromAuditLog(ActionType.CHANNEL_DELETE,1, channelDeleteEvent.getGuild());
             AuditLogEntry deletionEntry = channelDeletions.get(0);
             User userResponsible = deletionEntry.getUser();
@@ -89,6 +92,7 @@ public class EmergencyListener extends ListenerAdapter{
             awaitKick = true;
 
             GuildBanEvent memberBannedEvent = (GuildBanEvent) anyEvent;
+            currentGuild = memberBannedEvent.getGuild();
             List<AuditLogEntry> bans = AuditLog.retrieveFromAuditLog(ActionType.BAN,1, memberBannedEvent.getGuild());
             AuditLogEntry banEntry = bans.get(0);
             User userResponsible = banEntry.getUser();
@@ -105,6 +109,7 @@ public class EmergencyListener extends ListenerAdapter{
             }
 
             GuildMemberRemoveEvent kickOrLeaveEvent = (GuildMemberRemoveEvent) anyEvent;
+            currentGuild = kickOrLeaveEvent.getGuild();
             List<AuditLogEntry> kicks = AuditLog.retrieveFromAuditLog(ActionType.KICK,1, kickOrLeaveEvent.getGuild());
             AuditLogEntry kickEntry = kicks.get(0);
             //if true, member left a server (wasn't kicked)
@@ -141,8 +146,11 @@ public class EmergencyListener extends ListenerAdapter{
         }
         eventQueue.append(currentTimestamp);
         if(eventQueue.isAlarmable(TRIGGER_DELAY_MS)){
-            messageAuthorizedUsers(responsibleUser);
             System.out.println("---TRIGGERED ALARM---");
+            if(BAN_USER_RESPONSIBLE){
+                Bot.getActions().banUser(responsibleUser, currentGuild);
+            }
+            messageAuthorizedUsers(responsibleUser);
         }
     }
     private void resolveEvent(AuditLogEntry auditEntry, long currentTimestamp){
