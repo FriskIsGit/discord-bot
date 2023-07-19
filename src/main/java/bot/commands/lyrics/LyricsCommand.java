@@ -24,7 +24,6 @@ public class LyricsCommand extends Command{
     private static final String GENIUS_URL = "https://genius.com";
     private static final String GENIUS_API_URL = "https://api.genius.com";
 
-    private final String ACCESS_TOKEN;
     public LyricsCommand(String... aliases){
         super(aliases);
         description = "Display song info and lyrics.\n" +
@@ -33,7 +32,6 @@ public class LyricsCommand extends Command{
                 "lyrics `title` -a\n" +
                 "lyrics `title` -all\n" +
                 "lyrics `url`\n";
-        ACCESS_TOKEN = Bot.getConfig().geniusToken;
     }
 
     @Override
@@ -69,7 +67,7 @@ public class LyricsCommand extends Command{
         song = deGeniusify(song);
         Request request = Request.Get(GENIUS_API_URL + "/search?q=" + encode(song))
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer " + ACCESS_TOKEN);
+                .addHeader("Authorization", "Bearer " + Bot.getConfig().geniusToken);
 
         SimpleResponse response = SimpleResponse.performRequest(request).expect("Simple response is null");
         JSONObject jsonBody = JSONObject.parseObject(response.body);

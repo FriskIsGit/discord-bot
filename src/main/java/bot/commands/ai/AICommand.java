@@ -23,8 +23,6 @@ public class AICommand extends Command{
     private static final String OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
     public static final String AI21_J2_API = "https://api.ai21.com/studio/v1/j2-";
 
-    private final String OPENAI_KEY;
-    private final String AI21_KEY;
     private String phrase;
     private MessageChannelUnion channel;
     public AICommand(String... aliases){
@@ -48,8 +46,6 @@ public class AICommand extends Command{
                 "ai21 paraphrase `phrase`\n" +
                 "ai21 gec `phrase`\n" +
                 "openai models\n";
-        OPENAI_KEY = Bot.getConfig().openAIToken;
-        AI21_KEY = Bot.getConfig().ai21Token;
     }
 
     @Override
@@ -110,7 +106,7 @@ public class AICommand extends Command{
             actions.sendEmbed(channel, createInfoEmbed("Command issued", ""));
             if(isTask){
                 Request request = Request.Post(task.getEndpoint())
-                        .addHeader("Authorization", "Bearer " + AI21_KEY)
+                        .addHeader("Authorization", "Bearer " + Bot.getConfig().ai21Token)
                         .addHeader("Accept", "application/json")
                         .addHeader("Content-Type", "application/json");
                 JsonBody params = adaptJsonBodyToTask(task);
@@ -137,7 +133,7 @@ public class AICommand extends Command{
             }else{
                 String url = AI21_J2_API + modelOrTask + "/complete";
                 Request request = Request.Post(url)
-                        .addHeader("Authorization", "Bearer " + AI21_KEY)
+                        .addHeader("Authorization", "Bearer " + Bot.getConfig().ai21Token)
                         .addHeader("Accept", "application/json")
                         .addHeader("Content-Type", "application/json");
                 JsonBody paramsBody = JsonBody.body()
@@ -331,7 +327,7 @@ public class AICommand extends Command{
     private List<Model> retrieveOpenAIModels(){
         Request request = Request.Get(OPENAI_MODELS_URL)
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer " + OPENAI_KEY);
+                .addHeader("Authorization", "Bearer " + Bot.getConfig().openAIToken);
 
         SimpleResponse response = SimpleResponse.performRequest(request).expect("Simple response is null");
         System.out.println(response);
