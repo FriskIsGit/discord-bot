@@ -42,6 +42,7 @@ public class BotConfig{
         try{
             config.token = data.getString("token");
             config.prefix = data.getString("prefix");
+            Bot.AUTHORIZED_USERS.clear();
             for (Object sudo : data.getJSONArray("sudo_users")){
                 long userId = (Long) sudo;
                 Bot.AUTHORIZED_USERS.add(userId);
@@ -66,7 +67,7 @@ public class BotConfig{
     }
 
     private static JSONObject parseJSON(final String PATH){
-        BufferedReader reader;
+        BufferedReader reader = null;
         JSONObject jsonMap = null;
         try{
             reader = new BufferedReader(new FileReader(PATH));
@@ -79,7 +80,19 @@ public class BotConfig{
             jsonMap = new JSONObject(contents.toString());
         }catch (IOException e){
             e.printStackTrace();
+        }finally{
+            closeSilently(reader);
         }
         return jsonMap;
+    }
+
+    private static void closeSilently(BufferedReader reader){
+        if(reader == null){
+            return;
+        }
+        try{
+            reader.close();
+        }catch (IOException ignored){
+        }
     }
 }
