@@ -70,6 +70,10 @@ public class LyricsCommand extends Command{
                 .addHeader("Authorization", "Bearer " + Bot.getConfig().geniusToken);
 
         SimpleResponse response = SimpleResponse.performRequest(request).expect("Simple response is null");
+        if(response.code == 403){
+            actions.messageChannel(channel, "`403 Forbidden`");
+            return;
+        }
         JSONObject jsonBody = JSONObject.parseObject(response.body);
         JSONArray hits = jsonBody.getJSONObject("response").getJSONArray("hits");
         int songs = hits.size();

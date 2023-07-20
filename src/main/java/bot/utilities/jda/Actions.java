@@ -7,7 +7,10 @@ import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.exceptions.ContextException;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import java.io.File;
@@ -40,8 +43,8 @@ public class Actions{
             return false;
         }
         try{
-            guildOfOrigin.ban(user, 0, TimeUnit.SECONDS).queue();
-        }catch (HierarchyException e){
+            guildOfOrigin.ban(user, 0, TimeUnit.SECONDS).complete();
+        }catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e){
             System.err.println(e.getMessage());
             return false;
         }
@@ -52,8 +55,8 @@ public class Actions{
             return false;
         }
         try{
-            guildOfOrigin.unban(user).queue();
-        }catch (HierarchyException e){
+            guildOfOrigin.unban(user).complete();
+        }catch (InsufficientPermissionException | HierarchyException e){
             System.err.println(e.getMessage());
             return false;
         }
@@ -64,8 +67,8 @@ public class Actions{
             return false;
         }
         try{
-            guildOfOrigin.kick(user).reason(reason).queue();
-        }catch (HierarchyException e){
+            guildOfOrigin.kick(user).reason(reason).complete();
+        }catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e){
             System.err.println(e.getMessage());
             return false;
         }
