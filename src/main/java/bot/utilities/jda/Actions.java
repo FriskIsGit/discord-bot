@@ -2,6 +2,7 @@ package bot.utilities.jda;
 
 import bot.core.Bot;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -24,6 +25,7 @@ public class Actions{
     private static final int MEGABYTES_25 = 26214400;
     private static final int MAX_CONTENT_LENGTH = Message.MAX_CONTENT_LENGTH;
     private static final int SPLIT_LIMIT = 50;
+    private static final int USER_ID_LENGTH = 19;
     private final List<CompletableFuture<Message>> messageCache = new ArrayList<>(64);
     private final JDA jdaInterface;
 
@@ -73,6 +75,15 @@ public class Actions{
             return false;
         }
         return true;
+    }
+
+    public boolean hasPermission(final Permission permission, User user){
+        if(user == null){
+            return false;
+        }
+        Member member = (Member) user;
+        Set<Permission> permissionSet = member.getPermissions();
+        return permissionSet.contains(permission);
     }
 
     public void sendFile(MessageChannel channel, File fileToSend){

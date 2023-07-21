@@ -4,9 +4,11 @@ import bot.core.Bot;
 import bot.utilities.jda.Actions;
 import bot.utilities.jda.AuditLog;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.audit.AuditLogEntry;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
     Exists for the contingency of a breach
@@ -56,6 +59,10 @@ public class EmergencyListener extends ListenerAdapter{
         //to distinguish leave from a kick, the server must have at least one kick entry
         //this solution accounts for all servers the bot is connected to
         for(Guild guild : connectedGuilds){
+            if(!canViewAuditLogs(guild)){
+                System.err.println("Lacking VIEW_AUDIT_LOGS perm in " + guild.getName() + " to initialize emergency");
+                continue;
+            }
             List<AuditLogEntry> entryList = AuditLog.retrieveFromAuditLog(ActionType.KICK,1, guild);
             if(entryList == null || entryList.size() == 0){
                 continue;
@@ -169,6 +176,11 @@ public class EmergencyListener extends ListenerAdapter{
         for (long id : Bot.AUTHORIZED_USERS){
             actions.messageUser(id, emergencyMessage);
         }
-        
+    }
+
+    private boolean canViewAuditLogs(Guild guild){
+        Member member = guild.getSelfMember();
+        Set<Permission> permissionSet = member.getPermissions();
+        return permissionSet.contains(Permission.VIEW_AUDIT_LOGS);
     }
 }

@@ -14,7 +14,8 @@ import java.nio.file.Paths;
 public class BotConfig{
     public boolean exists;
     public String token, prefix, openAIToken, ai21Token, geniusToken;
-    public int purgeCap = 500, maxDequeSize = 1000;
+    public int purgeCap, maxDequeSize;
+    public boolean enableEmergency, enableShell;
     public File audioDirectory;
 
     public BotConfig(){
@@ -41,25 +42,33 @@ public class BotConfig{
         BotConfig config = new BotConfig();
         try{
             config.token = data.getString("token");
-            config.prefix = data.getString("prefix");
-            Bot.AUTHORIZED_USERS.clear();
-            for (Object sudo : data.getJSONArray("sudo_users")){
-                long userId = (Long) sudo;
-                Bot.AUTHORIZED_USERS.add(userId);
-            }
-            JSONObject tokens = data.getJSONObject("tokens");
-            config.openAIToken = tokens.getString("open_ai_token");
-            config.ai21Token = tokens.getString("ai21_token");
-            config.geniusToken = tokens.getString("genius_token");
+            config.prefix = data.optString("prefix", ">");
 
-            config.purgeCap = data.getInt("purge_cap");
-            config.maxDequeSize = data.getInt("message_cap_per_channel");
-            String audioDir = data.getString("audio_dir");
+            if(data.has("sudo_users")){
+                Bot.AUTHORIZED_USERS.clear();
+                for (Object sudo : data.getJSONArray("sudo_users")){
+                    long userId = (Long) sudo;
+                    Bot.AUTHORIZED_USERS.add(userId);
+                }
+            }
+
+            if(data.has("tokens")){
+                JSONObject tokens = data.getJSONObject("tokens");
+                config.openAIToken = tokens.optString("open_ai_token");
+                config.ai21Token = tokens.optString("ai21_token");
+                config.geniusToken = tokens.optString("genius_token");
+            }
+
+            config.purgeCap = data.optInt("purge_cap", 500);
+            config.maxDequeSize = data.optInt("message_cap_per_channel", 1000);
+            String audioDir = data.optString("audio_dir");
             if(!Files.isDirectory(Paths.get(audioDir))){
                 System.err.println("Audio directory doesn't exist");
             }else{
                 config.audioDirectory = new File(audioDir);
             }
+            config.enableEmergency = data.optBoolean("enable_emergency", true);
+            config.enableShell = data.optBoolean("enable_shell", false);
         }catch(JSONException e){
             System.err.println(e.getMessage());
         }

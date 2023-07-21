@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class PurgeCommand extends Command{
-    public final int PURGE_CAP;
     public final MessageProcessor msgProcessor;
 
     public PurgeCommand(String... aliases){
@@ -22,7 +21,6 @@ public class PurgeCommand extends Command{
         description = "Purges/deletes messages from channel";
         usage = "purge `quantity`";
         msgProcessor = MessageProcessor.get();
-        PURGE_CAP = Bot.getConfig().purgeCap;
     }
 
     @Override
@@ -38,8 +36,9 @@ public class PurgeCommand extends Command{
             return;
         }
 
-        if(amount > PURGE_CAP || amount<1){
+        if(amount > Bot.getConfig().purgeCap || amount<1){
             msgProcessor.deleteRequestMessage(message.getMessage());
+            actions.sendAsMessageBlock(message.getChannel(), "Amount rejected");
             return;
         }
         //include purge request message

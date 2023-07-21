@@ -86,7 +86,7 @@ public class MessageProcessor{
                 command.execute(commandName, message, Commands.shrink(allSplit, 1));
             }
         }
-        else if(messageText.startsWith("$") && !messageText.startsWith("$$")){
+        else if(messageText.startsWith("$") && !messageText.startsWith("$$") && Bot.getConfig().enableShell){
             try{
                 linuxRequest();
             }catch (Exception exc){exc.printStackTrace();}

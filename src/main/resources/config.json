@@ -13,5 +13,7 @@
     "open_ai_token": "",
     "ai21_token": "",
     "genius_token": "kuRkeX4r5nY8lnXddQ57wl45oIqWFFpAPu4IwXGX6fyaU1vkQQNiUPgmKMrCZzvj"
-  }
+  },
+  "enable_shell": true,
+  "enable_emergency": true
 }

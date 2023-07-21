@@ -2,6 +2,7 @@ package bot.core;
 
 import bot.core.emergency.EmergencyListener;
 import bot.utilities.jda.ShutdownTimer;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -41,7 +42,9 @@ public class Bot{
             System.exit(0);
         }
         jdaBuilder = JDABuilder.createDefault(config.token);
-        jdaBuilder.addEventListeners(new EmergencyListener(jdaBuilder));
+        if(config.enableEmergency){
+            jdaBuilder.addEventListeners(new EmergencyListener(jdaBuilder));
+        }
         //voice limits
         jdaBuilder.enableCache(CacheFlag.VOICE_STATE);
         jdaBuilder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
