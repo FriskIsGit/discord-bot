@@ -17,7 +17,6 @@ public class AudioPlayer implements AudioSendHandler{
     private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","m4a","mp4"));
     private static final HashMap<String, AudioTrack> fileNamesToSongs = new HashMap<>(32);
 
-    public final File audioDirectory;
     private boolean looping = false;
 
     private AudioTrack audioTrack;
@@ -32,7 +31,6 @@ public class AudioPlayer implements AudioSendHandler{
 
     public AudioPlayer() {
         this.songQueue = new SongQueue();
-        this.audioDirectory = Bot.getConfig().audioDirectory;
     }
 
     public static boolean isExtensionSupported(String extension){
@@ -101,7 +99,7 @@ public class AudioPlayer implements AudioSendHandler{
         if(fileNamesToSongs.containsKey(trackName)){
             this.audioTrack = fileNamesToSongs.get(trackName);
         }else{
-            FileSeeker fileSeeker = new FileSeeker(trackName, audioDirectory.getAbsolutePath());
+            FileSeeker fileSeeker = new FileSeeker(trackName, getAudioDirectory().getAbsolutePath());
             String containedPath = fileSeeker.findContainingPath();
             if(containedPath.isEmpty()){
                 return false;
@@ -117,6 +115,10 @@ public class AudioPlayer implements AudioSendHandler{
         }
         loadTrack();
         return true;
+    }
+
+    public File getAudioDirectory(){
+        return Bot.getConfig().audioDirectory;
     }
 
     private void loadTrack(){

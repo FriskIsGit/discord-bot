@@ -19,7 +19,7 @@ public class SongsCommand extends Command{
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
         AudioManager audioManager = message.getGuild().getAudioManager();
         AudioPlayer player = AudioPlayer.addSendingHandlerIfNull(audioManager);
-        String[] fileNames = player.audioDirectory.list();
+        String[] fileNames = player.getAudioDirectory().list();
         if(fileNames == null || fileNames.length < 1){
             actions.messageChannel(message.getChannel(), "No songs available");
             return;

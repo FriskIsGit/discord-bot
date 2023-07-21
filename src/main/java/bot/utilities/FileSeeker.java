@@ -46,14 +46,16 @@ public class FileSeeker{
     }
 
     private boolean stepDown(File currentDir){
-        File[] files = currentDir.listFiles();
+        File[] files = currentDir.listFiles(File::isFile);
         for (File file : files){
-            if (file.isDirectory()){
-                if (stepDown(file)){
-                    return true;
-                }
-            }else if (file.getName().startsWith(targetName)){
+            if (file.getName().startsWith(targetName)){
                 targetPath = file.getPath();
+                return true;
+            }
+        }
+        File[] dirs = currentDir.listFiles(File::isDirectory);
+        for(File dir : dirs){
+            if (stepDown(dir)){
                 return true;
             }
         }
