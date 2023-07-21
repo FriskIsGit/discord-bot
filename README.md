@@ -18,6 +18,7 @@
 - purging messages
 - downloading youtube videos/audio
 - emergency listener (listens for suspicious events)
+- fetching lyrics
 ***
 ### Dependencies used:
  - tritonus libs (sample rate conversion),
