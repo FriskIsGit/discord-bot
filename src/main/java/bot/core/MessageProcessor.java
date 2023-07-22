@@ -2,6 +2,7 @@ package bot.core;
 
 import bot.commands.Command;
 import bot.commands.Commands;
+import bot.textprocessors.TextProcessors;
 import bot.utilities.*;
 
 import bot.utilities.jda.Actions;
@@ -65,6 +66,7 @@ public class MessageProcessor{
         this.channelId = channelId;
         logMessage();
         dispatchCommand();
+        TextProcessors.get().passMessage(message);
     }
 
     private void dispatchCommand(){
