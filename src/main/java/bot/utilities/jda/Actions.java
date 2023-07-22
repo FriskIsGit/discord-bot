@@ -286,24 +286,4 @@ public class Actions{
         }
         return null;
     }
-
-    public List<String> getServerNames(){
-        List<Guild> guilds = jdaInterface.getGuilds();
-        int numberOfGuilds = guilds.size();
-        List<String> serverNames = new ArrayList<>(numberOfGuilds);
-        for (Guild guild : guilds){
-            serverNames.add(guild.getName());
-        }
-        return serverNames;
-    }
-
-    public List<Long> getServerIds(){
-        List<Guild> guilds = jdaInterface.getGuilds();
-        List<Long> ids = new ArrayList<>(guilds.size());
-        for (Guild guild : guilds){
-            ids.add(guild.getIdLong());
-            System.out.println(guild.getName());
-        }
-        return ids;
-    }
 }

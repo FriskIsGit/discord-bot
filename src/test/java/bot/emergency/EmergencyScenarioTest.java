@@ -30,7 +30,7 @@ public class EmergencyScenarioTest{
 
     public static void initAndCreateChannels(){
         try{
-            Bot.initialize();
+            Bot.initialize(null);
         }catch (InterruptedException e){
             e.printStackTrace();
             return;

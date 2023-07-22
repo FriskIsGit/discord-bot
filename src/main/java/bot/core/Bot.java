@@ -28,9 +28,9 @@ public class Bot{
     private static ShutdownTimer shutdownTimer;
     //private static bot.utilities.jda.Permissions permissions;
 
-    public static void initialize() throws InterruptedException{
+    public static void initialize(String configPath) throws InterruptedException{
         JDABuilder jdaBuilder;
-        config = BotConfig.readConfig();
+        config = BotConfig.readConfig(configPath);
         if(!config.exists){
             System.out.println("Config file not found.");
         }

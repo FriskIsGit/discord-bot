@@ -27,7 +27,7 @@ public class ConfigCommand extends Command{
         if(!args[0].equals("reload")){
             return;
         }
-        BotConfig config = BotConfig.readConfig();
+        BotConfig config = BotConfig.readConfig(null);
         MessageChannelUnion channel = message.getChannel();
         if(!config.exists){
             actions.sendEmbed(channel, embed("Config file not found", false));

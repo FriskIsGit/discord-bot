@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class BotConfig{
@@ -32,9 +34,12 @@ public class BotConfig{
         return config;
     }
 
-    public static BotConfig readConfig(){
-        FileSeeker fileSeeker = new FileSeeker("config.json");
-        String configPath = fileSeeker.findTargetPath();
+    public static BotConfig readConfig(String configPath){
+        if(configPath == null || !isFile(configPath)){
+            FileSeeker fileSeeker = new FileSeeker("config.json");
+            configPath = fileSeeker.findTargetPath();
+        }
+
         if(configPath.isEmpty()){
             return BotConfig.notExists();
         }
@@ -73,6 +78,15 @@ public class BotConfig{
             System.err.println(e.getMessage());
         }
         return config;
+    }
+
+    private static boolean isFile(String path){
+        try{
+            Path p = Paths.get(path);
+            return Files.isRegularFile(p);
+        }catch (InvalidPathException e){
+            return false;
+        }
     }
 
     private static JSONObject parseJSON(final String PATH){
