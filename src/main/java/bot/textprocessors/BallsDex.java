@@ -153,6 +153,7 @@ public class BallsDex extends TextProcessor{
         put("c331ff1e37e9a4f4e9c8798380adb457cf863e314a63317854185eac86c68a0d", new CountryBall("Nepal"));
         put("079616ad6dbb3b40750ceb6f141d7f35e777a152d0e81757faa5c71d0e936b95", new CountryBall("Egypt"));
         put("876a81454138f99a67b12561f2abb3eb42a2d5546914bf8022e0a75cdca77276", new CountryBall("Niger"));
+        put("d63a3cb0b6525d524c33627a0feb3ccc10062d24058dce24143d6eb8a172a726", new CountryBall("Nigeria"));
         put("12a84b8bb940ab1dca36befb1b70310e5c2893cff093aa85b881c74f277d55c8", new CountryBall("Guyana"));
         put("5b1e055755f4896bcc843bb8fc4d946efa8c9a5495943be0fabb8c98c1e60965", new CountryBall("Serbia"));
         put("3b4eff2c6831e94b37818c7194e603bd7231dce09b3348624977f031a409783c", new CountryBall("Lebanon"));
@@ -160,7 +161,7 @@ public class BallsDex extends TextProcessor{
         put("e893018de831dacfb55238a6730a2403c3c72011c6b4b8a9d443acb6a882bf27", new CountryBall("Portugal"));
         put("51fefc4909766cea9aa82ec171d99283d662d3eefcd424b8c4d04b1e10cb76fc", new CountryBall("Manchukuo", false));
         put("3fa690d8c6156e1c12161a9b84c3329e8083506416fdbaa1b346baad83dcd30a", new CountryBall("Bahamas"));
-        put("57af1d91525b1549b16d0b35a981e93c730cffe0bf1fad3df6f4084fd2fd0779", new CountryBall("Austria"));
+        put("57af1d91525b1549b16d0b35a981e93c730cffe0bf1fad3df6f4084fd2fd0779", new CountryBall("Latvia"));
         put("0c2f14738a0d13a8543cfc4c057374566430c48c7eeb057bbe46ec47eeadf560", new CountryBall("Austria"));
         put("fc687f056057324999fc0ae0280f4adbba06acbbecb3bec4af9e7ad02b8547ed", new CountryBall("Kiribati"));
         put("a61e7bb88ab2a90f6ac48b69f5caabb53c39e27265fa067340fed7848066f09a", new CountryBall("Byelorussian Soviet Socialist Republic", false));
@@ -247,6 +248,28 @@ public class BallsDex extends TextProcessor{
         put("06d1c1e21580402a3f040837d2d3d7e237b885c2b8ed1951fdce0217605897e9", new CountryBall("Cambodia"));
         put("04dc4f128ff755fc91998333f4ced237b9ef6105a4f48e81ea892816f60d54a0", new CountryBall("El Salvador"));
         put("54508312e91af089169cd9f8734c6127ad3a9a4f6e382df54b91aadbeda11408", new CountryBall("South Korea"));
+        put("0ec689bec5d54d5209a3db7852d9a6c2ff0519e4f4b5d23ef136b8e72909d2da", new CountryBall("Gaul", false));
+        put("afef637eb1306a5bc4eee8fb5162447cba6c3390408d2d0c47008ae9a6feea7a", new CountryBall("Switzerland"));
+        put("031ce02b2b8568211d577e077142bb3f85e328a51097d8746989c0efb603c8c2", new CountryBall("Senegal"));
+        put("d6d1d93a2a8d48e47a0b58e9504291c6af9d34656b4a45c623821e14f825b3f8", new CountryBall("Germania", false));
+        put("7ff7239506b4bedb3e44b7fb484032191f079499d5d6c10a6448d45fbc728ad2", new CountryBall("League of Nations", false));
+        put("b790b664c0b1d0ebc89fa13d65869deffe94253728303e4c758c3cbe03d6a0ec", new CountryBall("Thailand"));
+        put("3448f83b11999f617979c6af969ea7a5947655a7f0c03ef18bd764d7f8c5ade3", new CountryBall("Jordan"));
+        put("44f3d26690adece540debccf901d297b3b74945e3019cb2cbf5cad26b6eaabce", new CountryBall("Zambia"));
+        put("a4159e43256aa367b4db53577dab436b63819cf9d7774a7208dae90f341fb5b1", new CountryBall("Argentina"));
+        put("a6a0317ceec213569a6df27b9dddf2a5b0e0e27b6891fa27befca05ebcf164ae", new CountryBall("Oman"));
+        put("25a0404c823b8ef82fb264a2696bb3232e23e3320b4ed8b314be505eb83f5bc9", new CountryBall("Sweden"));
+        put("c685ec4fdcb85bb38f910236ce3c54ceeccde4786a937a4b7a19ab206b706b28", new CountryBall("Mayan Empire", false));
+        put("a0a7dfc60286331c4c7e6270fdac27d2777511c3b49c993826a261958bf2343d", new CountryBall("Iraq"));
+        put("b0ac67b46ad49b36beac2dae5f8fb11d934d32ab57532a794be062a3be40c856", new CountryBall("Venezuela"));
+        put("9690967adbefce7a853e100c0416506ea1475a1f1ae05ce87bfe6feb9ed5dd70", new CountryBall("Guatemala"));
+        put("b709a4d313ba96c0b70d3144790c5386fc1a836e2b0463de6b6b9fb75f0b04ef", new CountryBall("Estonia"));
+        put("70a8a7365303d1c0f3eeb3c523500c577f25f1703b78ba93ed571a582ab3e9d8", new CountryBall("Spain"));
+        put("048c54a35357082449bb3c9851a6896818658ca686bd8e15e82418a9d46778c7", new CountryBall("Mali"));
+        put("cb38f7de41703f6d769cd2cb5099336c7fdd97c7225703d07f2b1adac2a72796", new CountryBall("Philippines"));
+        put("99aeb3c9d5d6504095d91f3252072dec581dacf41928d1f4433884293436a7f7", new CountryBall("Union of South Africa", false));
+        put("155cf1d85aac7a0a0c8f5a1411579c253fcfd738cffd106197081d1a73cf7e84", new CountryBall("Israel"));
+        put("03062c4bb47fdb9a8272c3c1421e4b3e8cabf28f54b2b769c3e0155cb811ef18", new CountryBall("United Kingdom"));
     }};
 }
 
