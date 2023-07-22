@@ -7,7 +7,7 @@ public final class TextProcessors{
     private static TextProcessors instance;
 
     private final TextProcessor[] textProcessors = new TextProcessor[]{
-            // new BallsDex()
+            new BallsDex()
     };
     private TextProcessors(){
     }
