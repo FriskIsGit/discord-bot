@@ -125,6 +125,12 @@ public class JsonBody{
                 case '\\':
                     builder.append("\\\\");
                     break;
+                case '\n':
+                    builder.append("\\n");
+                    break;
+                case '\r':
+                    builder.append("\\r");
+                    break;
                 case '"':
                     builder.append("\\\"");
                     break;

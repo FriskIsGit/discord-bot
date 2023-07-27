@@ -118,6 +118,7 @@ public class BallsDex extends TextProcessor{
         put("ba2691dc2a8a2421a3541697fff1112f299568ca98fe70878248cce5e4a5c3be", new CountryBall("Bangladesh"));
         put("e0a700a42e2fcefdff4ffb3fa872c20b8aab0bab11d7b9cff74fbafc5e8c7c9e", new CountryBall("Iran"));
         put("69531f2a342918a8f63c269ff0734eee4bb7f16a10d8eb5f8c891ecec8ae2a7e", new CountryBall("Somaliland", false));
+        put("fb420740138fb2b5975c9bab46dcfeb0b64e8d38f02fe47790d48b0ca1808831", new CountryBall("Somaliland", false));
         put("c1bd6221aba1134926d301fcd13b34f81cbd7a6d5774f79089d6ffd63eb5e969", new CountryBall("Norway"));
         put("6a246a30bf4976ff6242c3e16abd0ae36a94ed6368669169de8205727207ecf5", new CountryBall("Belarus"));
         put("4f87d9df8286d3b94b1c4298400099e13542ff83a1a22c30cf2595b236846692", new CountryBall("Slovenia"));
@@ -175,6 +176,7 @@ public class BallsDex extends TextProcessor{
         put("7921815af1cbee26deb0fcf931ea5b29ec1b7b2ebe2dfc44af61cdc23ac14f69", new CountryBall("Manchukuo", false));
         put("2f463e9db81710e1086d4c25853f44b7c0ba081051e2a31d86fa77b4aaa12f01", new CountryBall("Manchukuo", false));
         put("aa8843322e686c87bd289830354c102a400024d89c0bd8069b21411bc402c13a", new CountryBall("Bahamas"));
+        put("91bac90e9e23cc140bd14b45a61ae99b8cf69db43df64467b3a52d0913b291a7", new CountryBall("Bahamas"));
         put("8bb3ada62c1302f2dece2dbd543e4d7cf8ac1182196075d79d3d325e2dfac7e5", new CountryBall("Latvia"));
         put("3dbbe789461c2bf0ba4e35b453713d0621b8bb3c9745667b35668ab2f2ea891a", new CountryBall("Austria"));
         put("d3a364a58cfff6c8ce53be93eda9ab40ac954788de0071ee6a33c8ed67e96b93", new CountryBall("Kiribati"));
@@ -241,6 +243,7 @@ public class BallsDex extends TextProcessor{
         put("6ed351a515f7781a485fdf3df11d36fe978a7418f1d03a20eb0cc14b51eeca77", new CountryBall("African Union", false));
         put("3fd96f8b946153d085a45507cee97be500f6c5f2ad95e88830738db859ffbf94", new CountryBall("Palestine"));
         put("0b86ed4cc36d75914255d1465f83fb9dc1fc4eae341e6a7d8cfb971b56d0f54e", new CountryBall("Malta"));
+        put("dae82dc29da185697767b0746f21a8907647226842175abf021c8c267054831a", new CountryBall("Malta"));
         put("d79fd0a4755a386deea3522aecfd714b5e25694ff8cf7fa093750b25625244da", new CountryBall("West Germany", false));
         put("8fb36573aa3ace1c040516fa351958ed32b462498ee46000f3492cd01df3ff6e", new CountryBall("Singapore"));
         put("854bd45538c84ae746eade5688f74c788807ba3ccb1af2549165b97af505cee0", new CountryBall("Czechia"));
@@ -307,7 +310,7 @@ public class BallsDex extends TextProcessor{
         put("2dea70f024b775fabc46cc662661291855d5a23eb5b4d7301357b3a8dc4c60b3", new CountryBall("Roman Empire", false));
         put("c3b1957c8a76daa067e564509067a2231f11c73bba43bc6958f8a898e7e57680", new CountryBall("Soviet Union"));
         put("b4a9299a607e9dcf0484b7e75da4e1deb3a2860d111288f5e293264061c70a40", new CountryBall("Ancient Greece", false));
-        put("9e30ebc19914950c38336fdd9e9cca13ed8b8cac901dfc2e1ba86c54e990b287", new CountryBall("Franks", false));
+        put("cbf46d06a306a63ad064a364a97947f855f4e1dd3e124681586ee0fe63e431fb", new CountryBall("Franks", false));
         put("552524ce5d2c6a218f75904862d4a892040efbfafab809c99d518ca8506419ec", new CountryBall("Poland"));
         put("f96e51e53225a75c0331c3f701088e5ea4cd48afe3f5cd20f4622e4fa3d1ed1d", new CountryBall("Kazakhstan"));
         put("0fa69f002df5f9f73fe94786472a571ba5cdb834348f4e529cb66fd17b875ce1", new CountryBall("Kazakhstan"));
