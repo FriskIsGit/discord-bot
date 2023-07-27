@@ -2,7 +2,6 @@ package bot.core;
 
 import bot.core.emergency.EmergencyListener;
 import bot.utilities.jda.ShutdownTimer;
-import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -23,10 +22,8 @@ public class Bot{
     private static long LAUNCH_TIME = 0;
     private static JDA jdaInterface;
     private static Actions actions;
-    private static MessageProcessor messageProcessor;
     private static BotConfig config;
     private static ShutdownTimer shutdownTimer;
-    //private static bot.utilities.jda.Permissions permissions;
 
     public static void initialize(String configPath) throws InterruptedException{
         JDABuilder jdaBuilder;
@@ -59,7 +56,6 @@ public class Bot{
 
         BOT_ID = jdaInterface.getSelfUser().getIdLong();
         jdaInterface.addEventListener(new EventsListener());
-        messageProcessor = MessageProcessor.get();
     }
 
     public static JDA getJDAInterface(){
@@ -73,9 +69,6 @@ public class Bot{
     }
     public static void setConfig(BotConfig newConfig){
         config = newConfig;
-    }
-    public static MessageProcessor getMessageProcessor(){
-        return messageProcessor;
     }
     public static ShutdownTimer getShutdownTimer(){
         return shutdownTimer;
