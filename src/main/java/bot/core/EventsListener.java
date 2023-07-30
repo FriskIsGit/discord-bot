@@ -2,6 +2,7 @@ package bot.core;
 
 import bot.commands.MemoryCommand;
 import bot.music.AudioPlayer;
+import bot.textprocessors.TextProcessors;
 import bot.utilities.jda.LeaverTimer;
 import bot.utilities.jda.MessageDeque;
 import net.dv8tion.jda.api.entities.*;
@@ -45,6 +46,7 @@ public class EventsListener extends ListenerAdapter{
             System.out.println(authorName + "(bot:" + isBot + ")" +
                     " edited their message in [" + messageEdited.getChannel().getName() + "] to " + editedRawContent);
         }
+        TextProcessors.get().passMessage(messageEdited.getMessage(), true);
     }
 
     @Override

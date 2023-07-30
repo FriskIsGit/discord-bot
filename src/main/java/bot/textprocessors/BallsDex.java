@@ -23,12 +23,12 @@ public class BallsDex extends TextProcessor{
     private static final Hint hints = Hint.NON_COUNTRIES_ONLY;
     private static final boolean resendImageURL = true;
     private Actions actions;
-    private MessageReceivedEvent message;
+    private Message message;
     private MessageChannelUnion channel;
     private String lastHash;
 
     @Override
-    boolean consume(String content, MessageReceivedEvent message){
+    boolean consume(String content, Message message, boolean isEdit){
         long authorId = message.getAuthor().getIdLong();
         if(authorId != 999736048596816014L && authorId != 1073275888466145370L)
             return false;
@@ -36,15 +36,15 @@ public class BallsDex extends TextProcessor{
         this.message = message;
         this.channel = message.getChannel();
         actions = Bot.getActions();
-        List<Message.Attachment> attachments = message.getMessage().getAttachments();
-        if(content.startsWith("A wild country") && attachments.size() == 1){
+        List<Message.Attachment> attachments = message.getAttachments();
+        if(content.startsWith("A wild country") && attachments.size() == 1 && !isEdit){
             Message.Attachment image = attachments.get(0);
             byte[] imageBytes = retrieveCountry(image);
             resolveHash(imageBytes);
             if(resendImageURL){
                 actions.messageChannel(message.getChannel(), image.getUrl());
             }
-        }else if(content.contains("You caught")){
+        }else if(content.contains("You caught") && isEdit){
             if(lastHash == null || sha256ToBall.containsKey(lastHash)){
                 return false;
             }
@@ -61,6 +61,8 @@ public class BallsDex extends TextProcessor{
         if(command instanceof BallsDexCommand){
             BallsDexCommand ballCommand = (BallsDexCommand) command;
             ballCommand.discoveredBalls.add(ballName);
+        }else{
+            System.err.println("Not an instance of, cannot safe add: " + ballName);
         }
     }
 
@@ -400,6 +402,7 @@ public class BallsDex extends TextProcessor{
         put("092c88ac7e9fcdbeebdd63ff0382dd0baae80893567a7a604bcdc02ef2e71bda", new CountryBall("Azerbaijan SSR", false));
         put("3f1f67108b6485e64b51e3ee155ac15270190795ea827cd68542ba4ca96baed3", new CountryBall("Armenian SSR", false));
         put("d266284c25b5c4ad4dd5bc24f396880bfe37484eb8cf8c62d6ed06a41c14f3d6", new CountryBall("Republic Of Bougainville", false));
+        put("d04eb270efd408fa07d7bf5d45aa6117cc010ac0748b5e948ba37cdb5b50d3e5", new CountryBall("Visigothic Kingdom", false));
     }};
 }
 

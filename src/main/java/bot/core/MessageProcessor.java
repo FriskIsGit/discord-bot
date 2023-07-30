@@ -66,7 +66,7 @@ public class MessageProcessor{
         this.channelId = channelId;
         logMessage();
         dispatchCommand();
-        TextProcessors.get().passMessage(message);
+        TextProcessors.get().passMessage(message.getMessage(), false);
     }
 
     private void dispatchCommand(){
