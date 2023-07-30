@@ -59,6 +59,7 @@ public final class Commands{
             new Base64Command("enc64", "dec64", "de64", "en64", "un64"),
             new ChannelCommand("vc"),
             new ConfigCommand("config"),
+            new BallsDexCommand("balls", "worlddex"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
