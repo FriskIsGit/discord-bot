@@ -66,11 +66,13 @@ public class BallsDexCommand extends Command{
 
     private Message searchForMessage(long botId){
         User user = jda.retrieveUserById(botId).complete();
-        Member member = requestMessage.getGuild().retrieveMember(user).complete();
-        if (member == null){
+        try{
+            requestMessage.getGuild().retrieveMember(user).complete();
+        }catch (ErrorResponseException e){
             actions.messageChannel(channel, "Bot not found in the server");
             return null;
         }
+
         MessageHistory history = MessageHistory.getHistoryBefore(channel, requestMessage.getId())
                 .limit(100)
                 .complete();
