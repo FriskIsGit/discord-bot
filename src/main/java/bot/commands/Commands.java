@@ -5,8 +5,7 @@ import bot.commands.lyrics.LyricsCommand;
 import bot.commands.voice.*;
 import bot.commands.ai.AICommand;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 //singleton
 public final class Commands{
@@ -113,6 +112,15 @@ public final class Commands{
     }
     public Command command(String name){
         return commandsMap.get(name);
+    }
+    @SuppressWarnings("unchecked")
+    public <T> T command(Class<? extends Command> clazz){
+        for(Command command : commandsMap.values()){
+            if(command.getClass() == clazz){
+                return (T)command;
+            }
+        }
+        return null;
     }
     public static String[] doubleTermSplit(String commandText){
         return doubleTermSplit(commandText,0);

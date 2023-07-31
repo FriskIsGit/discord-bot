@@ -1,6 +1,7 @@
 package bot.commands;
 
-import net.dv8tion.jda.api.entities.Member;
+import bot.textprocessors.BallsDex;
+import bot.textprocessors.TextProcessors;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageHistory;
 import net.dv8tion.jda.api.entities.User;
@@ -8,7 +9,6 @@ import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BallsDexCommand extends Command{
@@ -16,15 +16,18 @@ public class BallsDexCommand extends Command{
     private static final long BALLS_DEX_ID = 999736048596816014L, WORLD_DEX_ID = 1073275888466145370L;
     private MessageChannelUnion channel;
     private Message requestMessage;
-    public final List<String> discoveredBalls = new ArrayList<>();
+    private final BallsDex dexProcessor;
+
     public BallsDexCommand(String... aliases){
         super(aliases);
         description = "Estimates the percentage to reach the goal in a worst and best case scenario " +
                 "based on time from the last drop\n" +
-                "Execute in the drop channel. Alternatively prints discovered balls";
+                "Execute in the drop channel. Alternatively get ball by hash or view map size.";
         usage = "balls `message_id`\n" +
-                "balls discovered\n" +
+                "balls get `hash`\n" +
+                "balls size\n" +
                 "worlddex `message_id`";
+        dexProcessor = TextProcessors.get().textProcessor(BallsDex.class);
     }
 
     @Override
@@ -32,8 +35,17 @@ public class BallsDexCommand extends Command{
         channel = message.getChannel();
         requestMessage = message.getMessage();
         Message refMessage;
-        if(args.length == 1 && args[0].equals("discovered")){
-            actions.messageChannel(channel, discoveredBalls.toString());
+
+        if(args.length == 1 && args[0].equals("size")){
+            if(dexProcessor != null){
+                actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.size()));
+            }
+            return;
+        }
+        if(args.length == 2 && args[0].equals("get")){
+            if(dexProcessor != null){
+                actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.get(args[1])));
+            }
             return;
         }
         if (args.length == 0){
@@ -52,7 +64,6 @@ public class BallsDexCommand extends Command{
             actions.messageChannel(channel, "Reference message not found");
             return;
         }
-
 
         long secondsPassed = requestMessage.getTimeCreated().minusSeconds(
                 refMessage.getTimeCreated().toEpochSecond()

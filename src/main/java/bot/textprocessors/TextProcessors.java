@@ -2,7 +2,6 @@ package bot.textprocessors;
 
 import bot.core.Bot;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public final class TextProcessors{
     private static TextProcessors instance;
@@ -30,6 +29,16 @@ public final class TextProcessors{
                 break;
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T textProcessor(Class<? extends TextProcessor> clazz){
+        for(TextProcessor processor : textProcessors){
+            if(processor.getClass() == clazz){
+                return (T) processor;
+            }
+        }
+        return null;
     }
 }
 
