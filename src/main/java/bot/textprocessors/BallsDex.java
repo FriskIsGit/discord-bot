@@ -5,7 +5,6 @@ import bot.utilities.FileSeeker;
 import bot.utilities.Hasher;
 import bot.utilities.jda.Actions;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +33,18 @@ import java.util.concurrent.TimeoutException;
  */
 public class BallsDex extends TextProcessor{
     public final HashMap<String, CountryBall> sha256ToBall = new HashMap<>();
+    public final HashMap<Long, Dex> guildsToDex = new HashMap<>();
     public final Hint hints = Hint.NON_COUNTRIES_ONLY;
 
+    private static final long BALLS_DEX_ID = 999736048596816014L, WORLD_DEX_ID = 1073275888466145370L;
     private boolean readDatFile = false;
     private Path ballsPath = null;
     private Actions actions;
+
     private Message message;
-    private MessageChannelUnion channel;
-    private String lastHash;
+    private long authorId;
+    private long guildId;
+    private Dex hashes;
 
     public BallsDex(){
         System.out.println(mapToData());
@@ -56,6 +59,26 @@ public class BallsDex extends TextProcessor{
         }
         this.ballsPath = Paths.get(ballsPath);
         readBallsDat();
+    }
+
+    @Override
+    boolean consume(String content, Message message, boolean isEdit){
+        authorId = message.getAuthor().getIdLong();
+        if(authorId != BALLS_DEX_ID && authorId != WORLD_DEX_ID)
+            return false;
+
+        this.message = message;
+        this.guildId = message.getGuild().getIdLong();
+        actions = Bot.getActions();
+        List<Message.Attachment> attachments = message.getAttachments();
+        if(content.startsWith("A wild country") && attachments.size() == 1 && !isEdit){
+            Message.Attachment image = attachments.get(0);
+            byte[] imageBytes = retrieveCountry(image);
+            resolveHash(imageBytes);
+        }else if(content.contains("You caught") && isEdit){
+             addDiscoveredBall();
+        }
+        return false;
     }
 
     private void readBallsDat(){
@@ -111,31 +134,28 @@ public class BallsDex extends TextProcessor{
         return str.toString();
     }
 
-    @Override
-    boolean consume(String content, Message message, boolean isEdit){
-        long authorId = message.getAuthor().getIdLong();
-        if(authorId != 999736048596816014L && authorId != 1073275888466145370L)
-            return false;
-
-        this.message = message;
-        this.channel = message.getChannel();
-        actions = Bot.getActions();
-        List<Message.Attachment> attachments = message.getAttachments();
-        if(content.startsWith("A wild country") && attachments.size() == 1 && !isEdit){
-            Message.Attachment image = attachments.get(0);
-            byte[] imageBytes = retrieveCountry(image);
-            resolveHash(imageBytes);
-        }else if(content.contains("You caught") && isEdit){
-            if(lastHash == null || sha256ToBall.containsKey(lastHash)){
-                return false;
-            }
-            String ballName = extractName(content);
-            System.out.println("Discovered:[" + lastHash + ':' + ballName + ']');
-            CountryBall ball = new CountryBall(ballName, false);
-            sha256ToBall.put(lastHash, ball);
-            appendBallToFile(lastHash, ball);
+    private void addDiscoveredBall(){
+        Dex dex = getDex();
+        String lastHash;
+        if(authorId == BALLS_DEX_ID){
+            lastHash = dex.lastBallsDexHash;
+        }else{
+            lastHash = dex.lastWorldDexHash;
         }
-        return false;
+        if(lastHash == null || sha256ToBall.containsKey(lastHash)){
+            return;
+        }
+
+        String ballName = extractName(message.getContentRaw());
+        System.out.println("Discovered:[" + lastHash + ':' + ballName + ']');
+        CountryBall ball = new CountryBall(ballName, false);
+        sha256ToBall.put(lastHash, ball);
+        appendBallToFile(lastHash, ball);
+    }
+
+    public void reloadBallsFromFile(){
+        sha256ToBall.clear();
+        readBallsDat();
     }
 
     private static String extractName(String content){
@@ -148,14 +168,34 @@ public class BallsDex extends TextProcessor{
     }
 
     private void resolveHash(byte[] bytes){
+        if(bytes == null){
+            return;
+        }
         String hash = Hasher.hashBytes(bytes, Hasher.choose("sha256"));
-        lastHash = hash;
+        Dex dex = getDex();
+
+        if(authorId == BALLS_DEX_ID){
+            dex.lastBallsDexHash = hash;
+        }else{
+            dex.lastWorldDexHash = hash;
+        }
         if(sha256ToBall.containsKey(hash)){
             CountryBall country = sha256ToBall.get(hash);
             displayAccordingToHints(country);
         }else{
-            actions.messageChannel(channel, hash);
+            actions.messageChannel(message.getChannel(), hash);
         }
+    }
+
+    private Dex getDex(){
+        Dex dex;
+        if(guildsToDex.containsKey(guildId)){
+            dex = guildsToDex.get(guildId);
+        }else{
+            dex = new Dex();
+            guildsToDex.put(guildId, dex);
+        }
+        return dex;
     }
 
     private byte[] retrieveCountry(Message.Attachment image){
@@ -166,7 +206,7 @@ public class BallsDex extends TextProcessor{
         try{
             temp = image.getProxy().downloadToFile(temp).get(8, TimeUnit.SECONDS);
         }catch (InterruptedException | ExecutionException | TimeoutException e){
-            actions.messageChannel(channel, "Image download failed");
+            actions.messageChannel(message.getChannel(), "Image download failed");
             System.err.println(e.getMessage());
             return null;
         }
@@ -209,5 +249,17 @@ class CountryBall{
     @Override
     public String toString(){
         return "[" + name + ':' + isCountry + "]";
+    }
+}
+
+class Dex{
+    public String lastBallsDexHash;
+    public String lastWorldDexHash;
+
+    @Override
+    public String toString(){
+        return "GuildDex{" +
+                "lastBallsDexHash='" + lastBallsDexHash + '\'' +
+                ", lastWorldDexHash='" + lastWorldDexHash + '\'' + '}';
     }
 }

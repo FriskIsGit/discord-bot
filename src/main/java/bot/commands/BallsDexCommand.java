@@ -22,10 +22,14 @@ public class BallsDexCommand extends Command{
         super(aliases);
         description = "Estimates the percentage to reach the goal in a worst and best case scenario " +
                 "based on time from the last drop\n" +
-                "Execute in the drop channel. Alternatively get ball by hash or view map size.";
+                "Execute in the drop channel.\n" +
+                "balls get - retrieve countryball by hash\n" +
+                "balls size - view map size.\n" +
+                "balls reload - clears map and reloads balls from file\n";
         usage = "balls `message_id`\n" +
                 "balls get `hash`\n" +
                 "balls size\n" +
+                "balls write `hash` `name` `C`\n" +
                 "worlddex `message_id`";
         dexProcessor = TextProcessors.get().textProcessor(BallsDex.class);
     }
@@ -36,11 +40,22 @@ public class BallsDexCommand extends Command{
         requestMessage = message.getMessage();
         Message refMessage;
 
-        if(args.length == 1 && args[0].equals("size")){
-            if(dexProcessor != null){
-                actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.size()));
+        if(args.length == 1){
+            if(args[0].equals("size")){
+                if (dexProcessor != null){
+                    actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.size()));
+                }
+                return;
             }
-            return;
+            if(args[0].equals("reload")){
+                BallsDex dex = TextProcessors.get().textProcessor(BallsDex.class);
+                if(dex == null){
+                    return;
+                }
+                dex.reloadBallsFromFile();
+                actions.messageChannel(channel, "Reload completed");
+                return;
+            }
         }
         if(args.length == 2 && args[0].equals("get")){
             if(dexProcessor != null){
@@ -96,7 +111,6 @@ public class BallsDexCommand extends Command{
             }
             history.retrievePast(100).complete();
         }
-
         return null;
     }
 
