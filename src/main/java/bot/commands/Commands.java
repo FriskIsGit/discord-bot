@@ -59,6 +59,7 @@ public final class Commands{
             new ChannelCommand("vc"),
             new ConfigCommand("config"),
             new BallsDexCommand("balls", "worlddex"),
+            new EmojiCommand("emoji"),
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
