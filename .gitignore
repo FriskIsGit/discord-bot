@@ -5,4 +5,4 @@
 /target/
 /META-INF/
 /src/test/
-/src/main/resources/
+/src/main/resources/config.json

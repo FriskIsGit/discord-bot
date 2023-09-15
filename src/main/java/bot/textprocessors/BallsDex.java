@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -33,32 +34,43 @@ import java.util.concurrent.TimeoutException;
  */
 public class BallsDex extends TextProcessor{
     public final HashMap<String, CountryBall> sha256ToBall = new HashMap<>();
+    public final HashSet<String> countries = new HashSet<>();
     public final HashMap<Long, Dex> guildsToDex = new HashMap<>();
     public final Hint hints = Hint.NON_COUNTRIES_ONLY;
+    public boolean displayHints = true;
 
     private static final long BALLS_DEX_ID = 999736048596816014L, WORLD_DEX_ID = 1073275888466145370L;
     private boolean readDatFile = false;
     private Path ballsPath = null;
+    private Path countriesPath = null;
     private Actions actions;
 
     private Message message;
     private long authorId;
     private long guildId;
-    private Dex hashes;
 
     public BallsDex(){
         System.out.println(mapToData());
         if(readDatFile){
             return;
         }
-        FileSeeker fs = new FileSeeker("balls.dat");
-        String ballsPath = fs.findTargetPath();
+        FileSeeker seeker = new FileSeeker("balls.dat");
+        String ballsPath = seeker.findTargetPath();
         if(ballsPath.isEmpty()){
-            System.err.println("Country balls data file not found");
+            System.err.println("balls.dat not found");
             return;
         }
         this.ballsPath = Paths.get(ballsPath);
         readBallsDat();
+
+        seeker = new FileSeeker("countries.dat");
+        ballsPath = seeker.findTargetPath();
+        if(ballsPath.isEmpty()){
+            System.err.println("countries.dat not found");
+            return;
+        }
+        this.countriesPath = Paths.get(ballsPath);
+        readCountriesDat();
     }
 
     @Override
@@ -107,6 +119,17 @@ public class BallsDex extends TextProcessor{
         readDatFile = true;
     }
 
+    private void readCountriesDat(){
+        List<String> lines;
+        try{
+            lines = Files.readAllLines(countriesPath);
+        }catch (IOException e){
+            e.printStackTrace();
+            return;
+        }
+        countries.addAll(lines);
+    }
+
     public void appendBallToFile(String hash, CountryBall ball){
         StringBuilder definition = new StringBuilder();
         try{
@@ -148,7 +171,7 @@ public class BallsDex extends TextProcessor{
 
         String ballName = extractName(message.getContentRaw());
         System.out.println("Discovered:[" + lastHash + ':' + ballName + ']');
-        CountryBall ball = new CountryBall(ballName, false);
+        CountryBall ball = new CountryBall(ballName, countries.contains(ballName));
         sha256ToBall.put(lastHash, ball);
         appendBallToFile(lastHash, ball);
     }
@@ -222,6 +245,9 @@ public class BallsDex extends TextProcessor{
     }
 
     private void displayAccordingToHints(CountryBall country){
+        if(!displayHints){
+            return;
+        }
         if(hints == Hint.ALL){
             actions.messageChannel(message.getChannel(), country.name);
         }else if(hints == Hint.COUNTRIES_ONLY && country.isCountry){

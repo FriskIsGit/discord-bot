@@ -25,11 +25,11 @@ public class BallsDexCommand extends Command{
                 "Execute in the drop channel.\n" +
                 "balls get - retrieve countryball by hash\n" +
                 "balls size - view map size.\n" +
-                "balls reload - clears map and reloads balls from file\n";
+                "balls reload - clears map and reloads balls from file\n" +
+                "balls hints `on/off` - enables/disables hints (privileges required)\n";
         usage = "balls `message_id`\n" +
                 "balls get `hash`\n" +
                 "balls size\n" +
-                "balls write `hash` `name` `C`\n" +
                 "worlddex `message_id`";
         dexProcessor = TextProcessors.get().textProcessor(BallsDex.class);
     }
@@ -45,28 +45,39 @@ public class BallsDexCommand extends Command{
                 if (dexProcessor != null){
                     actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.size()));
                 }
-                return;
             }
-            if(args[0].equals("reload")){
+            else if(args[0].equals("reload")){
                 BallsDex dex = TextProcessors.get().textProcessor(BallsDex.class);
                 if(dex == null){
                     return;
                 }
                 dex.reloadBallsFromFile();
                 actions.messageChannel(channel, "Reload completed");
-                return;
             }
+            return;
         }
-        if(args.length == 2 && args[0].equals("get")){
-            if(dexProcessor != null){
+        if(args.length == 2){
+            if(args[0].equals("get") && dexProcessor != null){
                 actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.get(args[1])));
+            }
+            else if(args[0].equals("hints")){
+                if(!isAuthorized(message.getAuthor().getIdLong())){
+                    return;
+                }
+                if(args[1].equals("on")){
+                    dexProcessor.displayHints = true;
+                    actions.messageChannel(message.getChannel(), "Hints `on`");
+                }else if(args[1].equals("off")){
+                    dexProcessor.displayHints = false;
+                    actions.messageChannel(message.getChannel(), "Hints `off`");
+                }
             }
             return;
         }
         if (args.length == 0){
-            if (commandName.equals("balls")){
+            if (commandName.equals("bd") ||commandName.equals("balls")){
                 refMessage = searchForMessage(BALLS_DEX_ID);
-            }else if (commandName.equals("worlddex")){
+            }else if (commandName.equals("wd") || commandName.equals("worlddex")){
                 refMessage = searchForMessage(WORLD_DEX_ID);
             }else{
                 return;
