@@ -5,8 +5,6 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class KickCommand extends Command{
-    private static final int USER_ID_LEN = 18;
-
     public KickCommand(String... aliases){
         super(aliases);
         usage = "kick `user_id`\n" +
@@ -19,8 +17,8 @@ public class KickCommand extends Command{
         if(args.length == 0 || message == null){
             return;
         }
-        if(args[0].length() != USER_ID_LEN){
-            actions.messageChannel(message.getChannel(), "User user id length");
+        if(args[0].length() < 17 || args[0].length() > 19){
+            actions.messageChannel(message.getChannel(), "Invalid id length");
             return;
         }
         Option<Long> maybeId = parseLong(args[0]);
