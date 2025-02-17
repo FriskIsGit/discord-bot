@@ -6,9 +6,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.List;
 
-public class URLCommand extends Command{
+public class URLCommand extends Command {
     private final MessageProcessor messageProcessor;
-    public URLCommand(String... aliases){
+
+    public URLCommand(String... aliases) {
         super(aliases);
         description = "Responds with the underlying attachment link, then deletes the message";
         usage = "link";
@@ -16,11 +17,11 @@ public class URLCommand extends Command{
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
         Message msg = message.getMessage();
         List<Message.Attachment> attachments = msg.getAttachments();
         StringBuilder links = new StringBuilder();
-        for(Message.Attachment attachment : attachments){
+        for (Message.Attachment attachment : attachments) {
             links.append(attachment.getUrl());
         }
         messageProcessor.deleteRequestMessage(msg);

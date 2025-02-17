@@ -4,8 +4,8 @@ import bot.utilities.Option;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class KickCommand extends Command{
-    public KickCommand(String... aliases){
+public class KickCommand extends Command {
+    public KickCommand(String... aliases) {
         super(aliases);
         usage = "kick `user_id`\n" +
                 "kick `user_id` `reason`";
@@ -13,26 +13,26 @@ public class KickCommand extends Command{
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
-        if(args.length == 0 || message == null){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
+        if (args.length == 0 || message == null) {
             return;
         }
-        if(args[0].length() < 17 || args[0].length() > 19){
+        if (args[0].length() < 17 || args[0].length() > 19) {
             actions.messageChannel(message.getChannel(), "Invalid id length");
             return;
         }
         Option<Long> maybeId = parseLong(args[0]);
-        if(!maybeId.isSome()){
+        if (!maybeId.isSome()) {
             return;
         }
         long id = maybeId.unwrap();
         String reason = args.length > 1 ? args[1] : null;
         User user = jda.getUserById(id);
         //if not cached - retrieve
-        if(user == null){
-            try{
+        if (user == null) {
+            try {
                 user = jda.retrieveUserById(id).complete();
-            }catch (RuntimeException unknownUser){
+            } catch (RuntimeException unknownUser) {
                 System.err.println("UNKNOWN USER");
                 return;
             }
@@ -40,10 +40,11 @@ public class KickCommand extends Command{
 
         actions.kickUser(user, message.getGuild(), reason);
     }
-    private static Option<Long> parseLong(String num){
-        try{
+
+    private static Option<Long> parseLong(String num) {
+        try {
             return Option.of(Long.parseLong(num));
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             return Option.none();
         }
     }

@@ -3,58 +3,61 @@ package bot.utilities.requests;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cookies{
+public class Cookies {
     private static final boolean SPACE_AFTER_SEMICOLON = true;
     private final List<Cookie> pairs;
 
-    private Cookies(){
+    private Cookies() {
         this.pairs = new ArrayList<>();
     }
-    private Cookies(List<Cookie> cookies){
+
+    private Cookies(List<Cookie> cookies) {
         this.pairs = cookies;
     }
 
-    public static Cookies New(){
+    public static Cookies New() {
         return new Cookies();
     }
-    public static Cookies parseCookies(String cookies){
+
+    public static Cookies parseCookies(String cookies) {
         char[] arr = cookies.toCharArray();
         Parse state = Parse.NAME;
         StringBuilder name = new StringBuilder();
         StringBuilder val = new StringBuilder();
         Cookies biscuits = new Cookies();
-        for (int i = 0; i < arr.length; i++){
-            switch (arr[i]){
+        for (int i = 0; i < arr.length; i++) {
+            switch (arr[i]) {
                 default:
-                    if(state == Parse.NAME){
+                    if (state == Parse.NAME) {
                         name.append(arr[i]);
-                    }
-                    else{
+                    } else {
                         val.append(arr[i]);
                     }
-                    if(i == arr.length - 1){
-                        biscuits.pairs.add(new Cookie(name.toString(), val.toString()));
+                    if (i == arr.length - 1) {
+                        Cookie cookie = new Cookie(name.toString(), val.toString());
+                        biscuits.pairs.add(cookie);
                         return biscuits;
                     }
                     break;
                 case '=':
-                    if(state == Parse.NAME){
+                    if (state == Parse.NAME) {
                         state = Parse.VALUE;
-                    }else{
+                    } else {
                         val.append('=');
                     }
                     break;
                 case ';':
                     state = Parse.NAME;
-                    if(i+1 < arr.length && arr[i+1] == ' '){
+                    if (i + 1 < arr.length && arr[i + 1] == ' ') {
                         i++;
                     }
-                    if(val.length() == 0){
+                    if (val.length() == 0) {
                         biscuits.pairs.add(new Cookie(name.toString()));
                         name.setLength(0);
                         break;
                     }
-                    biscuits.pairs.add(new Cookie(name.toString(), val.toString()));
+                    Cookie cookie = new Cookie(name.toString(), val.toString());
+                    biscuits.pairs.add(cookie);
                     name.setLength(0);
                     val.setLength(0);
                     break;
@@ -63,25 +66,27 @@ public class Cookies{
         return biscuits;
     }
 
-    public Cookies addCookie(Cookie cookie){
+    public Cookies addCookie(Cookie cookie) {
         pairs.add(cookie);
         return this;
     }
-    public Cookies addPair(String name, String val){
+
+    public Cookies addPair(String name, String val) {
         pairs.add(new Cookie(name, val));
         return this;
     }
-    public Cookies addAttribute(String attribute){
+
+    public Cookies addAttribute(String attribute) {
         pairs.add(new Cookie(attribute));
         return this;
     }
 
-    public Cookies copy(){
+    public Cookies copy() {
         List<Cookie> cookies = new ArrayList<>(pairs.size());
-        for (Cookie cookie : pairs){
-            if (cookie.hasValue){
+        for (Cookie cookie : pairs) {
+            if (cookie.hasValue) {
                 cookies.add(new Cookie(cookie.name, cookie.value));
-            }else{
+            } else {
                 cookies.add(new Cookie(cookie.name));
             }
         }
@@ -89,32 +94,32 @@ public class Cookies{
     }
 
     //case-sensitive name
-    public Cookie getCookie(String name){
-        for(Cookie cookie : pairs){
-            if(cookie.getName().equals(name)){
+    public Cookie getCookie(String name) {
+        for (Cookie cookie : pairs) {
+            if (cookie.getName().equals(name)) {
                 return cookie;
             }
         }
         return null;
     }
 
-    public int size(){
+    public int size() {
         return pairs.size();
     }
 
-    public String asString(){
+    public String asString() {
         StringBuilder str = new StringBuilder();
         int len = pairs.size();
-        for (int i = 0; i < len; i++){
+        for (int i = 0; i < len; i++) {
             Cookie cookie = pairs.get(i);
-            if (cookie.hasValue){
+            if (cookie.hasValue) {
                 str.append(cookie.getName()).append('=').append(cookie.getValue());
-            }else{
+            } else {
                 str.append(cookie.getName());
             }
-            if(i != len-1){
+            if (i != len - 1) {
                 str.append(';');
-                if(SPACE_AFTER_SEMICOLON){
+                if (SPACE_AFTER_SEMICOLON) {
                     str.append(' ');
                 }
             }
@@ -122,28 +127,31 @@ public class Cookies{
         return str.toString();
     }
 
-    private enum Parse{
+    private enum Parse {
         NAME, VALUE
     }
 
-    public static class Cookie{
+    public static class Cookie {
         private final String name;
         private String value;
         public final boolean hasValue;
 
-        public Cookie(String name, String val){
+        public Cookie(String name, String val) {
             this.name = name;
             this.value = val;
             hasValue = true;
         }
-        public Cookie(String attribute){
+
+        public Cookie(String attribute) {
             name = attribute;
             hasValue = false;
         }
-        public String getName(){
+
+        public String getName() {
             return name;
         }
-        public String getValue(){
+
+        public String getValue() {
             return value;
         }
     }

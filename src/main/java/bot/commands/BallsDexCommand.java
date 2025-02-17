@@ -11,14 +11,14 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 
 import java.util.List;
 
-public class BallsDexCommand extends Command{
+public class BallsDexCommand extends Command {
     private static final int LOWEST_CHANCE = 40, HIGHEST_CHANCE = 55, RETRIEVAL_LIMIT = 500;
     private static final long BALLS_DEX_ID = 999736048596816014L, WORLD_DEX_ID = 1073275888466145370L;
     private MessageChannelUnion channel;
     private Message requestMessage;
     private final BallsDex dexProcessor;
 
-    public BallsDexCommand(String... aliases){
+    public BallsDexCommand(String... aliases) {
         super(aliases);
         description = "Estimates the percentage to reach the goal in a worst and best case scenario " +
                 "based on time from the last drop\n" +
@@ -35,20 +35,19 @@ public class BallsDexCommand extends Command{
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
         channel = message.getChannel();
         requestMessage = message.getMessage();
         Message refMessage;
 
-        if(args.length == 1){
-            if(args[0].equals("size")){
-                if (dexProcessor != null){
+        if (args.length == 1) {
+            if (args[0].equals("size")) {
+                if (dexProcessor != null) {
                     actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.size()));
                 }
-            }
-            else if(args[0].equals("reload")){
+            } else if (args[0].equals("reload")) {
                 BallsDex dex = TextProcessors.get().textProcessor(BallsDex.class);
-                if(dex == null){
+                if (dex == null) {
                     return;
                 }
                 dex.reloadBallsFromFile();
@@ -56,37 +55,36 @@ public class BallsDexCommand extends Command{
             }
             return;
         }
-        if(args.length == 2){
-            if(args[0].equals("get") && dexProcessor != null){
+        if (args.length == 2) {
+            if (args[0].equals("get") && dexProcessor != null) {
                 actions.messageChannel(channel, String.valueOf(dexProcessor.sha256ToBall.get(args[1])));
-            }
-            else if(args[0].equals("hints")){
-                if(!isAuthorized(message.getAuthor().getIdLong())){
+            } else if (args[0].equals("hints")) {
+                if (!isAuthorized(message.getAuthor().getIdLong())) {
                     return;
                 }
-                if(args[1].equals("on")){
+                if (args[1].equals("on")) {
                     dexProcessor.displayHints = true;
                     actions.messageChannel(message.getChannel(), "Hints `on`");
-                }else if(args[1].equals("off")){
+                } else if (args[1].equals("off")) {
                     dexProcessor.displayHints = false;
                     actions.messageChannel(message.getChannel(), "Hints `off`");
                 }
             }
             return;
         }
-        if (args.length == 0){
-            if (commandName.equals("bd") ||commandName.equals("balls")){
+        if (args.length == 0) {
+            if (commandName.equals("bd") || commandName.equals("balls")) {
                 refMessage = searchForMessage(BALLS_DEX_ID);
-            }else if (commandName.equals("wd") || commandName.equals("worlddex")){
+            } else if (commandName.equals("wd") || commandName.equals("worlddex")) {
                 refMessage = searchForMessage(WORLD_DEX_ID);
-            }else{
+            } else {
                 return;
             }
-        }else{
+        } else {
             refMessage = retrieveMessageById(args[0]);
         }
 
-        if (refMessage == null){
+        if (refMessage == null) {
             actions.messageChannel(channel, "Reference message not found");
             return;
         }
@@ -101,11 +99,11 @@ public class BallsDexCommand extends Command{
         sendCompletionMessage(worstChance, bestChance, minutes);
     }
 
-    private Message searchForMessage(long botId){
+    private Message searchForMessage(long botId) {
         User user = jda.retrieveUserById(botId).complete();
-        try{
+        try {
             requestMessage.getGuild().retrieveMember(user).complete();
-        }catch (ErrorResponseException e){
+        } catch (ErrorResponseException e) {
             actions.messageChannel(channel, "Bot not found in the server");
             return null;
         }
@@ -113,10 +111,10 @@ public class BallsDexCommand extends Command{
         MessageHistory history = MessageHistory.getHistoryBefore(channel, requestMessage.getId())
                 .limit(100)
                 .complete();
-        for (int i = 0; i < RETRIEVAL_LIMIT; i += 100){
+        for (int i = 0; i < RETRIEVAL_LIMIT; i += 100) {
             List<Message> messages = history.getRetrievedHistory();
-            for (Message msg : messages){
-                if (msg.getAuthor().getIdLong() == botId && msg.getContentRaw().startsWith("A wild")){
+            for (Message msg : messages) {
+                if (msg.getAuthor().getIdLong() == botId && msg.getContentRaw().startsWith("A wild")) {
                     return msg;
                 }
             }
@@ -125,26 +123,26 @@ public class BallsDexCommand extends Command{
         return null;
     }
 
-    private Message retrieveMessageById(String messageId){
-        if (messageId.length() < 17 || messageId.length() > 19){
+    private Message retrieveMessageById(String messageId) {
+        if (messageId.length() < 17 || messageId.length() > 19) {
             return null;
         }
 
         Long msgId = parseLong(messageId);
-        if (msgId == null){
+        if (msgId == null) {
             return null;
         }
 
         Message dropMessage = null;
-        try{
+        try {
             dropMessage = channel.retrieveMessageById(msgId).complete();
-        }catch (ErrorResponseException e){
+        } catch (ErrorResponseException e) {
             actions.messageChannel(channel, e.getMessage());
         }
         return dropMessage;
     }
 
-    private void sendCompletionMessage(double worstChance, double bestChance, int minutes){
+    private void sendCompletionMessage(double worstChance, double bestChance, int minutes) {
         boolean worstComplete = 1.25 >= worstChance;
         boolean bestComplete = 1.25 >= bestChance;
         String msg = "Minutes passed: " + minutes + '\n' +
@@ -153,26 +151,26 @@ public class BallsDexCommand extends Command{
         actions.messageChannel(channel, msg);
     }
 
-    private static String asPercentage(double d){
+    private static String asPercentage(double d) {
         return String.format("%.2f", d * 100);
     }
 
-    private static double multiplier(int memberCount){
-        if (memberCount < 5){
+    private static double multiplier(int memberCount) {
+        if (memberCount < 5) {
             return 0.1;
-        }else if (memberCount < 100){
+        } else if (memberCount < 100) {
             return 0.8;
-        }else if (memberCount < 1000){
+        } else if (memberCount < 1000) {
             return 0.5;
-        }else{
+        } else {
             return 0.2;
         }
     }
 
-    private static Long parseLong(String num){
-        try{
+    private static Long parseLong(String num) {
+        try {
             return Long.parseLong(num);
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             return null;
         }
     }

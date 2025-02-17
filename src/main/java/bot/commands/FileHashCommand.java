@@ -14,35 +14,35 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class FileHashCommand extends Command{
-    public FileHashCommand(String... aliases){
+public class FileHashCommand extends Command {
+    public FileHashCommand(String... aliases) {
         super(aliases);
         description = "Hashes file attached to the message\n" +
-                      "using specified algorithm\n";
+                "using specified algorithm\n";
         usage = "file `hashing_algorithm`\n" +
-        "file `hashing_algorithm` `discord_url`";
+                "file `hashing_algorithm` `discord_url`";
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
         MessageChannelUnion channel = message.getChannel();
         List<Message.Attachment> attachments = message.getMessage().getAttachments();
-        if(args.length == 0){
+        if (args.length == 0) {
             actions.messageChannel(channel, "No hashing algorithm specified");
             return;
         }
         AttachmentProxy attachmentProxy;
-        if(attachments.size() == 0 && args.length > 1){
+        if (attachments.size() == 0 && args.length > 1) {
             String url = args[1];
-            if(url.startsWith("https://cdn.discordapp.com")){
+            if (url.startsWith("https://cdn.discordapp.com")) {
                 attachmentProxy = new AttachmentProxy(url);
-            }else{
+            } else {
                 actions.messageChannel(channel, "Not a discord domain");
                 return;
             }
-        }else if(attachments.size() > 0){
+        } else if (attachments.size() > 0) {
             attachmentProxy = attachments.get(0).getProxy();
-        }else{
+        } else {
             actions.messageChannel(channel, "No file attached or url provided.");
             return;
         }
@@ -51,25 +51,25 @@ public class FileHashCommand extends Command{
         tempDir.mkdir();
         File temp = new File("tmp/temp_file");
         temp.delete();
-        try{
+        try {
             temp = attachmentProxy.downloadToFile(temp).get(10, TimeUnit.SECONDS);
-        }catch (InterruptedException | ExecutionException | TimeoutException e){
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             actions.messageChannel(channel, "Job timed out");
             return;
         }
         byte[] bytes;
-        try{
-             bytes = Files.readAllBytes(temp.toPath());
-        }catch (IOException e){
+        try {
+            bytes = Files.readAllBytes(temp.toPath());
+        } catch (IOException e) {
             System.err.println("IO error on read");
             return;
         }
-        try{
+        try {
             String hash = Hasher.hashBytes(bytes, Hasher.choose(args[0]));
             actions.messageChannel(channel, hash);
-        }catch (IllegalStateException exc){
+        } catch (IllegalStateException exc) {
             actions.messageChannel(channel, exc.getMessage());
-        }finally{
+        } finally {
             temp.delete();
             tempDir.deleteOnExit();
         }

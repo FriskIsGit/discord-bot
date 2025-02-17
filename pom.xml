@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20210307</version>
+            <version>20231013</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.79</version>
+            <version>1.2.83</version>
         </dependency>
         <dependency>
             <groupId>com.gitlab.9lukas5</groupId>
@@ -63,9 +63,9 @@
             <version>0.2.5</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>fluent-hc</artifactId>
-            <version>4.5.14</version>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>3.14.1</version>
         </dependency>
     </dependencies>
 </project>

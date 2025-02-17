@@ -11,11 +11,11 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import java.awt.*;
 
 //uses youtube and youtube_lib packages
-public class YoutubeCommand extends Command{
-    private static final Color niceGreen = new Color(34,139,34);
-    private static final Color crimson = new Color(220,20,60);
+public class YoutubeCommand extends Command {
+    private static final Color niceGreen = new Color(34, 139, 34);
+    private static final Color crimson = new Color(220, 20, 60);
 
-    public YoutubeCommand(String... aliases){
+    public YoutubeCommand(String... aliases) {
         super(aliases);
         description = "Retrieves information about youtube videos or downloads them\n";
         usage = "ytinfo `video_id`\n" +
@@ -24,16 +24,16 @@ public class YoutubeCommand extends Command{
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
         AudioManager audioManager = message.getGuild().getAudioManager();
         AudioPlayer.addSendingHandlerIfNull(audioManager);
 
-        if(args.length == 0){
+        if (args.length == 0) {
             return;
         }
         YoutubeRequest youtubeRequest;
         StreamType type;
-        switch(commandName){
+        switch (commandName) {
             case "ytinfo":
                 type = StreamType.INFO;
                 break;
@@ -53,9 +53,9 @@ public class YoutubeCommand extends Command{
         }
 
         String id = Youtube.getVideoId(args[0]);
-        if(type == StreamType.INFO){
+        if (type == StreamType.INFO) {
             youtubeRequest = new YoutubeRequest(StreamType.INFO, id);
-        }else{
+        } else {
             int formatNumber = Integer.parseInt(args[1]);
             youtubeRequest = new YoutubeRequest(type, id, formatNumber);
         }
@@ -63,32 +63,33 @@ public class YoutubeCommand extends Command{
         new Thread(() -> {
             MessageChannelUnion channel = message.getChannel();
             UserResponse response = UserRequest.executeRequest(youtubeRequest);
-            if(response.success && response.hasFile){
+            if (response.success && response.hasFile) {
                 actions.sendFile(channel, response.fileAttachment);
             }
             sendResponseEmbed(channel, response);
         }).start();
     }
-    private static void sendResponseEmbed(MessageChannelUnion channel, UserResponse response){
+
+    private static void sendResponseEmbed(MessageChannelUnion channel, UserResponse response) {
         EmbedBuilder embed = new EmbedBuilder();
         embed.setColor(response.success ? niceGreen : crimson);
         embed.setTitle(response.success ? "Success" : "Failure");
-        if(response.message.length == 1){
+        if (response.message.length == 1) {
             embed.addField("", response.message[0], true);
             actions.sendEmbed(channel, embed.build());
             return;
         }
         boolean first = true;
-        for(String msg : response.message){
-            if(first){
+        for (String msg : response.message) {
+            if (first) {
                 embed.setDescription(msg);
                 first = false;
                 continue;
             }
             int len = msg.length();
-            if(len > MessageEmbed.VALUE_MAX_LENGTH){
-                embed.addField("", msg.substring(0, len/2), true);
-                embed.addField("", msg.substring(len/2), true);
+            if (len > MessageEmbed.VALUE_MAX_LENGTH) {
+                embed.addField("", msg.substring(0, len / 2), true);
+                embed.addField("", msg.substring(len / 2), true);
                 continue;
             }
             embed.addField("", msg, false);

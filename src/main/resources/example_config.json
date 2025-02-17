@@ -1,0 +1,20 @@
+{
+  "token": "SX5u24tcd2fsC59DVQR9I26Q.LKwbYV.6f34mQV5x4o7nQGMhKHJ9sa4De0",
+  "prefix": "-",
+  "purge_cap": 1000,
+  "message_cap_per_channel": 1500,
+  "sudo_users": [
+    950501297615237120,
+    278774454554715137,
+    489788733245539072,
+    356165434486027788
+  ],
+  "audio_dir": "home/users/audio",
+  "tokens": {
+    "open_ai_token": "",
+    "ai21_token": "",
+    "genius_token": "kuRkeX4r5nY8lnXddQ57wl45oIqWFFpAPu4IwXGX6fyaU1vkQQNiUPgmKMrCZzvj"
+  },
+  "enable_shell": true,
+  "enable_emergency": true
+}

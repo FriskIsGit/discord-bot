@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PurgeCommand extends Command{
+public class PurgeCommand extends Command {
     public final MessageProcessor msgProcessor;
 
-    public PurgeCommand(String... aliases){
+    public PurgeCommand(String... aliases) {
         super(aliases);
         requiresAuth = true;
         description = "Purges/deletes messages from channel";
@@ -24,19 +24,19 @@ public class PurgeCommand extends Command{
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
-        if(args.length < 1){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
+        if (args.length < 1) {
             return;
         }
 
         int amount;
-        try{
+        try {
             amount = Integer.parseInt(args[0]);
-        }catch (NumberFormatException nfExc){
+        } catch (NumberFormatException nfExc) {
             return;
         }
 
-        if(amount > Bot.getConfig().purgeCap || amount<1){
+        if (amount > Bot.getConfig().purgeCap || amount < 1) {
             msgProcessor.deleteRequestMessage(message.getMessage());
             actions.sendAsMessageBlock(message.getChannel(), "Amount rejected");
             return;
@@ -45,7 +45,7 @@ public class PurgeCommand extends Command{
         amount++;
         MessageChannelUnion channel = message.getChannel();
         MessageDeque cachedMessages = msgProcessor.channelIdsToMessageDeques.get(channel.getIdLong());
-        if(cachedMessages == null){
+        if (cachedMessages == null) {
             actions.messageChannel(channel, "Channel key doesn't exist");
             return;
         }
@@ -55,28 +55,28 @@ public class PurgeCommand extends Command{
         amount = amount - deqAmount;
 
         boolean retrieved = false, exhausted = false;
-        long start = -1, end= -1;
-        if(amount > 0){
+        long start = -1, end = -1;
+        if (amount > 0) {
             retrieved = true;
             start = System.currentTimeMillis();
 
-            int maxedHistories = amount/100;
+            int maxedHistories = amount / 100;
             List<Message> historiesList = new ArrayList<>(maxedHistories + 1);
-            for (int h = 0; h < maxedHistories; h++){
-                MessageHistory.MessageRetrieveAction retrieveHistoryAction = MessageHistory.getHistoryBefore(channel,lastMessageId).limit(100);
+            for (int h = 0; h < maxedHistories; h++) {
+                MessageHistory.MessageRetrieveAction retrieveHistoryAction = MessageHistory.getHistoryBefore(channel, lastMessageId).limit(100);
                 List<Message> aHistory = retrieveHistoryAction.complete().getRetrievedHistory();
-                if(aHistory.size() == 0){
+                if (aHistory.size() == 0) {
                     exhausted = true;
                     break;
                 }
                 //almost always lastIndex == 99
-                int lastIndex = aHistory.size()-1;
+                int lastIndex = aHistory.size() - 1;
                 lastMessageId = aHistory.get(lastIndex).getId();
                 historiesList.addAll(aHistory);
             }
             //add leftovers
-            if(!exhausted){
-                MessageHistory.MessageRetrieveAction retrieveHistoryAction = MessageHistory.getHistoryBefore(channel,lastMessageId).limit(amount%100);
+            if (!exhausted) {
+                MessageHistory.MessageRetrieveAction retrieveHistoryAction = MessageHistory.getHistoryBefore(channel, lastMessageId).limit(amount % 100);
                 List<Message> aHistory = retrieveHistoryAction.complete().getRetrievedHistory();
                 historiesList.addAll(aHistory);
             }
@@ -87,8 +87,8 @@ public class PurgeCommand extends Command{
             end = System.currentTimeMillis();
         }
 
-        if(retrieved)
-            actions.messageChannel(channel,"Retrieve purge: " + (end-start));
+        if (retrieved)
+            actions.messageChannel(channel, "Retrieve purge: " + (end - start));
 
     }
 }

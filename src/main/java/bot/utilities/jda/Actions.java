@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
@@ -21,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class Actions{
+public class Actions {
     private static final int MEGABYTES_25 = 26214400;
     private static final int MAX_CONTENT_LENGTH = Message.MAX_CONTENT_LENGTH;
     private static final int SPLIT_LIMIT = 50;
@@ -29,56 +28,59 @@ public class Actions{
     private final List<CompletableFuture<Message>> messageCache = new ArrayList<>(64);
     private final JDA jdaInterface;
 
-    public Actions(){
+    public Actions() {
         jdaInterface = Bot.getJDAInterface();
     }
-    public void sendEmbed(MessageChannelUnion channel, MessageEmbed embed){
-        if(embed == null){
+
+    public void sendEmbed(MessageChannelUnion channel, MessageEmbed embed) {
+        if (embed == null) {
             return;
         }
         CompletableFuture<Message> msgPromise = channel.sendMessageEmbeds(embed).submit();
         messageCache.add(msgPromise);
     }
 
-    public boolean banUser(User user, Guild guildOfOrigin){
-        if(user == null || guildOfOrigin == null){
+    public boolean banUser(User user, Guild guildOfOrigin) {
+        if (user == null || guildOfOrigin == null) {
             return false;
         }
-        try{
+        try {
             guildOfOrigin.ban(user, 0, TimeUnit.SECONDS).complete();
-        }catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e){
-            System.err.println(e.getMessage());
-            return false;
-        }
-        return true;
-    }
-    public boolean unbanUser(User user, Guild guildOfOrigin){
-        if(user == null || guildOfOrigin == null){
-            return false;
-        }
-        try{
-            guildOfOrigin.unban(user).complete();
-        }catch (InsufficientPermissionException | HierarchyException e){
-            System.err.println(e.getMessage());
-            return false;
-        }
-        return true;
-    }
-    public boolean kickUser(User user, Guild guildOfOrigin, String reason){
-        if(user == null || guildOfOrigin == null){
-            return false;
-        }
-        try{
-            guildOfOrigin.kick(user).reason(reason).complete();
-        }catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e){
+        } catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e) {
             System.err.println(e.getMessage());
             return false;
         }
         return true;
     }
 
-    public boolean hasPermission(final Permission permission, User user){
-        if(user == null){
+    public boolean unbanUser(User user, Guild guildOfOrigin) {
+        if (user == null || guildOfOrigin == null) {
+            return false;
+        }
+        try {
+            guildOfOrigin.unban(user).complete();
+        } catch (InsufficientPermissionException | HierarchyException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public boolean kickUser(User user, Guild guildOfOrigin, String reason) {
+        if (user == null || guildOfOrigin == null) {
+            return false;
+        }
+        try {
+            guildOfOrigin.kick(user).reason(reason).complete();
+        } catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public boolean hasPermission(final Permission permission, User user) {
+        if (user == null) {
             return false;
         }
         Member member = (Member) user;
@@ -86,98 +88,98 @@ public class Actions{
         return permissionSet.contains(permission);
     }
 
-    public void sendFile(MessageChannel channel, File fileToSend){
-        if(fileToSend == null){
+    public void sendFile(MessageChannel channel, File fileToSend) {
+        if (fileToSend == null) {
             System.err.println("Given file was null");
             return;
         }
-        if(!fileToSend.exists()){
+        if (!fileToSend.exists()) {
             System.err.println("Given file doesn't exist");
             return;
         }
         byte[] bytes;
-        try{
+        try {
             bytes = Files.readAllBytes(fileToSend.toPath());
-        }catch (IOException ioException){
+        } catch (IOException ioException) {
             ioException.printStackTrace();
             return;
         }
-        if(bytes.length > MEGABYTES_25){
+        if (bytes.length > MEGABYTES_25) {
             channel.sendMessage("25MBs exceeded").queue();
             return;
         }
 
-        if(channel != null){
-            try (FileUpload upload = FileUpload.fromData(bytes, fileToSend.getName())){
+        if (channel != null) {
+            try (FileUpload upload = FileUpload.fromData(bytes, fileToSend.getName())) {
                 channel.sendFiles(upload).queue();
                 System.out.println("Sending file..");
-            }catch (IOException e){
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public TextChannel getTextChannel(String partialName){
+    public TextChannel getTextChannel(String partialName) {
         List<TextChannel> textChannels = jdaInterface.getTextChannels();
-        for (TextChannel textChannel : textChannels){
+        for (TextChannel textChannel : textChannels) {
             //if an exact match exists match to it first
-            if (textChannel.getName().equals(partialName)){
+            if (textChannel.getName().equals(partialName)) {
                 return textChannel;
             }
         }
-        for (TextChannel textChannel : textChannels){
+        for (TextChannel textChannel : textChannels) {
             //if an exact match exists match to it first
-            if (textChannel.getName().contains(partialName)){
+            if (textChannel.getName().contains(partialName)) {
                 return textChannel;
             }
         }
         return null;
     }
 
-    public Guild getGuildById(long id){
+    public Guild getGuildById(long id) {
         List<Guild> guilds = jdaInterface.getGuilds();
-        for (Guild guild : guilds){
-            if(guild.getIdLong() == id){
+        for (Guild guild : guilds) {
+            if (guild.getIdLong() == id) {
                 return guild;
             }
         }
         return null;
     }
 
-    public void messageChannel(TextChannel txtChannel, String msgText){
-        if(txtChannel == null || msgText.isEmpty())
+    public void messageChannel(TextChannel txtChannel, String msgText) {
+        if (txtChannel == null || msgText.isEmpty())
             return;
         int length = msgText.length();
 
-        if(MAX_CONTENT_LENGTH >= length){
+        if (MAX_CONTENT_LENGTH >= length) {
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msgText).submit();
             messageCache.add(msgPromise);
             return;
         }
 
         List<String> messageParts = smartPartition(msgText, MAX_CONTENT_LENGTH);
-        for(String msg : messageParts){
+        for (String msg : messageParts) {
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage(msg).submit();
             messageCache.add(msgPromise);
         }
     }
 
-    private List<String> smartPartition(String msgText, int SIZE_PER_MSG){
+    private List<String> smartPartition(String msgText, int SIZE_PER_MSG) {
         int length = msgText.length();
         int partsEst = length / SIZE_PER_MSG + 1;
         List<String> messageParts = new ArrayList<>(partsEst);
         int lastSplit = 0;
         int counter = 0;
-        while(counter++ < SPLIT_LIMIT){
+        while (counter++ < SPLIT_LIMIT) {
             int widestSplit = lastSplit + SIZE_PER_MSG;
-            if(widestSplit >= length){
+            if (widestSplit >= length) {
                 String last = msgText.substring(lastSplit, length);
                 messageParts.add(last);
                 break;
             }
 
             int nextSplit = msgText.lastIndexOf('\n', widestSplit);
-            if(nextSplit == lastSplit){
+            if (nextSplit == lastSplit) {
                 //accounts for - not found case
                 String part = msgText.substring(lastSplit, widestSplit);
                 messageParts.add(part);
@@ -191,43 +193,43 @@ public class Actions{
         return messageParts;
     }
 
-    public void messageChannel(long channelId, String msgText){
+    public void messageChannel(long channelId, String msgText) {
         messageChannel(jdaInterface.getTextChannelById(channelId), msgText);
     }
 
-    public void messageChannel(MessageChannel txtChannel, String msgText){
+    public void messageChannel(MessageChannel txtChannel, String msgText) {
         messageChannel((TextChannel) txtChannel, msgText);
     }
 
-    public void sendAsMessageBlock(MessageChannel txtChannel, String msgText){
-        if(txtChannel == null || msgText.isEmpty())
+    public void sendAsMessageBlock(MessageChannel txtChannel, String msgText) {
+        if (txtChannel == null || msgText.isEmpty())
             return;
         int msgLength = msgText.length();
 
-        if(MAX_CONTENT_LENGTH-6 >= msgLength){
+        if (MAX_CONTENT_LENGTH - 6 >= msgLength) {
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msgText + "```").submit();
             messageCache.add(msgPromise);
             return;
         }
 
         List<String> messageParts = smartPartition(msgText, MAX_CONTENT_LENGTH - 6);
-        for(String msg : messageParts){
+        for (String msg : messageParts) {
             CompletableFuture<Message> msgPromise = txtChannel.sendMessage("```" + msg + "```").submit();
             messageCache.add(msgPromise);
         }
     }
 
-    public void sendAsMessageBlock(long channelId, String msgText){
+    public void sendAsMessageBlock(long channelId, String msgText) {
         sendAsMessageBlock(jdaInterface.getTextChannelById(channelId), msgText);
     }
 
-    public void messageUser(long userId, String messageContent){
+    public void messageUser(long userId, String messageContent) {
         User user = jdaInterface.getUserById(userId);
         //if not cached - retrieve
-        if(user == null){
-            try{
+        if (user == null) {
+            try {
                 user = jdaInterface.retrieveUserById(userId).complete();
-            }catch (RuntimeException unknownUser){
+            } catch (RuntimeException unknownUser) {
                 System.err.println("UNKNOWN USER");
                 return;
             }
@@ -236,10 +238,10 @@ public class Actions{
         userDM.sendMessage(messageContent).queue();
     }
 
-    public void clearQueuedMessages(){
-        for (int i = 0; i < messageCache.size(); i++){
+    public void clearQueuedMessages() {
+        for (int i = 0; i < messageCache.size(); i++) {
             CompletableFuture<Message> promise = messageCache.get(i);
-            if (!promise.isDone()){
+            if (!promise.isDone()) {
                 //useless boolean value
                 promise.cancel(false);
             }
@@ -247,40 +249,41 @@ public class Actions{
         }
     }
 
-    public void sendFileToUser(long userId, File file){
+    public void sendFileToUser(long userId, File file) {
         User user = jdaInterface.getUserById(userId);
         //if not cached - retrieve
-        if(user == null){
-            try{
+        if (user == null) {
+            try {
                 user = jdaInterface.retrieveUserById(userId).complete();
-            }catch (RuntimeException unknownUser){
+            } catch (RuntimeException unknownUser) {
                 System.err.println("UNKNOWN USER");
                 return;
             }
         }
         PrivateChannel userDM = user.openPrivateChannel().complete();
-        try{
+        try {
             byte[] bytes;
-            try{
+            try {
                 bytes = Files.readAllBytes(file.toPath());
-            }catch (IOException ioException){
+            } catch (IOException ioException) {
                 return;
             }
-            try (FileUpload upload = FileUpload.fromData(bytes, file.getName())){
+            try (FileUpload upload = FileUpload.fromData(bytes, file.getName())) {
                 userDM.sendFiles(upload).queue();
                 System.out.println("Sending file..");
-            }catch (IOException e){
+            } catch (IOException e) {
                 System.err.println("IOException occurred on file upload");
             }
-        }catch (IllegalArgumentException iaExc){
+        } catch (IllegalArgumentException iaExc) {
             System.err.println("Cannot send file to user");
         }
     }
-    public Guild getServerIgnoreCase(String partialName){
+
+    public Guild getServerIgnoreCase(String partialName) {
         partialName = partialName.toLowerCase(Locale.ROOT);
         List<Guild> servers = jdaInterface.getGuilds();
-        for (Guild server : servers){
-            if (server.getName().toLowerCase(Locale.ROOT).contains(partialName)){
+        for (Guild server : servers) {
+            if (server.getName().toLowerCase(Locale.ROOT).contains(partialName)) {
                 return server;
             }
         }

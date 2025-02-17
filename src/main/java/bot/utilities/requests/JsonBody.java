@@ -8,20 +8,21 @@ import java.util.List;
  * Based on pairs of properties and values
  * Double quotation marks or reverse slash characters in string values are escaped before put into the body.
  */
-public class JsonBody{
+public class JsonBody {
     private final StringBuilder body = new StringBuilder();
     private boolean hasTokens = false;
-    private JsonBody(){
+
+    private JsonBody() {
     }
 
-    public static JsonBody body(){
+    public static JsonBody body() {
         JsonBody jsonBody = new JsonBody();
         jsonBody.body.append('{');
         return jsonBody;
     }
 
-    public JsonBody addPair(String property, String value){
-        if(hasTokens){
+    public JsonBody addPair(String property, String value) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":");
@@ -29,8 +30,9 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
-    public JsonBody addPair(String property, boolean value){
-        if(hasTokens){
+
+    public JsonBody addPair(String property, boolean value) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":");
@@ -38,8 +40,9 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
-    public JsonBody addPair(String property, float value){
-        if(hasTokens){
+
+    public JsonBody addPair(String property, float value) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":");
@@ -47,8 +50,9 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
-    public JsonBody addPair(String property, double value){
-        if(hasTokens){
+
+    public JsonBody addPair(String property, double value) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":");
@@ -56,8 +60,9 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
-    public JsonBody addPair(String property, int value){
-        if(hasTokens){
+
+    public JsonBody addPair(String property, int value) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":");
@@ -65,8 +70,9 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
-    public JsonBody addPair(String property, long value){
-        if(hasTokens){
+
+    public JsonBody addPair(String property, long value) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":");
@@ -74,8 +80,9 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
-    public JsonBody addPair(String property, JsonBody jsonBody){
-        if(hasTokens){
+
+    public JsonBody addPair(String property, JsonBody jsonBody) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":");
@@ -83,19 +90,20 @@ public class JsonBody{
         hasTokens = true;
         return this;
     }
-    public JsonBody addPair(String property, List<String> list){
-        if(hasTokens){
+
+    public JsonBody addPair(String property, List<String> list) {
+        if (hasTokens) {
             body.append(',');
         }
         body.append('"').append(property).append("\":[");
         Iterator<String> iterator = list.iterator();
         int size = list.size();
         int i = 0;
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             i++;
             String el = escape(iterator.next());
             body.append('\"').append(el).append('\"');
-            if(i != size)
+            if (i != size)
                 body.append(',');
         }
         body.append(']');
@@ -103,25 +111,26 @@ public class JsonBody{
         return this;
     }
 
-    public String get(){
+    public String get() {
         body.append('}');
         return body.toString();
     }
-    public byte[] getBytes(){
+
+    public byte[] getBytes() {
         body.append('}');
         return body.toString().getBytes();
     }
 
-    public void clear(){
+    public void clear() {
         hasTokens = false;
         body.setLength(1);
     }
 
-    private static String escape(String str){
+    private static String escape(String str) {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < str.length(); i++){
+        for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
-            switch (c){
+            switch (c) {
                 case '\\':
                     builder.append("\\\\");
                     break;
@@ -142,7 +151,7 @@ public class JsonBody{
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return body.toString();
     }
 }

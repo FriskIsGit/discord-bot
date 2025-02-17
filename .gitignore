@@ -6,3 +6,5 @@
 /META-INF/
 /src/test/
 /src/main/resources/config.json
+src/main/java/bot/utilities/excluded/
+src/main/resources/META-INF/

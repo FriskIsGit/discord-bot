@@ -2,9 +2,9 @@ package bot.commands;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class HaltCommand extends Command{
+public class HaltCommand extends Command {
 
-    public HaltCommand(String... aliases){
+    public HaltCommand(String... aliases) {
         super(aliases);
         requiresAuth = true;
         usage = "halt";
@@ -12,7 +12,7 @@ public class HaltCommand extends Command{
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
         System.out.println("IT WAS HALTED");
         actions.clearQueuedMessages();
     }

@@ -4,17 +4,17 @@ import bot.core.Bot;
 import bot.utilities.jda.ShutdownTimer;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class AbortCommand extends Command{
-    public AbortCommand(String... aliases){
+public class AbortCommand extends Command {
+    public AbortCommand(String... aliases) {
         super(aliases);
         requiresAuth = true;
         description = "Aborts shutdown";
     }
 
     @Override
-    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args){
+    protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
         ShutdownTimer shutdownTimer = Bot.getShutdownTimer();
-        if(!shutdownTimer.isScheduled()){
+        if (!shutdownTimer.isScheduled()) {
             return;
         }
         shutdownTimer.abort();

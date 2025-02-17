@@ -29,7 +29,7 @@ although not used directly in code, they're a supplement for existing methods
  - sealedtx/java-youtube-downloader to retrieve youtube content
  - fastjson (json parser)
  - junit (tests)
- - apache httpclient fluent API (requests)
+ - Unirest - Simplified, lightweight HTTP library
 
 ### Sources:
  - http://www.tritonus.org/plugins.html

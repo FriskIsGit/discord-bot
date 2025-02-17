@@ -8,7 +8,7 @@ import bot.commands.ai.AICommand;
 import java.util.*;
 
 //singleton
-public final class Commands{
+public final class Commands {
     private static Commands instance;
 
     //it can be public since the map will be already populated
@@ -23,7 +23,7 @@ public final class Commands{
             new ManageCommand("manage"),
             new UptimeCommand("uptime"),
             new LeaveCommand("leave", "l"),
-            new MemoryCommand("memory", "mem", "memstat","mempanel", "memuse"),
+            new MemoryCommand("memory", "mem", "memstat", "mempanel", "memuse"),
             new StopCommand("stop"),
             new SongsCommand("songs", "tracks"),
             new TokenCommand("token", "gentoken"),
@@ -31,7 +31,7 @@ public final class Commands{
             new ShutdownCommand("shutdown"),
             new AbortCommand("abort"),
             new LoopCommand("loop"),
-            new HttpCommand( "httpcat", "http", "cat"),
+            new HttpCommand("httpcat", "http", "cat"),
             new LengthCommand("len", "length"),
             new QueueCommand("queue", "q"),
             new SkipCommand("skip"),
@@ -45,7 +45,7 @@ public final class Commands{
             new InviteCommand("invite", "invites"),
             new RoleCommand("role", "roles"),
             new SudoCommand("sudo"),
-            new URLCommand("url" , "link", "links"),
+            new URLCommand("url", "link", "links"),
             new CompareCommand("compare", "comp", "diff"),
             new ConvertCommand("convert"),
             new AverageCommand("average", "avg"),
@@ -63,91 +63,96 @@ public final class Commands{
     };
     private final HashMap<String, Command> commandsMap = new HashMap<>(commands.length);
 
-    public Commands(){
+    public Commands() {
         populateMap();
     }
 
-    public static Commands get(){
-        if(instance == null){
+    public static Commands get() {
+        if (instance == null) {
             instance = new Commands();
         }
         return instance;
     }
 
     //from inclusive, to exclusive
-    public static String mergeTerms(String[] terms, int fromIndex, int toIndex){
-        if(terms.length == 0){
+    public static String mergeTerms(String[] terms, int fromIndex, int toIndex) {
+        if (terms.length == 0) {
             return "";
         }
         int totalLength = 0;
-        for (int i = fromIndex; i < toIndex; i++){
+        for (int i = fromIndex; i < toIndex; i++) {
             totalLength += terms[i].length() + 1;
         }
         StringBuilder str = new StringBuilder(totalLength);
-        for (int i = fromIndex; i < toIndex; i++){
+        for (int i = fromIndex; i < toIndex; i++) {
             str.append(terms[i]);
-            if(i != toIndex - 1)
+            if (i != toIndex - 1)
                 str.append(' ');
         }
         return str.toString();
     }
-    public static String mergeTerms(String[] terms){
+
+    public static String mergeTerms(String[] terms) {
         return mergeTerms(terms, 0, terms.length);
     }
 
-    private void populateMap(){
-        for(Command command : commands){
-            for(String name : command.aliases){
+    private void populateMap() {
+        for (Command command : commands) {
+            for (String name : command.aliases) {
                 commandsMap.put(name, command);
             }
         }
     }
-    public void addToMap(Command command){
-        for(String name : command.aliases){
+
+    public void addToMap(Command command) {
+        for (String name : command.aliases) {
             commandsMap.put(name, command);
         }
     }
 
-    public boolean hasCommand(String alias){
+    public boolean hasCommand(String alias) {
         return commandsMap.containsKey(alias);
     }
-    public Command command(String name){
+
+    public Command command(String name) {
         return commandsMap.get(name);
     }
+
     @SuppressWarnings("unchecked")
-    public <T> T command(Class<? extends Command> clazz){
-        for(Command command : commandsMap.values()){
-            if(command.getClass() == clazz){
-                return (T)command;
+    public <T> T command(Class<? extends Command> clazz) {
+        for (Command command : commandsMap.values()) {
+            if (command.getClass() == clazz) {
+                return (T) command;
             }
         }
         return null;
     }
-    public static String[] doubleTermSplit(String commandText){
-        return doubleTermSplit(commandText,0);
+
+    public static String[] doubleTermSplit(String commandText) {
+        return doubleTermSplit(commandText, 0);
     }
+
     //always returns an array of length 2
-    public static String[] doubleTermSplit(String commandText, int fromIndex){
-        if(fromIndex < 0 || commandText.length() <= fromIndex){
-            return new String[]{"",""};
+    public static String[] doubleTermSplit(String commandText, int fromIndex) {
+        if (fromIndex < 0 || commandText.length() <= fromIndex) {
+            return new String[]{"", ""};
         }
         ArrayList<String> terms = new ArrayList<>(2);
         char[] arr = commandText.toCharArray();
         boolean lookingForWhitespace = true;
-        for (int i = fromIndex; i < arr.length; i++){
-            if(lookingForWhitespace && arr[i] == ' '){
+        for (int i = fromIndex; i < arr.length; i++) {
+            if (lookingForWhitespace && arr[i] == ' ') {
                 terms.add(commandText.substring(fromIndex, i));
                 lookingForWhitespace = false;
-            }
-            else if(!lookingForWhitespace && arr[i] != ' '){
+            } else if (!lookingForWhitespace && arr[i] != ' ') {
                 terms.add(commandText.substring(i));
                 break;
             }
         }
-        if(terms.size() == 0){
+        if (terms.size() == 0) {
             return new String[]{commandText.substring(fromIndex), ""};
         }
-        if (terms.size() == 1){
+        if (terms.size() == 1) {
             return new String[]{terms.get(0), ""};
         }
         String[] res = new String[2];
@@ -177,13 +182,14 @@ public final class Commands{
      *          <li>there can only be one grave term in given text, since only the outer graves are considered</li>
      *     </ul>
      * </ol>
+     *
      * @param fromIndex index to begin splitting from
-     * @param text string to parse
+     * @param text      string to parse
      * @return array of terms split by aforementioned rules,
      * the array returned is guaranteed to have length of at least one
      */
-    public static String[] splitIntoTerms(String text, int fromIndex){
-        if(fromIndex < 0 || text.length() <= fromIndex){
+    public static String[] splitIntoTerms(String text, int fromIndex) {
+        if (fromIndex < 0 || text.length() <= fromIndex) {
             return new String[]{""};
         }
         ArrayList<String> terms = new ArrayList<>(8);
@@ -191,18 +197,18 @@ public final class Commands{
         int len = arr.length;
         boolean hasToken = false, inQuotes = false;
         boolean triedGrave = false;
-        for (int i = fromIndex; i<len; i++){
-            boolean isLast = i == len-1;
+        for (int i = fromIndex; i < len; i++) {
+            boolean isLast = i == len - 1;
             char c = arr[i];
-            switch (c){
+            switch (c) {
                 case ' ':
-                    if(hasToken && !inQuotes){
+                    if (hasToken && !inQuotes) {
                         String term = text.substring(fromIndex, i);
                         terms.add(term);
                         hasToken = false;
                     }
                     //never closed
-                    else if(inQuotes && isLast){
+                    else if (inQuotes && isLast) {
                         //go back since the initial assumption was incorrect
                         i = fromIndex;
                         inQuotes = false;
@@ -210,19 +216,19 @@ public final class Commands{
                     }
                     break;
                 case '"':
-                    if(hasToken && !inQuotes){
+                    if (hasToken && !inQuotes) {
                         break;
                     }
-                    if(inQuotes){
+                    if (inQuotes) {
                         //wants to close quotes
-                        if(isLast || arr[i+1] == ' '){
+                        if (isLast || arr[i + 1] == ' ') {
                             //"quote";"quote" ;
-                            String qTerm = text.substring(fromIndex+1, i);
-                            if(!qTerm.isEmpty()){
+                            String qTerm = text.substring(fromIndex + 1, i);
+                            if (!qTerm.isEmpty()) {
                                 terms.add(qTerm);
                                 hasToken = false;
                             }
-                        }else{
+                        } else {
                             //another quote was opened with a proceeding non-whitespace char
                             i = fromIndex;
                         }
@@ -236,20 +242,20 @@ public final class Commands{
                     fromIndex = i;
                     break;
                 default:
-                    if(!triedGrave && c == '`'){
-                        if(!hasToken){
+                    if (!triedGrave && c == '`') {
+                        if (!hasToken) {
                             triedGrave = true;
                             int grave = lastValidGrave(arr);
-                            if(grave != -1 && grave != i){
-                                String graveTerm = text.substring(i+1, grave);
+                            if (grave != -1 && grave != i) {
+                                String graveTerm = text.substring(i + 1, grave);
                                 terms.add(graveTerm);
                                 i = grave;
                                 break;
                             }
                         }
                     }
-                    if(isLast && hasToken){
-                        if(inQuotes){
+                    if (isLast && hasToken) {
+                        if (inQuotes) {
                             //unclosed
                             i = fromIndex;
                             inQuotes = false;
@@ -260,11 +266,11 @@ public final class Commands{
                         //end
                         break;
                     }
-                    if(hasToken){
+                    if (hasToken) {
                         break;
                     }
                     hasToken = true;
-                    if(isLast){
+                    if (isLast) {
                         //last singular char token
                         terms.add(Character.toString(c));
                     }
@@ -272,7 +278,7 @@ public final class Commands{
                     break;
             }
         }
-        if(terms.size() == 0){
+        if (terms.size() == 0) {
             return new String[]{""};
         }
 
@@ -283,25 +289,25 @@ public final class Commands{
     }
 
     //looks for a valid closing grave, if not found returns -1
-    private static int lastValidGrave(char[] arr){
+    private static int lastValidGrave(char[] arr) {
         int lastIndex = arr.length - 1;
-        for (int i = lastIndex; i > -1; i--){
-            if(arr[i] == '`'){
-                if(i == lastIndex)
+        for (int i = lastIndex; i > -1; i--) {
+            if (arr[i] == '`') {
+                if (i == lastIndex)
                     return lastIndex;
-                if(arr[i+1] == ' ')
+                if (arr[i + 1] == ' ')
                     return i;
             }
         }
         return -1;
     }
 
-    public static String[] splitIntoTerms(String text){
+    public static String[] splitIntoTerms(String text) {
         return splitIntoTerms(text, 0);
     }
 
-    public static String[] shrink(String[] arr, int fromIndex){
-        if(fromIndex < 0 || arr.length <= fromIndex){
+    public static String[] shrink(String[] arr, int fromIndex) {
+        if (fromIndex < 0 || arr.length <= fromIndex) {
             return new String[0];
         }
         String[] freshArr = new String[arr.length - fromIndex];

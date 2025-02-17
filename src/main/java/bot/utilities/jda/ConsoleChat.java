@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import java.io.File;
 import java.util.Scanner;
 
-public class ConsoleChat{
+public class ConsoleChat {
     private final static int USER_ID_LEN = 18;
     private final Scanner scanner = new Scanner(System.in);
 
@@ -19,29 +19,29 @@ public class ConsoleChat{
 
     private final Actions actions;
 
-    public ConsoleChat(){
+    public ConsoleChat() {
         actions = Bot.getActions();
     }
 
-    public void quit(){
+    public void quit() {
         looping = false;
     }
 
-    public void beginChat(){
-        while(looping) {
+    public void beginChat() {
+        while (looping) {
             String input = scanner.nextLine();
-            if(input.isEmpty()){
+            if (input.isEmpty()) {
                 continue;
             }
-            if(input.equals("exit")){
+            if (input.equals("exit")) {
                 quit();
                 break;
             }
-            if(!input.startsWith(Bot.PREFIX)){
-                if(inServer){
+            if (!input.startsWith(Bot.PREFIX)) {
+                if (inServer) {
                     actions.messageChannel(currentChannel, input);
-                }else{
-                    if(dmId == 0){
+                } else {
+                    if (dmId == 0) {
                         System.err.println("Unset dm id");
                         continue;
                     }
@@ -50,7 +50,7 @@ public class ConsoleChat{
                 continue;
             }
             String[] args = Commands.doubleTermSplit(input, Bot.PREFIX_OFFSET);
-            switch (args[0]){
+            switch (args[0]) {
                 case "cc":
                     changeChannel(args);
                     break;
@@ -67,44 +67,43 @@ public class ConsoleChat{
                     actions.messageChannel(currentChannel, args[1]);
                     break;
                 case "where": {
-                    if (inServer)
-                        System.out.println("Current channel: " + currentChannel);
+                    if (inServer) System.out.println("Current channel: " + currentChannel);
                     else System.out.println("In dm, id: " + dmId);
                     break;
                 }
                 default:
                     String[] remainingArgs = Commands.splitIntoTerms(args[1]);
-                    try{
+                    try {
                         Command command = Commands.get().command(args[0]);
-                        if(command == null){
+                        if (command == null) {
                             System.err.println("Command not found, name: " + args[0]);
                             continue;
                         }
                         command.executeUnrestricted(args[0], remainingArgs);
-                    }catch (Exception exc){
+                    } catch (Exception exc) {
                         System.err.println(exc.getMessage());
                     }
             }
         }
     }
 
-    private void sendFile(String[] args){
+    private void sendFile(String[] args) {
         //file path
         File file = new File(args[1]);
-        if(inServer){
+        if (inServer) {
             actions.sendFile(currentChannel, file);
-        }else{
+        } else {
             actions.sendFileToUser(dmId, file);
         }
     }
 
-    private void switchToDm(String[] anySplit){
+    private void switchToDm(String[] anySplit) {
         String toParse = anySplit[1];
-        if(!toParse.matches("[0-9]+")){
+        if (!toParse.matches("[0-9]+")) {
             System.err.println("Provided ID is not numerical");
             return;
         }
-        if(toParse.length() != USER_ID_LEN){
+        if (toParse.length() != USER_ID_LEN) {
             System.err.println("ID should be exactly 18 digits long");
             return;
         }
@@ -113,24 +112,24 @@ public class ConsoleChat{
         inServer = false;
     }
 
-    private void listChannels(String[] args){
+    private void listChannels(String[] args) {
         //server name required
-        if(args.length == 1){
+        if (args.length == 1) {
             return;
         }
         Guild server = actions.getServerIgnoreCase(args[1]);
-        if (server == null){
+        if (server == null) {
             return;
         }
         System.out.println(server.getTextChannels());
     }
 
-    private void changeChannel(String[] args){
-        if(args.length == 0 || args[1].isEmpty()){
+    private void changeChannel(String[] args) {
+        if (args.length == 0 || args[1].isEmpty()) {
             return;
         }
         TextChannel nextChannel = actions.getTextChannel(args[1]);
-        if(nextChannel != null){
+        if (nextChannel != null) {
             currentChannel = nextChannel;
             System.out.println("Moved to: " + nextChannel.getName());
             inServer = true;

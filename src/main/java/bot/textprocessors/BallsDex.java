@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
  * name - any valid name of the ball
  * identifier - (optional) C - country, whether ball should be considered a country
  */
-public class BallsDex extends TextProcessor{
+public class BallsDex extends TextProcessor {
     public final HashMap<String, CountryBall> sha256ToBall = new HashMap<>();
     public final HashSet<String> countries = new HashSet<>();
     public final HashMap<Long, Dex> guildsToDex = new HashMap<>();
@@ -49,14 +49,14 @@ public class BallsDex extends TextProcessor{
     private long authorId;
     private long guildId;
 
-    public BallsDex(){
+    public BallsDex() {
         System.out.println(mapToData());
-        if(readDatFile){
+        if (readDatFile) {
             return;
         }
         FileSeeker seeker = new FileSeeker("balls.dat");
         String ballsPath = seeker.findTargetPath();
-        if(ballsPath.isEmpty()){
+        if (ballsPath.isEmpty()) {
             System.err.println("balls.dat not found");
             return;
         }
@@ -65,7 +65,7 @@ public class BallsDex extends TextProcessor{
 
         seeker = new FileSeeker("countries.dat");
         ballsPath = seeker.findTargetPath();
-        if(ballsPath.isEmpty()){
+        if (ballsPath.isEmpty()) {
             System.err.println("countries.dat not found");
             return;
         }
@@ -74,36 +74,22 @@ public class BallsDex extends TextProcessor{
     }
 
     @Override
-    boolean consume(String content, Message message, boolean isEdit){
-        authorId = message.getAuthor().getIdLong();
-        if(authorId != BALLS_DEX_ID && authorId != WORLD_DEX_ID)
-            return false;
+    boolean consume(String content, Message message, boolean isEdit) {
 
-        this.message = message;
-        this.guildId = message.getGuild().getIdLong();
-        actions = Bot.getActions();
-        List<Message.Attachment> attachments = message.getAttachments();
-        if(content.startsWith("A wild country") && attachments.size() == 1 && !isEdit){
-            Message.Attachment image = attachments.get(0);
-            byte[] imageBytes = retrieveCountry(image);
-            resolveHash(imageBytes);
-        }else if(content.contains("You caught") && isEdit){
-             addDiscoveredBall();
-        }
         return false;
     }
 
-    private void readBallsDat(){
+    private void readBallsDat() {
         List<String> lines;
-        try{
+        try {
             lines = Files.readAllLines(ballsPath);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        for(String line : lines){
+        for (String line : lines) {
             String[] components = line.split(":");
-            switch (components.length){
+            switch (components.length) {
                 case 0:
                 case 1:
                     continue;
@@ -119,37 +105,37 @@ public class BallsDex extends TextProcessor{
         readDatFile = true;
     }
 
-    private void readCountriesDat(){
+    private void readCountriesDat() {
         List<String> lines;
-        try{
+        try {
             lines = Files.readAllLines(countriesPath);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return;
         }
         countries.addAll(lines);
     }
 
-    public void appendBallToFile(String hash, CountryBall ball){
+    public void appendBallToFile(String hash, CountryBall ball) {
         StringBuilder definition = new StringBuilder();
-        try{
+        try {
             definition.append(hash).append(':').append(ball.name);
-            if(ball.isCountry){
+            if (ball.isCountry) {
                 definition.append(":C");
             }
             definition.append('\n');
             Files.write(ballsPath, definition.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-        }catch (IOException e){
+        } catch (IOException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    public String mapToData(){
+    public String mapToData() {
         StringBuilder str = new StringBuilder();
-        for(Map.Entry<String, CountryBall> entry : sha256ToBall.entrySet()){
+        for (Map.Entry<String, CountryBall> entry : sha256ToBall.entrySet()) {
             CountryBall ball = entry.getValue();
             str.append(entry.getKey()).append(':').append(ball.name);
-            if(ball.isCountry){
+            if (ball.isCountry) {
                 str.append(":C");
             }
             str.append('\n');
@@ -157,15 +143,15 @@ public class BallsDex extends TextProcessor{
         return str.toString();
     }
 
-    private void addDiscoveredBall(){
+    private void addDiscoveredBall() {
         Dex dex = getDex();
         String lastHash;
-        if(authorId == BALLS_DEX_ID){
+        if (authorId == BALLS_DEX_ID) {
             lastHash = dex.lastBallsDexHash;
-        }else{
+        } else {
             lastHash = dex.lastWorldDexHash;
         }
-        if(lastHash == null || sha256ToBall.containsKey(lastHash)){
+        if (lastHash == null || sha256ToBall.containsKey(lastHash)) {
             return;
         }
 
@@ -176,114 +162,114 @@ public class BallsDex extends TextProcessor{
         appendBallToFile(lastHash, ball);
     }
 
-    public void reloadBallsFromFile(){
+    public void reloadBallsFromFile() {
         sha256ToBall.clear();
         readBallsDat();
     }
 
-    private static String extractName(String content){
+    private static String extractName(String content) {
         int index = content.indexOf("You caught");
-        if(index == -1){
+        if (index == -1) {
             return "";
         }
         int exclamation = content.indexOf('!', index);
-        return content.substring(index+13, exclamation);
+        return content.substring(index + 13, exclamation);
     }
 
-    private void resolveHash(byte[] bytes){
-        if(bytes == null){
+    private void resolveHash(byte[] bytes) {
+        if (bytes == null) {
             return;
         }
         String hash = Hasher.hashBytes(bytes, Hasher.choose("sha256"));
         Dex dex = getDex();
 
-        if(authorId == BALLS_DEX_ID){
+        if (authorId == BALLS_DEX_ID) {
             dex.lastBallsDexHash = hash;
-        }else{
+        } else {
             dex.lastWorldDexHash = hash;
         }
-        if(sha256ToBall.containsKey(hash)){
+        if (sha256ToBall.containsKey(hash)) {
             CountryBall country = sha256ToBall.get(hash);
             displayAccordingToHints(country);
-        }else{
+        } else {
             actions.messageChannel(message.getChannel(), hash);
         }
     }
 
-    private Dex getDex(){
+    private Dex getDex() {
         Dex dex;
-        if(guildsToDex.containsKey(guildId)){
+        if (guildsToDex.containsKey(guildId)) {
             dex = guildsToDex.get(guildId);
-        }else{
+        } else {
             dex = new Dex();
             guildsToDex.put(guildId, dex);
         }
         return dex;
     }
 
-    private byte[] retrieveCountry(Message.Attachment image){
+    private byte[] retrieveCountry(Message.Attachment image) {
         File tempDir = new File("tmp");
         tempDir.mkdir();
         File temp = new File("tmp/temp_file");
         temp.delete();
-        try{
+        try {
             temp = image.getProxy().downloadToFile(temp).get(8, TimeUnit.SECONDS);
-        }catch (InterruptedException | ExecutionException | TimeoutException e){
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             actions.messageChannel(message.getChannel(), "Image download failed");
             System.err.println(e.getMessage());
             return null;
         }
-        try{
+        try {
             return Files.readAllBytes(temp.toPath());
-        }catch (IOException e){
+        } catch (IOException e) {
             System.err.println(e.getMessage());
             return null;
-        }finally{
+        } finally {
             temp.delete();
             tempDir.deleteOnExit();
         }
     }
 
-    private void displayAccordingToHints(CountryBall country){
-        if(!displayHints){
+    private void displayAccordingToHints(CountryBall country) {
+        if (!displayHints) {
             return;
         }
-        if(hints == Hint.ALL){
+        if (hints == Hint.ALL) {
             actions.messageChannel(message.getChannel(), country.name);
-        }else if(hints == Hint.COUNTRIES_ONLY && country.isCountry){
+        } else if (hints == Hint.COUNTRIES_ONLY && country.isCountry) {
             actions.messageChannel(message.getChannel(), country.name);
-        }else if(hints == Hint.NON_COUNTRIES_ONLY && !country.isCountry){
+        } else if (hints == Hint.NON_COUNTRIES_ONLY && !country.isCountry) {
             actions.messageChannel(message.getChannel(), "Non-country: " + country.name);
         }
     }
 
 }
 
-enum Hint{
+enum Hint {
     ALL, COUNTRIES_ONLY, NON_COUNTRIES_ONLY
 }
 
-class CountryBall{
+class CountryBall {
     public final String name;
     public final boolean isCountry;
 
-    public CountryBall(String name, boolean isCountry){
+    public CountryBall(String name, boolean isCountry) {
         this.name = name;
         this.isCountry = isCountry;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "[" + name + ':' + isCountry + "]";
     }
 }
 
-class Dex{
+class Dex {
     public String lastBallsDexHash;
     public String lastWorldDexHash;
 
     @Override
-    public String toString(){
+    public String toString() {
         return "GuildDex{" +
                 "lastBallsDexHash='" + lastBallsDexHash + '\'' +
                 ", lastWorldDexHash='" + lastWorldDexHash + '\'' + '}';
