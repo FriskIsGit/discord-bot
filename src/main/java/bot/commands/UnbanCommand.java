@@ -25,8 +25,8 @@ public class UnbanCommand extends Command {
         User userToUnban;
         try {
             userToUnban = jda.retrieveUserById(args[0]).complete();
-        } catch (IllegalArgumentException illegalArgExc) {
-            System.err.println(illegalArgExc.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.exception(e);
             return;
         }
         //id

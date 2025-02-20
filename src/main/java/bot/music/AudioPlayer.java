@@ -3,6 +3,7 @@ package bot.music;
 import bot.core.Bot;
 import net.dv8tion.jda.api.audio.AudioSendHandler;
 import net.dv8tion.jda.api.managers.AudioManager;
+import no4j.core.Logger;
 import org.jetbrains.annotations.Nullable;
 import bot.utilities.FileSeeker;
 
@@ -13,8 +14,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class AudioPlayer implements AudioSendHandler{
-    private final static HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","m4a","mp4"));
+public class AudioPlayer implements AudioSendHandler {
+    private static final Logger logger = Logger.getLogger("primary");
+
+    private static final HashSet<String> SUPPORTED_FORMATS = new HashSet<>(Arrays.asList("wav","mp3","snd","aiff","aifc","au","m4a","mp4"));
     private static final HashMap<String, AudioTrack> fileNamesToSongs = new HashMap<>(32);
 
     private boolean looping = false;
@@ -28,6 +31,7 @@ public class AudioPlayer implements AudioSendHandler{
     private volatile boolean playing = false;
 
     private final SongQueue songQueue;
+
 
     public AudioPlayer() {
         this.songQueue = new SongQueue();
@@ -57,7 +61,7 @@ public class AudioPlayer implements AudioSendHandler{
         AudioPlayer currentHandler = (AudioPlayer) audioManager.getSendingHandler();
         if(currentHandler == null){
             sendingHandler = new AudioPlayer();
-            System.out.println("-Setting up sending handler-");
+            logger.info("-Setting up sending handler-");
             audioManager.setSendingHandler(sendingHandler);
             return sendingHandler;
         }
@@ -66,7 +70,7 @@ public class AudioPlayer implements AudioSendHandler{
 
     public void setPlaying(boolean flag){
         if(audioBuffer == null){
-            System.err.println("Audio buffer null");
+            logger.error("Audio buffer null");
             return;
         }
         this.playing = flag;
@@ -124,7 +128,7 @@ public class AudioPlayer implements AudioSendHandler{
     private void loadTrack(){
         byte [] bytes = audioTrack.getSongBytes();
         if(bytes == null){
-            System.err.println("Underlying array null");
+            logger.error("Underlying array null");
             return;
         }
         this.audioBuffer = ByteBuffer.wrap(bytes);
@@ -152,7 +156,7 @@ public class AudioPlayer implements AudioSendHandler{
 
         if(methodCalls >= fragmentsOf20Ms-1){
             playing = false;
-            System.out.println("Finished after " + methodCalls + " calls");
+            logger.debug("Finished after " + methodCalls + " calls");
             if(looping){
                 rewindTrack();
                 playing = true;

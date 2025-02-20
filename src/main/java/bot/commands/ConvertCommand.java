@@ -39,7 +39,7 @@ public class ConvertCommand extends Command {
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
         if (message == null) {
-            System.err.println("Message is null, this command requires a file attachment to work");
+            log.error("Message is null, this command requires a file attachment to work");
             return;
         }
         MessageChannelUnion channel = message.getChannel();
@@ -104,13 +104,13 @@ public class ConvertCommand extends Command {
         try {
             //bash -c 'args'
             procBuilder.command("ffmpeg", "-y", "-i", normalize(temp.getAbsolutePath()), normalize(converted.getAbsolutePath()));
-            System.out.println("COMMAND: " + procBuilder.command());
+            log.info("COMMAND: " + procBuilder.command());
             Process process = procBuilder.start();
             readInputToAvoidHang(process, 50);
             long waitBegin = System.currentTimeMillis();
             process.waitFor(conversionTimeout, TimeUnit.SECONDS);
             long waitTime = System.currentTimeMillis() - waitBegin;
-            System.out.println("Waited for " + waitTime + " ms");
+            log.info("Waited for " + waitTime + " ms");
 
             if (converted.length() == 0) {
                 channel.editMessageEmbedsById(embedMessage.getId(), createEmptyFileEmbed(waitTime, process.isAlive())).queue();
@@ -119,16 +119,15 @@ public class ConvertCommand extends Command {
                 actions.sendFile(requestMessage.getChannel(), converted);
             }
 
-
         } catch (IOException e) {
-            e.printStackTrace();
+            log.stackTrace("", e);
             String msg = e.getMessage();
             if (msg.startsWith("Cannot run program")) {
                 channel.editMessageEmbedsById(embedMessage.getId(), createNoProgramEmbed()).queue();
             }
             return false;
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.stackTrace("", e);
             return false;
         } finally {
             //this aims to reduce the clutter of files left over as a result of lots of downloads
@@ -156,16 +155,16 @@ public class ConvertCommand extends Command {
                         if (available != -1) {
                             byte[] outBytes = new byte[available];
                             int ignored = errorOutput.read(outBytes);
-                            //alternatively process output can be printed with System.out.print(new String(outBytes));
+                            // Alternatively process output can be converted to string: new String(outBytes)
                         }
                         available = normalOutput.available();
                         if (available != -1) {
                             byte[] outBytes = new byte[available];
                             int ignored = normalOutput.read(outBytes);
-                            //alternatively process output can be printed with System.out.print(new String(outBytes));
+                            // Alternatively process output can be converted to string: new String(outBytes)
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.stackTrace("", e);
                         return;
                     }
                     lastRead = System.currentTimeMillis();

@@ -24,9 +24,7 @@ public class StreamUtil{
                 }
             }
             return new String(buffer, 0, writeOffset);
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
+        } catch (IOException ignored) {}
         return null;
     }
 }

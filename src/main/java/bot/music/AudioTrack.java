@@ -1,13 +1,16 @@
 package bot.music;
 
+import no4j.core.Logger;
+
 import javax.sound.sampled.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class AudioTrack{
+    protected static final Logger logger = Logger.getLogger("primary");
 
-    protected final static double MILLIS_20 = 20;
+    protected static final double MILLIS_20 = 20;
 
     private byte[] songBytes;
     private int length;
@@ -31,7 +34,7 @@ public class AudioTrack{
             AudioConversionResult result;
             switch (extFormat){
                 case "mp3":
-                    System.out.println("-Attempting mp3 conversion-");
+                    logger.info("-Attempting mp3 conversion-");
                     result = AudioConverter.convertMP3FileToRaw(PATH);
                     if(result == null) return;
                     songBytes = result.bytes;
@@ -52,12 +55,11 @@ public class AudioTrack{
             result = AudioConverter.target48Hz(audioStream);
             songBytes = result.bytes != null ? result.bytes : songBytes;
             audioStream = result.audioInputStream;
-        }catch (UnsupportedAudioFileException uafExc){
-            System.err.println("Unsupported file format");
-            System.out.println(PATH);
+        }catch (UnsupportedAudioFileException e){
+            logger.stackTrace(PATH, e);
             return;
-        }catch(IOException ioExc){
-            System.err.println("IO error/Path doesn't exist");
+        }catch(IOException e){
+            logger.stackTrace("IO error/Path doesn't exist", e);
             return;
         }
 
@@ -69,8 +71,8 @@ public class AudioTrack{
     private void closeAndNullifyAudioStream(){
         try{
             audioStream.close();
-        }catch (IOException ioException){
-            ioException.printStackTrace();
+        }catch (IOException e){
+            logger.exception(e);
         }
         audioStream = null;
     }
@@ -84,18 +86,19 @@ public class AudioTrack{
         fragmentsOf20Ms = (int) fragmentsOf20Ms;
         if (length % 2 == 1){
             length--;
-            System.out.println("Made default buffer length even: " + length);
+            logger.debug("Made default buffer length even: " + length);
         }
         targetBigEndianness();
     }
 
     public void displayAudioInfo(){
-        System.out.println(audioInfo + ", " + audioInfo.getChannels() + " channels, " + audioFileFormat(PATH) + " format");
-        System.out.printf("Length(seconds): %.2f \n", lengthSeconds);
-        System.out.println("Number of 20ms parts " + fragmentsOf20Ms);
-        System.out.println("How many arr parts: " + length);
-        System.out.println("Byte array size (audio file size): " + songBytes.length + " in MBs " + String.format("%.2f", (double) songBytes.length / 1048576L));
-        System.out.println("Size of raw audio in input stream: " + audioStream.getFrameLength() * audioStream.getFormat().getFrameSize());
+        logger.debug(audioInfo + ", " + audioInfo.getChannels() + " channels, " + audioFileFormat(PATH) + " format");
+        String length = String.format("Length(seconds): %.2f", lengthSeconds);
+        logger.debug(length);
+        logger.debug("Number of 20ms parts " + fragmentsOf20Ms);
+        logger.debug("How many arr parts: " + length);
+        logger.debug("Byte array size (audio file size): " + songBytes.length + " in MBs " + String.format("%.2f", (double) songBytes.length / 1048576L));
+        logger.debug("Size of raw audio in input stream: " + audioStream.getFrameLength() * audioStream.getFormat().getFrameSize());
     }
 
     //flips endianness
@@ -109,7 +112,7 @@ public class AudioTrack{
                 songBytes[i+1] = temp;
             }
             isBigEndian = true;
-            System.out.println("Each two consequent bytes were swapped to maintain big endian order");
+            logger.debug("Each two consequent bytes were swapped to maintain big endian order");
         }
     }
 

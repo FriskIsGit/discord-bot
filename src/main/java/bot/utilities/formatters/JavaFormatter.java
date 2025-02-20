@@ -3,6 +3,7 @@ package bot.utilities.formatters;
 import java.util.List;
 import static bot.utilities.formatters.Token.*;
 
+// EXPERIMENT
 public class JavaFormatter{
     private static final String TAB = "    ";
 
@@ -20,9 +21,7 @@ public class JavaFormatter{
 
     private String format(){
         List<TextToken> tokens = JavaTokenizer.tokenize(code);
-        /*for(TextToken textToken : tokens){
-            System.out.println(textToken.token + " " + textToken.text());
-        }*/
+
         for (TextToken textToken : tokens){
             switch (textToken.token){
                 case KEYWORD:

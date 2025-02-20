@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import no4j.core.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import java.util.Set;
     Intended to monitor suspicious behavior
  */
 public class EmergencyListener extends ListenerAdapter{
+    public static final Logger logger = Logger.getLogger("primary");
 
     public static final boolean BAN_USER_RESPONSIBLE = false;
     public static final int TRIGGER_DELAY_MS = 5000;
@@ -60,7 +62,7 @@ public class EmergencyListener extends ListenerAdapter{
         //this solution accounts for all servers the bot is connected to
         for(Guild guild : connectedGuilds){
             if(!canViewAuditLogs(guild)){
-                System.err.println("Lacking VIEW_AUDIT_LOGS perm in " + guild.getName() + " to initialize emergency");
+                logger.error("Lacking VIEW_AUDIT_LOGS perm in " + guild.getName() + " to initialize emergency");
                 continue;
             }
             List<AuditLogEntry> entryList = AuditLog.retrieveFromAuditLog(ActionType.KICK,1, guild);
@@ -87,7 +89,7 @@ public class EmergencyListener extends ListenerAdapter{
             List<AuditLogEntry> channelDeletions = AuditLog.retrieveFromAuditLog(ActionType.CHANNEL_DELETE,1, channelDeleteEvent.getGuild());
             AuditLogEntry deletionEntry = channelDeletions.get(0);
             User userResponsible = deletionEntry.getUser();
-            System.out.println("Channel [" + channelDeleteEvent.getChannel().getName() + "] was deleted by " + Objects.requireNonNull(userResponsible).getName());
+            logger.info("Channel [" + channelDeleteEvent.getChannel().getName() + "] was deleted by " + Objects.requireNonNull(userResponsible).getName());
 
             if(channelDeleteEvent.getChannelType() != ChannelType.TEXT){
                 return;
@@ -103,7 +105,7 @@ public class EmergencyListener extends ListenerAdapter{
             List<AuditLogEntry> bans = AuditLog.retrieveFromAuditLog(ActionType.BAN,1, memberBannedEvent.getGuild());
             AuditLogEntry banEntry = bans.get(0);
             User userResponsible = banEntry.getUser();
-            System.out.println("Member [" + memberBannedEvent.getUser().getName() + "] was banned by " + Objects.requireNonNull(userResponsible).getName());
+            logger.info("Member [" + memberBannedEvent.getUser().getName() + "] was banned by " + Objects.requireNonNull(userResponsible).getName());
 
             resolveEvent(userResponsible, eventTimestamp);
 
@@ -111,7 +113,7 @@ public class EmergencyListener extends ListenerAdapter{
             //will trigger on ban/kick/leave - supposed to differentiate between bans and kicks
             if(awaitKick) {
                 awaitKick = false;
-                System.out.println("Caught subsequent kick");
+                logger.info("Caught subsequent kick");
                 return;
             }
 
@@ -122,14 +124,14 @@ public class EmergencyListener extends ListenerAdapter{
             //if true, member left a server (wasn't kicked)
             AuditLogEntry lastKickEntry = guildsToLastKicks.get(kickOrLeaveEvent.getGuild());
             if(kickEntry.equals(lastKickEntry)){
-                System.out.println("Member ["
+                logger.info("Member ["
                         + kickOrLeaveEvent.getUser().getName()
                         + "] left the server");
                 return;
             }
             guildsToLastKicks.put(kickEntry.getGuild(), kickEntry);
             User userResponsible = kickEntry.getUser();
-            System.out.println("Member ["
+            logger.info("Member ["
                     + kickOrLeaveEvent.getUser().getName()
                     + "] was kicked by "
                     + Objects.requireNonNull(userResponsible).getName());
@@ -153,7 +155,7 @@ public class EmergencyListener extends ListenerAdapter{
         }
         eventQueue.append(currentTimestamp);
         if(eventQueue.isAlarmable(TRIGGER_DELAY_MS)){
-            System.out.println("---TRIGGERED ALARM---");
+            logger.warn("---TRIGGERED ALARM---");
             if(BAN_USER_RESPONSIBLE){
                 Bot.getActions().banUser(responsibleUser, currentGuild);
             }

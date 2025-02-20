@@ -1,27 +1,32 @@
 import bot.core.Bot;
+import bot.music.AudioConverter;
 import bot.utilities.jda.ConsoleChat;
 import net.dv8tion.jda.api.entities.Guild;
+import no4j.core.Logger;
 
+import java.io.IOException;
 import java.util.List;
 
-class BotRunner{
-    public static void main(String[] args){
-        try{
+class BotRunner {
+    public static void main(String[] args) {
+        try {
             Bot.initialize(args.length == 0 ? null : selectPathArgument(args));
-        }catch (InterruptedException ignored){}
+        } catch (IOException | InterruptedException ignored) {}
 
-        System.out.println(connectionInformationString());
-        System.out.println("Threads active: " + Thread.activeCount());
-        System.out.println("Bot prefix: " + Bot.PREFIX);
+        Logger log = Logger.getLogger("primary");
+        log.debug("Threads active: " + Thread.activeCount());
+        log.info("Bot prefix: " + Bot.PREFIX);
+        log.info(connectionInformationString());
+
 
         Thread chatThread = new Thread(() -> new ConsoleChat().beginChat());
         chatThread.start();
     }
 
-    private static String selectPathArgument(String[] args){
+    private static String selectPathArgument(String[] args) {
         String path = null;
-        for (String arg : args){
-            if (!arg.isEmpty() && arg.charAt(0) != '-'){
+        for (String arg : args) {
+            if (!arg.isEmpty() && arg.charAt(0) != '-') {
                 path = arg;
                 break;
             }
@@ -29,33 +34,40 @@ class BotRunner{
         return path;
     }
 
-    public static String connectionInformationString(){
+    // This needs to be changed
+    public static String connectionInformationString() {
         List<Guild> guilds = Bot.getJDAInterface().getGuilds();
         int size = guilds.size();
-        StringBuilder servers = new StringBuilder();
-        servers.append("Connected to ").append(size).append(" servers:\n");
-        if(size == 0){
-            return servers.toString();
+        StringBuilder format = new StringBuilder();
+        format.append("Connected to ").append(size).append(" server");
+
+        if (size == 0 || size > 1) {
+            format.append("s");
         }
-        servers.append('[');
-        for (int i = 0; i < size; i++){
+
+        if (size == 0) {
+            return format.toString();
+        }
+
+        format.append(":\n[");
+        for (int i = 0; i < size; i++) {
             Guild guild = guilds.get(i);
-            servers.append(guild.getName());
-            if(i == size-1){
+            format.append(guild.getName());
+            if (i == size - 1) {
                 break;
             }
-            servers.append(", ");
+            format.append(", ");
         }
-        servers.append("]\n[");
-        for (int i = 0; i < size; i++){
+        format.append("]\n[");
+        for (int i = 0; i < size; i++) {
             Guild guild = guilds.get(i);
-            servers.append(guild.getIdLong());
-            if(i == size-1){
+            format.append(guild.getIdLong());
+            if (i == size - 1) {
                 break;
             }
-            servers.append(", ");
+            format.append(", ");
         }
-        servers.append(']');
-        return servers.toString();
+        format.append(']');
+        return format.toString();
     }
 }

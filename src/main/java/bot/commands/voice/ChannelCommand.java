@@ -180,7 +180,7 @@ public class ChannelCommand extends Command{
                 try{
                     vc.delete().complete();
                 }catch (Exception e){
-                    System.err.println("\"" + vc.getName() + "\" doesn't exist.");
+                    log.error("\"" + vc.getName() + "\" doesn't exist.");
                 }finally{
                     membersToChannels.remove(member.getIdLong());
                 }

@@ -16,6 +16,7 @@ public class MessageDeque extends ArrayDeque<MessageReceivedEvent>{
         super();
         this.maxSize = maxNumberOfMessages;
     }
+
     public int getMaxSize(){
         return maxSize;
     }
@@ -29,20 +30,6 @@ public class MessageDeque extends ArrayDeque<MessageReceivedEvent>{
         return listToPurge;
     }
 
-
-    public void print(){
-        System.out.println("[========================]");
-        this.forEach(
-                msgEvent -> {
-                    System.out.println(
-                            msgEvent.getMessage().getTimeCreated().toLocalDate() + " " +
-                            "[" + msgEvent.getChannel().getName() + "] " +
-                            msgEvent.getAuthor().getName() + ": " + msgEvent.getMessage().getContentRaw()
-                    );
-                }
-        );
-        System.out.println("[============ "+ this.size() + " ============]");
-    }
     @Override
     public boolean add(@NotNull MessageReceivedEvent msgReceived){
         if(this.maxSize == this.size()){
@@ -51,7 +38,7 @@ public class MessageDeque extends ArrayDeque<MessageReceivedEvent>{
         return super.add(msgReceived);
     }
 
-    //O(N)
+    // O(N)
     public void removeById(final long messageId){
         Iterator<MessageReceivedEvent> iterator = this.descendingIterator();
         while(iterator.hasNext()){

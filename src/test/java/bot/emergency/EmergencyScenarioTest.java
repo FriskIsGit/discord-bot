@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +32,7 @@ public class EmergencyScenarioTest{
     public static void initAndCreateChannels(){
         try{
             Bot.initialize(null);
-        }catch (InterruptedException e){
+        }catch (RuntimeException | IOException | InterruptedException e){
             e.printStackTrace();
             return;
         }

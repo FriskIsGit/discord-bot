@@ -1,5 +1,6 @@
 package bot.music.youtube;
 
+import no4j.core.Logger;
 import youtube_lib.Config;
 import youtube_lib.YoutubeDownloader;
 import youtube_lib.downloader.request.RequestVideoFileDownload;
@@ -15,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class Youtube{
+    private static final Logger logger = Logger.getLogger("primary");
+
     private final YoutubeDownloader downloader;
     private final Config config;
 
@@ -71,8 +74,8 @@ public class Youtube{
         VideoInfo videoInfo = null;
         try{
             videoInfo = response.data(3, TimeUnit.SECONDS);
-        }catch (TimeoutException timeoutExc){
-            timeoutExc.printStackTrace();
+        }catch (TimeoutException e){
+            logger.stackTrace("Timed out", e);
         }
         return new YoutubeVideoInfo(videoInfo);
     }
@@ -81,8 +84,8 @@ public class Youtube{
         File audioFile = null;
         try{
             audioFile = response.data(timeoutSeconds, TimeUnit.SECONDS);
-        }catch (TimeoutException timeoutExc){
-            timeoutExc.printStackTrace();
+        }catch (TimeoutException e){
+            logger.stackTrace("Timed out", e);
         }
         return audioFile;
     }

@@ -1,5 +1,6 @@
 package bot.music.youtube;
 
+import no4j.core.Logger;
 import youtube_lib.YoutubeDownloader;
 import youtube_lib.downloader.request.RequestVideoFileDownload;
 import youtube_lib.downloader.response.Response;
@@ -15,6 +16,8 @@ import java.util.UUID;
 
 //internal singleton
 public class UserRequest{
+    private static final Logger logger = Logger.getLogger("primary");
+
     public static final int DOWNLOAD_SIZE_LIMIT_MB = 100;
     private static UserRequest userRequest;
 
@@ -101,8 +104,8 @@ public class UserRequest{
         }
 
         long millisTaken  = en - st;
-        System.out.println("Absolute path for new file: " + video.getAbsolutePath());
-        System.out.println("Time taken on download: " + millisTaken);
+        logger.info("Absolute path for new file: " + video.getAbsolutePath());
+        logger.info("Time taken on download: " + millisTaken);
 
         return UserResponse.success(video, "File downloaded (" + millisTaken + ')');
     }
@@ -133,7 +136,7 @@ public class UserRequest{
             if(format.extension() == Extension.M4A){
                 if(format.bitrate() > bestBitrate){
                     bestBitrate = format.bitrate();
-                    System.out.println("M4A available");
+                    logger.info("M4A is available");
                     bestFormat = format;
                 }
             }

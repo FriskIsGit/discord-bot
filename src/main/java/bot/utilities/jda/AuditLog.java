@@ -36,7 +36,7 @@ public class AuditLog{
                 .complete();
     }
 
-    public static List<AuditLogEntry> retrieveBansAndKicksSimultaneously(int limit, Guild guildOfOrigin){
+    public static List<AuditLogEntry> retrieveBansAndKicksSimultaneously(int limit, Guild guildOfOrigin) {
         AtomicReference<List<AuditLogEntry>> banEntries = new AtomicReference<>();
         AtomicReference<List<AuditLogEntry>> kickEntries = new AtomicReference<>();
 
@@ -60,12 +60,12 @@ public class AuditLog{
         );
         banRetrieval.start();
         kicksRetrieval.start();
-        try{
+        try {
             banRetrieval.join();
             kicksRetrieval.join();
-        }catch (InterruptedException interruptedExc){
-            interruptedExc.printStackTrace();
+        } catch (InterruptedException ignored) {
         }
+
         List<AuditLogEntry> miscEntries = banEntries.get();
         miscEntries.addAll(kickEntries.get());
         return miscEntries;

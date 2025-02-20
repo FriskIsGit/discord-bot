@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import no4j.core.Logger;
 
 import java.io.*;
 
@@ -20,12 +21,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 //singleton
-public class MessageProcessor{
+public class MessageProcessor {
     private static MessageProcessor messageProcessor;
     public static final Button[] interactiveButtons = {
-            Button.primary("clrsongs",  "Free songs from memory"),
-            Button.primary("gc",        "Run GC"),
-            Button.primary("refresh",   "Refresh")
+            Button.primary("clrsongs", "Free songs from memory"),
+            Button.primary("gc", "Run GC"),
+            Button.primary("refresh", "Refresh")
     };
     private final Actions actions;
 
@@ -35,32 +36,34 @@ public class MessageProcessor{
     private String messageText;
     private long channelId;
 
+    private final Logger logger;
     private final Runtime run = Runtime.getRuntime();
     private final String OS = System.getProperty("os.name");
 
-    private MessageProcessor(){
+    private MessageProcessor() {
         actions = Bot.getActions();
+        logger = Logger.getLogger("primary");
         Command.initializeStaticMembers();
     }
 
-    public static MessageProcessor get(){
-        if(messageProcessor == null){
+    public static MessageProcessor get() {
+        if (messageProcessor == null) {
             messageProcessor = new MessageProcessor();
         }
         return messageProcessor;
     }
 
-    private void logMessage(){
-        if(channelIdsToMessageDeques.containsKey(channelId)){
+    private void logMessage() {
+        if (channelIdsToMessageDeques.containsKey(channelId)) {
             channelIdsToMessageDeques.get(channelId).add(message);
-        }else{
+        } else {
             MessageDeque deq = new MessageDeque(Bot.getConfig().maxDequeSize);
             deq.add(message);
             channelIdsToMessageDeques.put(channelId, deq);
         }
     }
 
-    public void processMessage(MessageReceivedEvent message, long channelId){
+    public void processMessage(MessageReceivedEvent message, long channelId) {
         this.message = message;
         messageText = message.getMessage().getContentRaw();
         this.channelId = channelId;
@@ -69,93 +72,93 @@ public class MessageProcessor{
         TextProcessors.get().passMessage(message.getMessage(), false);
     }
 
-    private void dispatchCommand(){
-        if(messageText.startsWith(Bot.PREFIX)){
+    private void dispatchCommand() {
+        if (messageText.startsWith(Bot.PREFIX)) {
             final String[] allSplit = Commands.splitIntoTerms(messageText, Bot.PREFIX_OFFSET);
             String commandName = allSplit[0].toLowerCase();
-            if(commandName.isEmpty()){
+            if (commandName.isEmpty()) {
                 return;
             }
             Command command = Commands.get().command(commandName);
-            if(command == null){
+            if (command == null) {
                 return;
             }
 
-            if(allSplit.length == 1){
+            if (allSplit.length == 1) {
                 command.execute(commandName, message);
-            }
-            else{
+            } else {
                 command.execute(commandName, message, Commands.shrink(allSplit, 1));
             }
-        }
-        else if(messageText.startsWith("$") && !messageText.startsWith("$$") && Bot.getConfig().enableShell){
-            try{
+        } else if (messageText.startsWith("$") && !messageText.startsWith("$$") && Bot.getConfig().enableShell) {
+            try {
                 linuxRequest();
-            }catch (Exception exc){exc.printStackTrace();}
+            } catch (Exception e) {
+                logger.stackTrace("", e);
+            }
         }
     }
 
-    public void deleteRequestMessage(Message msgToDelete){
+    public void deleteRequestMessage(Message msgToDelete) {
         msgToDelete.delete().queue();
         channelIdsToMessageDeques.get(msgToDelete.getChannel().getIdLong()).removeLast();
     }
 
     /**
      * @param channel - where the purge occurs
-     * @param amount - excluding the purge request message
+     * @param amount  - excluding the purge request message
      * @returns id of the oldest message as a reference point
      **/
-    public String popAndPurgeLastMessages(MessageChannel channel, int amount){
+    public String popAndPurgeLastMessages(MessageChannel channel, int amount) {
         List<Message> list = channelIdsToMessageDeques.get(channelId).toList(amount);
-        int lastIndex = list.size()-1;
+        int lastIndex = list.size() - 1;
         String oldestMessageId = list.get(lastIndex).getId();
         List<CompletableFuture<Void>> completableFutureList = channel.purgeMessages(list);
         completeInFuture(completableFutureList);
         return oldestMessageId;
     }
-    public static void completeInFuture(List<CompletableFuture<Void>> futures){
+
+    public static void completeInFuture(List<CompletableFuture<Void>> futures) {
         futures.forEach(future -> future.completeExceptionally(new Throwable("Insufficient permissions to purge?")));
     }
 
-    protected void linuxRequest(){
-        if(OS.toLowerCase(Locale.ENGLISH).startsWith("win")){
-            actions.messageChannel(message.getChannel(),"Host running windows");
+    protected void linuxRequest() {
+        if (OS.toLowerCase(Locale.ENGLISH).startsWith("win")) {
+            actions.messageChannel(message.getChannel(), "Host running windows");
             return;
         }
-        if(!isAuthorAuthorized()){
+        if (!isAuthorAuthorized()) {
             return;
         }
         String command = messageText.substring(messageText.indexOf("$") + 1);
         Process proc = null;
-        try{
+        try {
             proc = run.exec(command);
             proc.waitFor(3, TimeUnit.SECONDS);
-        }catch (IOException | InterruptedException ioException){
-            ioException.printStackTrace();
-            System.err.println("Execution error for command: " + command);
+        } catch (IOException | InterruptedException e) {
+            logger.stackTrace("Execution error for command: " + command, e);
         }
-        if (proc == null){
-            System.err.println("Process is null");
+        if (proc == null) {
+            logger.error("Process is null");
             return;
         }
         InputStream inputStream = proc.getInputStream();
 
         //InputStream errorStream = procBuilder.getErrorStream();
         String stringedStream = StreamUtil.streamToString(inputStream);
-        if (stringedStream != null){
+        if (stringedStream != null) {
             actions.sendAsMessageBlock(message.getChannel(), stringedStream);
-            try{
+            try {
                 inputStream.close();
-            }catch (IOException ioException){
-                ioException.printStackTrace();
+            } catch (IOException e) {
+                logger.exception(e);
             }
             inputStream = null;
             stringedStream = null;
         }
-        System.out.println("Finished request");
+        logger.info("Finished request");
     }
 
-    private boolean isAuthorAuthorized(){
+    private boolean isAuthorAuthorized() {
         return Bot.AUTHORIZED_USERS.contains(message.getAuthor().getIdLong());
     }
 }

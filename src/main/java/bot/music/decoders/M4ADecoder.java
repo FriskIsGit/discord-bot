@@ -1,6 +1,7 @@
 package bot.music.decoders;
 
 import net.sourceforge.jaad.aac.AACException;
+import no4j.core.Logger;
 import org.jcodec.common.*;
 import org.jcodec.common.model.AudioBuffer;
 import org.jcodec.common.model.Packet;
@@ -9,12 +10,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-//will not decode if file lacks chunk sample tables (all .m4a (audio only) yt videos)
+// Fails to decode audio file if chunk sample tables are missing (all .m4a (audio only) yt videos)
 public class M4ADecoder{
-    private final static int NULL_THRESHOLD = 22;
+    private static final Logger logger = Logger.getLogger("primary");
+    private static final int NULL_THRESHOLD = 22;
     private AudioFormat decodedAudioFormat;
     private DemuxerTrack audioTrack;
     private ByteArrayOutputStream streamBytes;
@@ -26,15 +26,15 @@ public class M4ADecoder{
         }
         try{
             Format fileFormat = JCodecUtil.detectFormat(m4aFile);
-            if (fileFormat == null){
-                System.out.println("File format is null");
+            if (fileFormat == null) {
+                logger.warn("File format is null");
                 return;
             }
             demuxer = JCodecUtil.createDemuxer(fileFormat, m4aFile);
             audioTrack = demuxer.getAudioTracks().get(0);
 
-        }catch (IOException ioException){
-            ioException.printStackTrace();
+        }catch (IOException e){
+            logger.stackTrace("", e);
         }
     }
     public M4ADecoder(String path) throws FileNotFoundException{
@@ -57,9 +57,9 @@ public class M4ADecoder{
 
         streamBytes = new ByteArrayOutputStream(4096);
 
-        System.out.println("Duration: " + audioTrack.getMeta().getTotalDuration());
-        System.out.println("Audio codec: " + audioTrack.getMeta().getCodec());
-        System.out.println("Total frames: " + audioTrack.getMeta().getTotalFrames());
+        logger.debug("Duration: " + audioTrack.getMeta().getTotalDuration());
+        logger.debug("Audio codec: " + audioTrack.getMeta().getCodec());
+        logger.debug("Total frames: " + audioTrack.getMeta().getTotalFrames());
 
         Packet encodedPacket;
         boolean firstPacket = true;
@@ -67,17 +67,17 @@ public class M4ADecoder{
         int frames = 0;
         AudioDecoder audioDecoder = JCodecUtil.createAudioDecoder(Codec.AAC, audioTrack.getMeta().getCodecPrivate());
         if (audioDecoder == null){
-            System.out.println("Audio decoder null, quitting?");
+            logger.warn("Audio decoder null, quitting?");
             return 0;
         }
         do{
             encodedPacket = audioTrack.nextFrame();
             if (encodedPacket == null){
                 if (++nulls > NULL_THRESHOLD){
-                    System.out.println("Packet was null " + NULL_THRESHOLD + "+ times in a row.. quitting");
+                    logger.debug("Packet was null " + NULL_THRESHOLD + "+ times in a row.. quitting");
                     break;
                 }
-                System.out.println("Packet null..");
+                logger.debug("Packet null..");
                 continue;
             }
             frames++;
@@ -110,9 +110,8 @@ public class M4ADecoder{
     protected void finalize(){
         try{
             demuxer.close();
-        }catch (IOException ioExc){
-            System.out.println("Couldn't finalize demuxer");
-            ioExc.printStackTrace();
+        }catch (IOException e){
+            logger.stackTrace("Couldn't finalize demuxer", e);
         }
     }
 }

@@ -33,7 +33,7 @@ public class KickCommand extends Command {
             try {
                 user = jda.retrieveUserById(id).complete();
             } catch (RuntimeException unknownUser) {
-                System.err.println("UNKNOWN USER");
+                log.error("UNKNOWN USER");
                 return;
             }
         }

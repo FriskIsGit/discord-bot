@@ -4,10 +4,13 @@ import bot.core.Bot;
 import bot.utilities.jda.Actions;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import no4j.core.Logger;
 
 public abstract class Command {
+    protected static Logger log;
     protected static JDA jda;
     protected static Actions actions;
+
     protected String[] aliases;
     protected String description = "";
     protected String usage = "";
@@ -24,6 +27,9 @@ public abstract class Command {
     }
 
     public static void initializeStaticMembers() {
+        log = Logger.getLogger("primary");
+        log.debug("Initializing static members");
+
         jda = Bot.getJDAInterface();
         if (jda == null) {
             throw new NullPointerException("Bot's JDA context is null");

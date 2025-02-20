@@ -1,6 +1,7 @@
 package bot.music.decoders;
 
 import javazoom.jl.decoder.*;
+import no4j.core.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -8,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class MP3Decoder{
+    private static final Logger logger = Logger.getLogger("primary");
 
     protected Decoder decoder;
     protected Bitstream mp3Bitstream;
@@ -45,9 +47,8 @@ public class MP3Decoder{
                 mp3Bitstream.closeFrame();
             }
 
-        }catch (BitstreamException | DecoderException | IOException decodingExc){
-            decodingExc.printStackTrace();
-            System.err.println("Failed decoding");
+        }catch (BitstreamException | DecoderException | IOException e){
+            logger.stackTrace("Failed decoding", e);
         }
 
         return totalRead;

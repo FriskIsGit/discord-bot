@@ -34,10 +34,12 @@ although not used directly in code, they're a supplement for existing methods
 ### Sources:
  - http://www.tritonus.org/plugins.html
  - https://github.com/DV8FromTheWorld/JDA
+ - https://github.com/Kong/unirest-java
  - https://mvnrepository.com/artifact/javazoom/jlayer/1.0.1
  - https://github.com/Delthas/JavaMP3
  - https://github.com/sealedtx/java-youtube-downloader
  - https://github.com/alibaba/fastjson
+ - https://github.com/friskisgit/no4j-logger
 
 ### TODO:
 - change mp3 libraries to improve audio quality

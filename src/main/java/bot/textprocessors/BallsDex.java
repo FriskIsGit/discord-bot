@@ -5,6 +5,7 @@ import bot.utilities.FileSeeker;
 import bot.utilities.Hasher;
 import bot.utilities.jda.Actions;
 import net.dv8tion.jda.api.entities.Message;
+import no4j.core.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,8 @@ import java.util.concurrent.TimeoutException;
  * identifier - (optional) C - country, whether ball should be considered a country
  */
 public class BallsDex extends TextProcessor {
+    private static final Logger logger = Logger.getLogger("primary");
+
     public final HashMap<String, CountryBall> sha256ToBall = new HashMap<>();
     public final HashSet<String> countries = new HashSet<>();
     public final HashMap<Long, Dex> guildsToDex = new HashMap<>();
@@ -50,14 +53,14 @@ public class BallsDex extends TextProcessor {
     private long guildId;
 
     public BallsDex() {
-        System.out.println(mapToData());
+        logger.info(mapToData());
         if (readDatFile) {
             return;
         }
         FileSeeker seeker = new FileSeeker("balls.dat");
         String ballsPath = seeker.findTargetPath();
         if (ballsPath.isEmpty()) {
-            System.err.println("balls.dat not found");
+            logger.error("balls.dat not found");
             return;
         }
         this.ballsPath = Paths.get(ballsPath);
@@ -66,7 +69,7 @@ public class BallsDex extends TextProcessor {
         seeker = new FileSeeker("countries.dat");
         ballsPath = seeker.findTargetPath();
         if (ballsPath.isEmpty()) {
-            System.err.println("countries.dat not found");
+            logger.error("countries.dat not found");
             return;
         }
         this.countriesPath = Paths.get(ballsPath);
@@ -84,7 +87,7 @@ public class BallsDex extends TextProcessor {
         try {
             lines = Files.readAllLines(ballsPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.stackTrace("Failed to read balls.dat", e);
             return;
         }
         for (String line : lines) {
@@ -110,7 +113,7 @@ public class BallsDex extends TextProcessor {
         try {
             lines = Files.readAllLines(countriesPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.stackTrace("Failed to read countries.dat", e);
             return;
         }
         countries.addAll(lines);
@@ -126,7 +129,7 @@ public class BallsDex extends TextProcessor {
             definition.append('\n');
             Files.write(ballsPath, definition.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            logger.exception(e);
         }
     }
 
@@ -156,7 +159,7 @@ public class BallsDex extends TextProcessor {
         }
 
         String ballName = extractName(message.getContentRaw());
-        System.out.println("Discovered:[" + lastHash + ':' + ballName + ']');
+        logger.info("Discovered:[" + lastHash + ':' + ballName + ']');
         CountryBall ball = new CountryBall(ballName, countries.contains(ballName));
         sha256ToBall.put(lastHash, ball);
         appendBallToFile(lastHash, ball);
@@ -216,13 +219,13 @@ public class BallsDex extends TextProcessor {
             temp = image.getProxy().downloadToFile(temp).get(8, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             actions.messageChannel(message.getChannel(), "Image download failed");
-            System.err.println(e.getMessage());
+            logger.exception(e);
             return null;
         }
         try {
             return Files.readAllBytes(temp.toPath());
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            logger.exception(e);
             return null;
         } finally {
             temp.delete();

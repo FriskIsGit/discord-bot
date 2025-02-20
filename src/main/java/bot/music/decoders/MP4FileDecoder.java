@@ -7,6 +7,7 @@ import net.sourceforge.jaad.mp4.MP4Container;
 import net.sourceforge.jaad.mp4.api.AudioTrack;
 import net.sourceforge.jaad.mp4.api.Frame;
 import net.sourceforge.jaad.mp4.api.Track;
+import no4j.core.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import java.io.ByteArrayOutputStream;
@@ -18,9 +19,12 @@ import java.util.List;
 
 //very limited use, JAAD is unreliable to decode most containers
 public class MP4FileDecoder{
+    private static final Logger logger = Logger.getLogger("primary");
+
     private Decoder dec;
     private net.sourceforge.jaad.mp4.api.AudioTrack track;
     private AudioFormat originalFormat;
+
     public MP4FileDecoder(File file){
         InputStream is;
         try{
@@ -35,9 +39,8 @@ public class MP4FileDecoder{
             dec = new Decoder(track.getDecoderSpecificInfo());
             originalFormat = new AudioFormat(track.getSampleRate(), track.getSampleSize(), track.getChannelCount(), true, true);
 
-        }catch (IOException ioException){
-            System.err.println("Encountered error initializing m4a decoder");
-            ioException.printStackTrace();
+        }catch (IOException e){
+            logger.stackTrace("Encountered error initializing m4a decoder", e);
         }
     }
     public MP4FileDecoder(String filePath){
@@ -56,8 +59,8 @@ public class MP4FileDecoder{
                 baos.write(b,0,b.length);
             }
             catch(AACException aacExc) {
-                aacExc.printStackTrace();
-                //since the frames are separate, decoding can continue if one fails
+                logger.stackTrace("", aacExc);
+                logger.debug("Since the frames are separate, decoding can continue if one fails");
             }
         }
         return baos.toByteArray();

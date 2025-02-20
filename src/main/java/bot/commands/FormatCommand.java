@@ -15,7 +15,7 @@ public class FormatCommand extends Command {
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
-        System.out.println("NUMBER OF ARGS:  " + args.length);
+        log.debug("NUMBER OF ARGS:  " + args.length);
         if (args.length < 2 || message == null) {
             return;
         }

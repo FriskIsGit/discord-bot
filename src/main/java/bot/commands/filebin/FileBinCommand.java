@@ -104,7 +104,7 @@ public class FileBinCommand extends Command {
                     actions.sendEmbed(channel, createInfoEmbed(code, body));
                     break;
                 }
-                System.out.println(body);
+                log.debug(body);
                 BinInfo info = new BinInfo(body);
                 actions.sendEmbed(channel, createBinEmbed(info));
                 break;

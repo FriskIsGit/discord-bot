@@ -13,7 +13,7 @@ public class HaltCommand extends Command {
 
     @Override
     protected void executeImpl(String commandName, MessageReceivedEvent message, String... args) {
-        System.out.println("IT WAS HALTED");
+        log.info("Message purging was halted!");
         actions.clearQueuedMessages();
     }
 }

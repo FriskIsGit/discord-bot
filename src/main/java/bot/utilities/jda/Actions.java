@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.HierarchyException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.utils.FileUpload;
+import no4j.core.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +28,11 @@ public class Actions {
     private static final int USER_ID_LENGTH = 19;
     private final List<CompletableFuture<Message>> messageCache = new ArrayList<>(64);
     private final JDA jdaInterface;
+    private final Logger logger;
 
     public Actions() {
         jdaInterface = Bot.getJDAInterface();
+        logger = Logger.getLogger("primary");
     }
 
     public void sendEmbed(MessageChannelUnion channel, MessageEmbed embed) {
@@ -47,7 +50,7 @@ public class Actions {
         try {
             guildOfOrigin.ban(user, 0, TimeUnit.SECONDS).complete();
         } catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e) {
-            System.err.println(e.getMessage());
+            logger.exception(e);
             return false;
         }
         return true;
@@ -60,7 +63,7 @@ public class Actions {
         try {
             guildOfOrigin.unban(user).complete();
         } catch (InsufficientPermissionException | HierarchyException e) {
-            System.err.println(e.getMessage());
+            logger.exception(e);
             return false;
         }
         return true;
@@ -73,7 +76,7 @@ public class Actions {
         try {
             guildOfOrigin.kick(user).reason(reason).complete();
         } catch (InsufficientPermissionException | ErrorResponseException | HierarchyException e) {
-            System.err.println(e.getMessage());
+            logger.exception(e);
             return false;
         }
         return true;
@@ -90,18 +93,18 @@ public class Actions {
 
     public void sendFile(MessageChannel channel, File fileToSend) {
         if (fileToSend == null) {
-            System.err.println("Given file was null");
+            logger.error("Given file was null");
             return;
         }
         if (!fileToSend.exists()) {
-            System.err.println("Given file doesn't exist");
+            logger.error("Given file doesn't exist");
             return;
         }
         byte[] bytes;
         try {
             bytes = Files.readAllBytes(fileToSend.toPath());
         } catch (IOException ioException) {
-            ioException.printStackTrace();
+            logger.stackTrace("", ioException);
             return;
         }
         if (bytes.length > MEGABYTES_25) {
@@ -112,9 +115,9 @@ public class Actions {
         if (channel != null) {
             try (FileUpload upload = FileUpload.fromData(bytes, fileToSend.getName())) {
                 channel.sendFiles(upload).queue();
-                System.out.println("Sending file..");
+                logger.info("Sending file..");
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                logger.stackTrace("", e);
             }
         }
     }
@@ -230,7 +233,7 @@ public class Actions {
             try {
                 user = jdaInterface.retrieveUserById(userId).complete();
             } catch (RuntimeException unknownUser) {
-                System.err.println("UNKNOWN USER");
+                logger.error("UNKNOWN USER");
                 return;
             }
         }
@@ -256,7 +259,7 @@ public class Actions {
             try {
                 user = jdaInterface.retrieveUserById(userId).complete();
             } catch (RuntimeException unknownUser) {
-                System.err.println("UNKNOWN USER");
+                logger.error("UNKNOWN USER");
                 return;
             }
         }
@@ -265,17 +268,18 @@ public class Actions {
             byte[] bytes;
             try {
                 bytes = Files.readAllBytes(file.toPath());
-            } catch (IOException ioException) {
+            } catch (IOException e) {
+                logger.exception(e);
                 return;
             }
             try (FileUpload upload = FileUpload.fromData(bytes, file.getName())) {
                 userDM.sendFiles(upload).queue();
-                System.out.println("Sending file..");
+                logger.info("Sending file..");
             } catch (IOException e) {
-                System.err.println("IOException occurred on file upload");
+                logger.stackTrace("IOException occurred on file upload", e);
             }
-        } catch (IllegalArgumentException iaExc) {
-            System.err.println("Cannot send file to user");
+        } catch (IllegalArgumentException e) {
+            logger.exception(e);
         }
     }
 

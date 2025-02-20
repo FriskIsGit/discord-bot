@@ -45,7 +45,7 @@ public class RoleCommand extends Command {
 
             String roles = rolesToString(guild);
             if (msgNull) {
-                System.out.println(roles);
+                log.info(roles);
             } else {
                 actions.messageChannel(message.getChannel(), roles);
             }
@@ -72,7 +72,7 @@ public class RoleCommand extends Command {
         }
 
         if (guild == null) {
-            System.out.println("Not enough arguments or guild id is incorrect.");
+            log.warn("Not enough arguments or guild id is incorrect.");
             return;
         }
 

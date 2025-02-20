@@ -34,7 +34,7 @@ public class JoinCommand extends Command{
                 return;
             GuildVoiceState membersVoiceState = member.getVoiceState();
             if(membersVoiceState == null){
-                System.out.println("Null voice state");
+                log.warn("Null voice state");
                 return;
             }
             if(membersVoiceState.inAudioChannel()){

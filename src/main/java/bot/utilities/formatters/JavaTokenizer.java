@@ -81,7 +81,7 @@ public class JavaTokenizer{
                         tokens.add(TextToken.as(OTHER_CHARACTER, chr));
                         break;
                     }
-                    System.out.println("SUB ARRAY OF i, e: " + i + ", " + chrEnd);
+                    // System.out.println("SUB ARRAY OF i, e: " + i + ", " + chrEnd);
                     String charToken = subArray(i, chrEnd);
                     tokens.add(TextToken.as(CHAR, escapeSpecialCharacters(charToken)));
                     i = chrEnd;
@@ -240,7 +240,7 @@ public class JavaTokenizer{
                         i = end - 1;
                     }else{
                         tokens.add(TextToken.as(OTHER_CHARACTER, chr));
-                        System.err.println("Raised exception for char: " + chr + " at index: " + i);
+                        // System.err.println("Raised exception for char: " + chr + " at index: " + i);
                         break;
                     }
             }
@@ -344,13 +344,10 @@ public class JavaTokenizer{
                     }
                     break;
                 default:
-                    System.err.println("QUIT ON DEFAULt");
-                    System.out.println(txtToken);
                     //don't do anything as it's not a diamond operator
                     return;
             }
         }
-        System.err.println("Greatly failed at changing tokens");
     }
 
     //lack of this would ruin the purpose of formatting if a string can contain an unescaped new line character

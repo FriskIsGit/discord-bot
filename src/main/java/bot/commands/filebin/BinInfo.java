@@ -1,5 +1,6 @@
 package bot.commands.filebin;
 
+import no4j.core.Logger;
 import org.jetbrains.annotations.NonNls;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,6 +10,8 @@ import java.util.Set;
 
 //wrapper and parser
 public class BinInfo{
+    private static final Logger logger = Logger.getLogger("primary");
+
     private static final String FILE_BIN_NET = "https://filebin.net";
     public String fileName, id;
     public String contentType, contentSize;
@@ -31,8 +34,8 @@ public class BinInfo{
                 //bytes_readable
                 md5         = fileInfo.getString("md5");
                 sha256      = fileInfo.getString("sha256");
-            }catch (JSONException jsonExc){
-                jsonExc.printStackTrace();
+            }catch (JSONException e){
+                logger.stackTrace("Failed to read json into BinInfo object", e);
             }
         }
         if(objects.contains("bin")){

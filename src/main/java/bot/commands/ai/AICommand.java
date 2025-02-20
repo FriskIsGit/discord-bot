@@ -159,7 +159,7 @@ public class AICommand extends Command {
 
                 String body = response.getBody();
                 int code = response.getStatus();
-                System.out.println(body);
+                log.debug(body);
                 if (code != 200) {
                     embed = createInfoEmbed(code, body);
                     actions.sendEmbed(channel, embed);
@@ -341,7 +341,7 @@ public class AICommand extends Command {
                 .header("Authorization", "Bearer " + Bot.getConfig().openAIToken);
 
         HttpResponse<String> response = request.asString();
-        System.out.println(response);
+        log.debug(response);
         JSONObject jsonBody = JSONObject.parseObject(response.getBody());
         JSONArray modelsArr = jsonBody.getJSONArray("data");
         List<Model> models = new ArrayList<>(modelsArr.size());

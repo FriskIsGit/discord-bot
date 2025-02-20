@@ -49,7 +49,7 @@ public class AverageCommand extends Command {
             MessageEmbed embed = avgEmbed(sum / elements, "One or more arguments couldn't be parsed");
             actions.sendEmbed(message.getChannel(), embed);
         } else {
-            System.out.println("Average:" + (sum / elements));
+            log.info("Average:" + (sum / elements));
         }
     }
 

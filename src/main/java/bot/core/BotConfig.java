@@ -1,6 +1,7 @@
 package bot.core;
 
 import bot.utilities.FileSeeker;
+import no4j.core.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,6 +15,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class BotConfig{
+    private static final Logger logger = Logger.getLogger("primary");
+
     public boolean exists;
     public String token, prefix, openAIToken, ai21Token, geniusToken;
     public int purgeCap, maxDequeSize;
@@ -68,14 +71,14 @@ public class BotConfig{
             config.maxDequeSize = data.optInt("message_cap_per_channel", 1000);
             String audioDir = data.optString("audio_dir");
             if(!Files.isDirectory(Paths.get(audioDir))){
-                System.err.println("Audio directory doesn't exist");
+                logger.error("Audio directory doesn't exist");
             }else{
                 config.audioDirectory = new File(audioDir);
             }
             config.enableEmergency = data.optBoolean("enable_emergency", true);
             config.enableShell = data.optBoolean("enable_shell", false);
         }catch(JSONException e){
-            System.err.println(e.getMessage());
+            logger.exception(e);
         }
         return config;
     }
@@ -102,7 +105,7 @@ public class BotConfig{
             }
             jsonMap = new JSONObject(contents.toString());
         }catch (IOException e){
-            e.printStackTrace();
+            logger.stackTrace("", e);
         }finally{
             closeSilently(reader);
         }

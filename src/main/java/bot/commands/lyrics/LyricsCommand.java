@@ -170,7 +170,7 @@ public class LyricsCommand extends Command {
                 index = i;
             }
         }
-        System.out.println(Arrays.toString(accuracies));
+        log.debug("Accuracies: " + Arrays.toString(accuracies));
         if (index == -1) {
             index = 0;
         }

@@ -20,7 +20,7 @@ public class HttpCommand extends Command {
         try {
             Integer.parseInt(args[0]);
         } catch (NumberFormatException nfExc) {
-            System.out.println("Parsing failure for:" + args[0]);
+            log.warn("Parsing failure for:" + args[0]);
             return;
         }
         actions.messageChannel(message.getChannel(), httpCatAddress + args[0]);

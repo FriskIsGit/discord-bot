@@ -16,7 +16,17 @@
     <repositories>
         <repository>
             <id>tomp2p.net</id>
-            <url>http://tomp2p.net/dev/mvn/</url>
+            <url>https://tomp2p.net/dev/mvn/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+
+        <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://maven.org/maven2</url>
         </repository>
     </repositories>
 
@@ -66,6 +76,11 @@
             <groupId>com.konghq</groupId>
             <artifactId>unirest-java</artifactId>
             <version>3.14.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.FriskIsGit</groupId>
+            <artifactId>no4j-logger</artifactId>
+            <version>eac5da5</version>
         </dependency>
     </dependencies>
 </project>

@@ -61,7 +61,7 @@ public class FileHashCommand extends Command {
         try {
             bytes = Files.readAllBytes(temp.toPath());
         } catch (IOException e) {
-            System.err.println("IO error on read");
+            log.stackTrace("IO error on read", e);
             return;
         }
         try {

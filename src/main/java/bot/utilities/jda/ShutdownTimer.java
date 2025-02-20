@@ -1,11 +1,14 @@
 package bot.utilities.jda;
 
 import bot.core.Bot;
+import no4j.core.Logger;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class ShutdownTimer {
+    private static final Logger logger = Logger.getLogger("primary");
+
     private static final char[] supportedUnits = {'s','m','h','d'};
     private Timer timer;
     private TimerTask shutdownTask;
@@ -36,7 +39,7 @@ public class ShutdownTimer {
         shutdownTask = new TimerTask(){
             @Override
             public void run(){
-                System.out.println("Shutting down");
+                logger.info("Shutting down");
                 Bot.getJDAInterface().shutdown();
                 System.exit(0);
             }
